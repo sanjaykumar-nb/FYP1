@@ -5,11 +5,11 @@ from datetime import datetime, date, timedelta
 from uuid import uuid4
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy import select
-from passlib.context import CryptContext
 
 from app.config import get_settings
+from app.database import Base
 from app.models import (
-    Base, Organization, User, Role, UserRole, Team, TeamMember,
+    Organization, User, Role, UserRole, Team, TeamMember,
     Project, ProjectMember, Milestone, Task, TaskDependency,
     Meeting, MeetingParticipant, MeetingActionItem,
     CommunicationEvent, WorkloadSnapshot,
@@ -18,13 +18,27 @@ from app.models import (
 )
 
 settings = get_settings()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use the application's own hashing helper rather than a second, separate
+# CryptContext: passlib 1.7.4 cannot drive bcrypt 5.x and fails outright,
+# and a seed that hashes differently from the app is a bug waiting to happen.
+from app.core.security import get_password_hash
 
 engine = create_async_engine(settings.DATABASE_URL, echo=True)
 async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
+def _as_date(v):
+    """date | datetime -> date, so the two can be compared safely."""
+    return v.date() if isinstance(v, datetime) else v
+
 async def seed_database():
+    # The app creates its schema via init_db() on startup (there are no Alembic
+    # revisions yet), so seeding a fresh database before the app has ever run
+    # would fail on "no such table". Ensure the schema exists first so the seed
+    # is self-sufficient and order-independent.
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
     async with async_session_maker() as db:
         print("Seeding database...")
         
@@ -82,7 +96,7 @@ async def seed_database():
             user = User(
                 organization_id=org.id,
                 email=u["email"],
-                password_hash=pwd_context.hash("password123"),
+                password_hash=get_password_hash("password123"),
                 full_name=u["full_name"],
                 is_active=True,
             )
@@ -415,7 +429,13 @@ async def seed_database():
                     in_progress_story_points=in_progress,
                     blocked_story_points=blocked,
                     active_task_count=len([t for t in user_tasks if t.status in ["in_progress", "planned"]]),
-                    overdue_task_count=len([t for t in user_tasks if t.due_date and t.due_date < datetime.utcnow() and t.status != "done"]),
+                    # Task.due_date is a DateTime column, but these objects are
+                    # still session-resident with whatever Python type was
+                    # assigned (a date, above). Normalise both sides so the
+                    # comparison holds for either type.
+                    overdue_task_count=len([t for t in user_tasks
+                                            if t.due_date and _as_date(t.due_date) < date.today()
+                                            and t.status != "done"]),
                     utilization_score=min(assigned / 40, 1.0) if assigned > 0 else 0,
                 ))
         

@@ -1,5 +1,5 @@
 from sqlalchemy import String, Text, Date, DateTime, ForeignKey, Numeric, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid as UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import date, datetime
 from app.models.base import BaseModel

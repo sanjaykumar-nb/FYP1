@@ -1,5 +1,5 @@
-from sqlalchemy import String, Text, Integer, DateTime, ForeignKey, JSON, Boolean, Numeric, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import String, Text, Integer, DateTime, Date, ForeignKey, JSON, Boolean, Numeric, UniqueConstraint
+from sqlalchemy import Uuid as UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, date
 from app.models.base import BaseModel
@@ -23,7 +23,7 @@ class CommunicationEvent(BaseModel):
     event_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
     channel: Mapped[str | None] = mapped_column(String(100), nullable=True)
     content: Mapped[str | None] = mapped_column(Text, nullable=True)
-    metadata: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    event_metadata: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     response_time_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_question: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_blocker_mention: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

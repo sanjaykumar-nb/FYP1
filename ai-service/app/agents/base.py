@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
-from ai_service.app.models.agent_base import AgentOutput
+from app.models.agent_base import AgentOutput
 
 InputT = TypeVar("InputT")
 OutputT = TypeVar("OutputT", bound=AgentOutput)

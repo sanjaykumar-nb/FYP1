@@ -1,0 +1,61 @@
+{
+  "n_sprints": 987,
+  "n_projects": 31,
+  "label_positive_rate": 0.5876,
+  "graph_metrics": {
+    "n": 987,
+    "tp": 580,
+    "fp": 341,
+    "fn": 0,
+    "tn": 66,
+    "precision": 0.6298,
+    "recall": 1.0,
+    "f1": 0.7728,
+    "accuracy": 0.6545
+  },
+  "graph_metrics_auc": 0.5811,
+  "graph_metrics_brier": 0.3455,
+  "baseline_story_points_median": {
+    "n": 987,
+    "tp": 224,
+    "fp": 187,
+    "fn": 356,
+    "tn": 220,
+    "precision": 0.545,
+    "recall": 0.3862,
+    "f1": 0.4521,
+    "accuracy": 0.4498
+  },
+  "per_project_f1": {
+    "DM": 0.8838,
+    "TIMOB": 0.6115,
+    "MULE": 0.625,
+    "MESOS": 0.9545,
+    "XD": 0.4878,
+    "MDL": 0.7838,
+    "TISTUD": 0.2703,
+    "FAB": 0.9508,
+    "INDY": 0.9836,
+    "JSWSERVER": 0.4516,
+    "JAVA": 0.7179,
+    "IS": 0.6316,
+    "JSWCLOUD": 0.4,
+    "STL": 0.7647,
+    "NEXUS": 0.4,
+    "TIDOC": 0.4,
+    "COMPASS": 0.9032,
+    "CONFSERVER": 0.9,
+    "CXX": 0.7059,
+    "USERGRID": 0.7778,
+    "CONFCLOUD": 1.0,
+    "BE": 1.0,
+    "DATACASS": 1.0,
+    "MXNET": 1.0,
+    "APIKIT": 0.6667
+  },
+  "config": {
+    "sprint_delay_threshold": 0.3,
+    "min_issues_per_sprint": 15,
+    "eval_time_offset_days_after_sprint_end": 1
+  }
+}

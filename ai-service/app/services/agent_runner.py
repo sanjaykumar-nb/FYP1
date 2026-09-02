@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID
-from ai_service.app.agents.coordinator import CoordinatorAgent
-from ai_service.app.models.agent_base import CoordinatorInput, ReviewTrioInput
+from app.agents.coordinator import CoordinatorAgent
+from app.models.agent_base import CoordinatorInput, ReviewTrioInput
 
 
 async def run_full_analysis(
@@ -9,17 +9,18 @@ async def run_full_analysis(
     project_id: UUID,
     scope: list[str],
     trigger_type: str = "manual",
+    snapshot: Optional[dict] = None,
     triggered_by: UUID = None,
 ) -> dict:
     """Run full multi-agent analysis pipeline"""
-    
+
     input_data = CoordinatorInput(
         project_id=project_id,
         organization_id=UUID("00000000-0000-0000-0000-000000000000"),  # Would come from context
         triggered_by=triggered_by,
         trigger_type=trigger_type,
         scope=scope,
-        context={},
+        context={"snapshot": snapshot} if snapshot else {},
     )
     
     result = await coordinator.run(input_data)
@@ -55,7 +56,7 @@ async def run_single_agent(
         raise ValueError(f"Unknown agent: {agent_name}")
     
     # Create appropriate input based on agent
-    from ai_service.app.models.agent_base import (
+    from app.models.agent_base import (
         PlanningInput, ProgressInput, MeetingIntelInput,
         CommIntelInput, WorkloadIntelInput, RiskInput, RecommendationInput,
     )

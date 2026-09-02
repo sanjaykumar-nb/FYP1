@@ -80,13 +80,17 @@ async def websocket_endpoint(
         while True:
             data = await websocket.receive_json()
             
-            # Handle subscription/unsubscription
+            # A connection is bound to one project for its whole lifetime (see
+            # manager.connect above) — switching to another project would
+            # require re-registering the connection, which isn't implemented.
+            # Say so explicitly rather than silently accepting and doing
+            # nothing.
             if data.get("type") == "subscribe":
-                new_project_id = UUID(data.get("project_id"))
-                # In a real implementation, you'd verify access to the project
-                # For now. I'll continue building out the backend with the core services.websocket.manager import manager
-                pass
-            
+                await websocket.send_json({
+                    "type": "error",
+                    "message": "Subscribing to additional projects is not supported; open a new connection instead.",
+                })
+
             elif data.get("type") == "ping":
                 await websocket.send_json({"type": "pong"})
     

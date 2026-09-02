@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "teamsync-ai-service"
+version = "1.0.0"
+description = "TeamSync AI Service - Multi-Agent Project Intelligence"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.115.0",
+    "uvicorn[standard]==0.32.0",
+    "pydantic==2.9.2",
+    "pydantic-settings==2.5.0",
+    "sqlalchemy==2.0.35",
+    "asyncpg==0.29.0",
+    "httpx==0.28.0",
+    "groq==0.7.0",
+    "python-dotenv==1.0.1",
+    "PyYAML==6.0.2",
+    "networkx==3.4.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.0",
+    "pytest-asyncio==0.24.0",
+    "pytest-cov==6.0.0",
+    "pytest-mock==3.14.0",
+    "httpx==0.28.0",
+    "mypy==1.13.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]

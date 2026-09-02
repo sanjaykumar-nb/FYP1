@@ -1,14 +1,18 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Literal, Optional
 from datetime import datetime
 from uuid import UUID
+
+# Kanban workflow: backlog -> planned -> in_progress -> blocked -> review -> done
+TaskStatus = Literal["backlog", "planned", "in_progress", "blocked", "review", "done"]
+TaskPriority = Literal["low", "medium", "high", "critical"]
 
 
 class TaskBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=500)
     description: Optional[str] = None
-    status: str = "backlog"
-    priority: str = "medium"
+    status: TaskStatus = "backlog"
+    priority: TaskPriority = "medium"
     story_points: Optional[int] = None
     estimated_hours: Optional[float] = None
     due_date: Optional[datetime] = None
@@ -17,18 +21,17 @@ class TaskBase(BaseModel):
 
 
 class TaskCreate(TaskBase):
-    project_id: UUID
+    # project_id comes from the path; reporter_id from the authenticated user.
     milestone_id: Optional[UUID] = None
     parent_task_id: Optional[UUID] = None
     assignee_id: Optional[UUID] = None
-    reporter_id: UUID
 
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=500)
     description: Optional[str] = None
-    status: Optional[str] = None
-    priority: Optional[str] = None
+    status: Optional[TaskStatus] = None
+    priority: Optional[TaskPriority] = None
     story_points: Optional[int] = None
     estimated_hours: Optional[float] = None
     actual_hours: Optional[float] = None
@@ -66,8 +69,8 @@ class TaskWithRelations(TaskResponse):
 
 
 class TaskDependencyCreate(BaseModel):
+    # blocked_task_id comes from the path.
     blocking_task_id: UUID
-    blocked_task_id: UUID
     dependency_type: str = "blocks"
 
 
@@ -99,7 +102,7 @@ class TaskCommentResponse(BaseModel):
 
 
 class TaskMove(BaseModel):
-    status: Optional[str] = None
+    status: Optional[TaskStatus] = None
     position: Optional[int] = None
     milestone_id: Optional[UUID] = None
 

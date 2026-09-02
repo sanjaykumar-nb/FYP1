@@ -17,8 +17,8 @@ from app.schemas.meeting import (
     MeetingActionItemCreate,
     MeetingActionItemUpdate,
     MeetingActionItemResponse,
-    PaginatedResponse,
 )
+from app.schemas.auth import PaginatedResponse
 
 router = APIRouter()
 

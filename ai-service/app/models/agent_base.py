@@ -12,7 +12,11 @@ class AgentSignal(BaseModel):
 
 class AgentEvidence(BaseModel):
     source: str
-    reference_id: UUID
+    # A knowledge-graph node id (e.g. "task:<uuid>"), NOT a raw UUID — grounding
+    # (app.graph.grounding) checks this string against the witness subgraph the
+    # agent was shown, so citations are mechanically verifiable rather than
+    # merely plausible.
+    reference_id: str
     excerpt: str
     relevance: float = Field(..., ge=0, le=1)
 
@@ -51,7 +55,11 @@ class CoordinatorOutput(BaseModel):
     overall_summary: str
     overall_risk_level: str = Field(..., pattern="^(low|medium|high|critical)$")
     overall_confidence: float = Field(..., ge=0, le=1)
-    specialist_outputs: dict[str, AgentOutput] = {}
+    # dict, not dict[str, AgentOutput]: specialist outputs are subclasses of
+    # AgentOutput (PlanningOutput.sprint_readiness, RiskOutput.risk_scores, …)
+    # — typing this as the base class silently discarded those fields on
+    # validation. Coordinator always populates this with already-dumped dicts.
+    specialist_outputs: dict[str, dict] = {}
     merged_recommendations: list[AgentRecommendation] = []
     next_actions: list[str] = []
 
@@ -76,6 +84,11 @@ class PlanningInput(BaseModel):
     milestones: list[dict] = []
     tasks: list[dict] = []
     team_capacity: dict = {}
+    # Pre-rendered witness subgraph (see app.graph.subgraph) — when set, the
+    # agent prompts the LLM with this compact text instead of dumping the raw
+    # lists above, and grounds any evidence citation against finding_ids.
+    graph_context: Optional[str] = None
+    finding_ids: Optional[list[str]] = None
 
 
 class PlanningOutput(AgentOutput):
@@ -89,9 +102,12 @@ class ProgressInput(BaseModel):
     tasks: list[dict] = []
     velocity_history: list[float] = []
     burndown_data: list[dict] = []
+    graph_context: Optional[str] = None
+    finding_ids: Optional[list[str]] = None
 
 
 class ProgressOutput(AgentOutput):
+    completion_rate: float = 0.0
     velocity_trend: str = "stable"
     completion_forecast: str = ""
     stalled_work: list[dict] = []
@@ -129,6 +145,8 @@ class WorkloadIntelInput(BaseModel):
     project_id: UUID
     assignments: list[dict] = []
     story_points: dict = {}
+    graph_context: Optional[str] = None
+    finding_ids: Optional[list[str]] = None
 
 
 class WorkloadIntelOutput(AgentOutput):
@@ -161,9 +179,22 @@ class AnalyzeRequest(BaseModel):
     project_id: UUID
     scope: list[str] = ["planning", "progress", "meetings", "communication", "workload"]
     trigger_type: str = "manual"
+    # Caller-supplied project state (see app.graph.snapshot.ProjectSnapshot). The
+    # AI service is stateless — it never queries the core API itself — so the
+    # caller (the backend) fetches project/task rows and hands over a snapshot.
+    snapshot: Optional[dict] = None
+
+
+class RunAgentRequest(BaseModel):
+    project_id: UUID
+    input: dict = {}
 
 
 class AnalyzeResponse(BaseModel):
     agent_run_id: UUID
     status: str
     message: str
+    # The MVP runs analysis synchronously (no Celery — see plan Part B3), so
+    # the full result is available in the same response rather than requiring
+    # a follow-up poll.
+    result: Optional[CoordinatorOutput] = None

@@ -1,15 +1,19 @@
+from datetime import datetime
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import selectinload
-from app.api.deps import get_db, get_current_org_id
+from app.api.deps import get_db, get_current_org_id, get_current_user_id
 from app.models.project import Project
 from app.models.task import Task
 from app.models.meeting import Meeting
 from app.models.workload import WorkloadSnapshot, CommunicationEvent
 from app.models.risk import RiskScore, Recommendation, AgentRun
 from app.models.memory import OrganizationMemory, AuditLog, Notification
+from app.services.ai_client import ai_client
+from app.services.snapshot_builder import build_project_snapshot
+from app.core.exceptions import AIServiceError
 from app.schemas.analytics import (
     ProjectHealthResponse,
     WorkloadDistributionResponse,
@@ -294,7 +298,6 @@ async def get_intelligence_index(
         )
     
     # Calculate index (placeholder implementation)
-    from datetime import datetime
     return TeamIntelligenceIndexResponse(
         score=75.0,
         tier="Good",
@@ -307,25 +310,66 @@ async def get_intelligence_index(
     )
 
 
-@router.post("/projects/{project_id}/analyze")
+@router.post("/projects/{project_id}/analyze", response_model=AgentRunResponse)
 async def trigger_analysis(
     project_id: UUID,
     db: AsyncSession = Depends(get_db),
     org_id: UUID = Depends(get_current_org_id),
+    user_id: UUID = Depends(get_current_user_id),
 ):
+    """Run the multi-agent analysis pipeline and persist the result.
+
+    Runs synchronously — the MVP has no Celery worker (see plan Part B3).
+    The AI service is stateless, so the project state is read here and
+    handed over as a snapshot; the AgentRun row this creates is the only
+    persistent record of the run.
+    """
     project_result = await db.execute(
         select(Project).where(Project.id == project_id, Project.organization_id == org_id)
     )
-    if not project_result.scalar_one_or_none():
+    project = project_result.scalar_one_or_none()
+    if not project:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found",
         )
-    
-    # TODO: Trigger AI analysis via Celery task
-    # This would create an AgentRun record and queue the analysis
-    
-    return {"message": "Analysis triggered", "project_id": str(project_id)}
+
+    snapshot = await build_project_snapshot(db, project)
+
+    run = AgentRun(
+        project_id=project_id,
+        triggered_by=user_id,
+        trigger_type="manual",
+        status="running",
+    )
+    db.add(run)
+    await db.commit()
+    await db.refresh(run)
+
+    try:
+        result = await ai_client.analyze_project(
+            project_id=project_id,
+            scope=["planning", "progress", "workload"],
+            trigger_type="manual",
+            snapshot=snapshot,
+        )
+    except AIServiceError as e:
+        run.status = "failed"
+        run.error_message = str(e.detail)
+        await db.commit()
+        await db.refresh(run)
+        return AgentRunResponse.model_validate(run)
+
+    analysis = result.get("result") or {}
+    run.status = "completed"
+    run.coordinator_output = analysis
+    run.specialist_outputs = analysis.get("specialist_outputs")
+    run.final_recommendations = {"items": analysis.get("merged_recommendations", [])}
+    run.completed_at = datetime.utcnow()
+    await db.commit()
+    await db.refresh(run)
+
+    return AgentRunResponse.model_validate(run)
 
 
 @router.get("/projects/{project_id}/agent-runs", response_model=list[AgentRunResponse])

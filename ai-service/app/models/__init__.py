@@ -1,4 +1,4 @@
-from ai_service.app.models.agent_base import (
+from app.models.agent_base import (
     AgentSignal,
     AgentEvidence,
     AgentRecommendation,

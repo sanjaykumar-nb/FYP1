@@ -1,8 +1,8 @@
-from ai_service.app.agents.base import BaseAgent
-from ai_service.app.models.agent_base import CommIntelInput, CommIntelOutput
-from ai_service.app.llm.client import GroqClient
-from ai_service.app.llm.fallback import RuleBasedFallback
-from ai_service.app.prompts.comm_intel import COMM_INTEL_PROMPT
+from app.agents.base import BaseAgent
+from app.models.agent_base import CommIntelInput, CommIntelOutput
+from app.llm.client import GroqClient
+from app.llm.fallback import RuleBasedFallback
+from app.prompts.comm_intel import COMM_INTEL_PROMPT
 
 
 class CommunicationIntelligenceAgent(BaseAgent[CommIntelInput, CommIntelOutput]):

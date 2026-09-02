@@ -32,6 +32,10 @@ const navigation = [
   { name: "Admin", href: "/admin", icon: Settings, adminOnly: true },
 ]
 
+// Relative to a project's root — resolved against /projects/{id} below.
+// Pages not yet built in the MVP (meetings, recommendations, memory, review,
+// settings) still route correctly; they 404 until their phase lands rather
+// than silently going to the workspace root.
 const projectNavigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { name: "Tasks", href: "/tasks", icon: FolderKanban },
@@ -45,8 +49,15 @@ const projectNavigation = [
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname()
-  const isProjectPage = pathname.startsWith("/projects/") && !pathname.endsWith("/new")
-  
+  const projectMatch = pathname.match(/^\/projects\/([^/]+)/)
+  const isProjectPage = !!projectMatch && projectMatch[1] !== "new"
+  const projectRoot = projectMatch ? `/projects/${projectMatch[1]}` : ""
+
+  const resolvedProjectNavigation = projectNavigation.map((item) => ({
+    ...item,
+    href: `${projectRoot}${item.href}`,
+  }))
+
   return (
     <>
       <aside
@@ -81,7 +92,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <div className="flex items-center gap-2 px-2 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Project
                 </div>
-                {projectNavigation.map((item) => (
+                {resolvedProjectNavigation.map((item) => (
                   <NavLink key={item.name} item={item} pathname={pathname} onClose={onClose} />
                 ))}
               </>

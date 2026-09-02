@@ -31,22 +31,23 @@ async def list_projects(
     team_id: Optional[UUID] = Query(None),
 ):
     query = select(Project).where(Project.organization_id == org_id)
-    
+    total_query = select(func.count(Project.id)).where(Project.organization_id == org_id)
+
     if status:
         query = query.where(Project.status == status)
+        total_query = total_query.where(Project.status == status)
+    else:
+        # Archived projects are hidden unless explicitly requested.
+        query = query.where(Project.status != "archived")
+        total_query = total_query.where(Project.status != "archived")
     if team_id:
         query = query.where(Project.team_id == team_id)
-    
+        total_query = total_query.where(Project.team_id == team_id)
+
     query = query.offset(pagination.offset).limit(pagination.limit).order_by(Project.created_at.desc())
-    
+
     result = await db.execute(query)
     projects = result.scalars().all()
-    
-    total_query = select(func.count(Project.id)).where(Project.organization_id == org_id)
-    if status:
-        total_query = total_query.where(Project.status == status)
-    if team_id:
-        total_query = total_query.where(Project.team_id == team_id)
     
     total_result = await db.execute(total_query)
     total = total_result.scalar()
@@ -60,7 +61,7 @@ async def list_projects(
     )
 
 
-@router.post("", response_model=ProjectResponse)
+@router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
 async def create_project(
     project_data: ProjectCreate,
     db: AsyncSession = Depends(get_db),
@@ -112,20 +113,23 @@ async def get_project(
     db: AsyncSession = Depends(get_db),
     org_id: UUID = Depends(get_current_org_id),
 ):
+    # DELETE archives rather than hard-deletes; archived projects are not
+    # retrievable through the normal read path.
     result = await db.execute(
         select(Project).where(
             Project.id == project_id,
             Project.organization_id == org_id,
+            Project.status != "archived",
         )
     )
     project = result.scalar_one_or_none()
-    
+
     if not project:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found",
         )
-    
+
     return ProjectResponse.model_validate(project)
 
 
@@ -159,7 +163,7 @@ async def update_project(
     return ProjectResponse.model_validate(project)
 
 
-@router.delete("/{project_id}")
+@router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_project(
     project_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -181,8 +185,6 @@ async def delete_project(
     
     project.status = "archived"
     await db.commit()
-    
-    return {"message": "Project archived"}
 
 
 # Project members

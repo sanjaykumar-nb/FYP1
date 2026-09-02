@@ -34,13 +34,17 @@ class AIClient:
         project_id: UUID,
         scope: list[str] = None,
         trigger_type: str = "manual",
-        context: dict = None,
+        snapshot: dict = None,
     ) -> dict:
+        """Runs synchronously and returns the full result (no Celery in the
+        MVP — see plan Part B3). ``snapshot`` is the project-state payload
+        from app.services.snapshot_builder.build_project_snapshot; the AI
+        service is stateless and never queries Postgres itself."""
         return await self._request("POST", "/api/v1/analyze", {
             "project_id": str(project_id),
-            "scope": scope or ["planning", "progress", "meetings", "communication", "workload"],
+            "scope": scope or ["planning", "progress", "workload"],
             "trigger_type": trigger_type,
-            "context": context or {},
+            "snapshot": snapshot,
         })
     
     async def run_agent(

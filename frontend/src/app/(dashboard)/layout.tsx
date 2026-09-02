@@ -1,20 +1,26 @@
 "use client"
 
-import { ReactNode, useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import { ReactNode, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
+import { isAuthenticated } from "@/lib/auth"
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname()
+  const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  
-  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/signup")
-  
-  if (isAuthPage) {
-    return <>{children}</>
+  const [checked, setChecked] = useState(false)
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.replace("/login")
+      return
+    }
+    setChecked(true)
+  }, [router])
+
+  if (!checked) {
+    return null
   }
 
   return (

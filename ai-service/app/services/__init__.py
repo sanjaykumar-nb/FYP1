@@ -1,11 +1,8 @@
-from ai_service.app.services.agent_runner import run_full_analysis, run_single_agent, run_review_trio
-from ai_service.app.services.memory_service import MemoryService
-from ai_service.app.services.index_service import IndexService
+"""AI service services package.
 
-__all__ = [
-    "run_full_analysis",
-    "run_single_agent",
-    "run_review_trio",
-    "MemoryService",
-    "IndexService",
-]
+Deliberately no eager re-exports here: app.services.agent_runner imports
+app.agents.coordinator, which imports app.services.graph_pipeline — an eager
+`from app.services.agent_runner import ...` at package-init time would make
+that a circular import. Import submodules directly:
+`from app.services.agent_runner import run_full_analysis`.
+"""

@@ -1,0 +1,166 @@
+{
+  "model": "openai/gpt-oss-120b",
+  "n_scenarios": 36,
+  "n_scored": 36,
+  "n_naive_calls_failed": 0,
+  "note": "Scenarios where the naive LLM call failed outright (rate limit / unparseable) are excluded from BOTH scorers, so the comparison is strictly like-for-like on identical scenarios.",
+  "graph_architecture": {
+    "tp": 18,
+    "fp": 0,
+    "fn": 0,
+    "tn": 18,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "accuracy": 1.0
+  },
+  "naive_architecture": {
+    "tp": 18,
+    "fp": 2,
+    "fn": 0,
+    "tn": 16,
+    "precision": 0.9,
+    "recall": 1.0,
+    "f1": 0.9474,
+    "accuracy": 0.9444
+  },
+  "per_risk_type": {
+    "dependency": {
+      "graph": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "naive": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      }
+    },
+    "knowledge": {
+      "graph": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "naive": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      }
+    },
+    "workload": {
+      "graph": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "naive": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      }
+    },
+    "delay": {
+      "graph": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "naive": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      }
+    },
+    "silent_member": {
+      "graph": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "naive": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      }
+    },
+    "coordination": {
+      "graph": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "naive": {
+        "tp": 3,
+        "fp": 2,
+        "fn": 0,
+        "tn": 1,
+        "precision": 0.6,
+        "recall": 1.0,
+        "f1": 0.75,
+        "accuracy": 0.6667
+      }
+    }
+  },
+  "mean_prompt_tokens": {
+    "graph": 1109.2,
+    "naive": 1804.5
+  },
+  "naive_call_errors": []
+}

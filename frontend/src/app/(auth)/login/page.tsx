@@ -36,7 +36,16 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true)
     try {
-      const response = await api.post("/auth/login", data)
+      // The login endpoint is an OAuth2 password grant: it takes a
+      // form-urlencoded body with "username" (our email) and "password",
+      // not JSON — see backend/app/api/v1/auth.py.
+      const form = new URLSearchParams()
+      form.set("username", data.email)
+      form.set("password", data.password)
+
+      const response = await api.post("/auth/login", form, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      })
       const { access_token, refresh_token } = response.data
       
       // Store tokens

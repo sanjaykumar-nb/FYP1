@@ -1,5 +1,5 @@
 from typing import Optional
-from ai_service.app.models.agent_base import (
+from app.models.agent_base import (
     PlanningInput, PlanningOutput,
     ProgressInput, ProgressOutput,
     MeetingIntelInput, MeetingIntelOutput,
@@ -76,10 +76,11 @@ class RuleBasedFallback:
         
         completion_rate = len(done_tasks) / max(len(tasks), 1)
         
-        # Velocity trend
-        if len(velocity_history) >= 2:
+        # Velocity trend. Both windows need >=2 points to be meaningful, so
+        # trend only speaks up once there are at least 4 data points.
+        if len(velocity_history) >= 4:
             recent_avg = sum(velocity_history[-2:]) / 2
-            older_avg = sum(velocity_history[:-2]) / max(len(velocity_history) - 2, 1) if len(velocity_history) > 2 else recent_avg
+            older_avg = sum(velocity_history[:-2]) / max(len(velocity_history) - 2, 1)
             if recent_avg > older_avg * 1.1:
                 trend = "improving"
             elif recent_avg < older_avg * 0.9:
@@ -89,9 +90,16 @@ class RuleBasedFallback:
         else:
             trend = "stable"
         
+        if completion_rate < 0.3 and not in_progress_tasks:
+            risk_level = "high"
+        elif completion_rate <= 0.5 or blocked_tasks:
+            risk_level = "medium"
+        else:
+            risk_level = "low"
+
         return ProgressOutput(
             summary=f"Progress: {len(done_tasks)}/{len(tasks)} tasks done ({completion_rate:.0%}). Velocity {trend}.",
-            risk_level="high" if completion_rate < 0.3 and len(in_progress_tasks) == 0 else "medium" if completion_rate < 0.5 else "low",
+            risk_level=risk_level,
             confidence=0.6,
             signals=[
                 AgentSignal(name="completion_rate", value=completion_rate, weight=0.6),
@@ -109,6 +117,7 @@ class RuleBasedFallback:
                 )
             ] if blocked_tasks else [],
             next_action="Review blocked tasks in standup",
+            completion_rate=round(completion_rate, 3),
             velocity_trend=trend,
             completion_forecast=f"Estimated completion: {100*completion_rate:.0f}% at current pace",
             stalled_work=[{"task_id": t.get('id'), "reason": "blocked"} for t in blocked_tasks],
@@ -264,36 +273,46 @@ class RuleBasedFallback:
             single_points_of_failure=[],
         )
     
+    # Which risk types a specialist's finding actually speaks to. Used to fan a
+    # single specialist risk_level out into the six named risk categories,
+    # since specialist_outputs is keyed by AGENT name, not risk TYPE.
+    _AGENT_RISK_TYPES = {
+        "planning": ("dependency",),
+        "progress": ("delay", "coordination"),
+        "meetings": ("coordination", "knowledge"),
+        "communication": ("silent_member", "coordination"),
+        "workload": ("workload", "knowledge"),
+    }
+    _LEVEL_ORDER = {"critical": 4, "high": 3, "medium": 2, "low": 1}
+
     def risk_prediction(self, input_data: RiskInput) -> RiskOutput:
         specialist_outputs = input_data.specialist_outputs or {}
-        
-        # Aggregate risk from specialist outputs
-        risk_scores = {}
-        for name, output in specialist_outputs.items():
-            if hasattr(output, 'risk_level'):
-                risk_scores[name] = output.risk_level
-        
-        # Default risk levels
+
         default_risks = {
-            "delay": "medium",
+            "delay": "low",
             "coordination": "low",
             "workload": "low",
             "dependency": "low",
             "knowledge": "low",
             "silent_member": "low",
         }
-        
-        # Override with specialist data
-        for risk_type, level in default_risks.items():
-            if risk_type in specialist_outputs:
-                default_risks[risk_type] = specialist_outputs[risk_type].get('risk_level', level)
-        
+
+        for agent_name, output in specialist_outputs.items():
+            level = output.get("risk_level") if isinstance(output, dict) else getattr(output, "risk_level", None)
+            if level not in self._LEVEL_ORDER:
+                continue
+            for risk_type in self._AGENT_RISK_TYPES.get(agent_name, ()):
+                if self._LEVEL_ORDER[level] > self._LEVEL_ORDER[default_risks[risk_type]]:
+                    default_risks[risk_type] = level
+
+        overall = max(default_risks.values(), key=lambda x: self._LEVEL_ORDER.get(x, 0))
+
         return RiskOutput(
             summary=f"Risk assessment: {default_risks}",
-            risk_level=max(default_risks.values(), key=lambda x: {"critical":4,"high":3,"medium":2,"low":1}.get(x,0)),
+            risk_level=overall,
             confidence=0.5,
             signals=[
-                AgentSignal(name=k, value={"critical":4,"high":3,"medium":2,"low":1}.get(v,1), weight=1.0/len(default_risks))
+                AgentSignal(name=k, value=self._LEVEL_ORDER.get(v, 1), weight=1.0 / len(default_risks))
                 for k, v in default_risks.items()
             ],
             evidence=[],
@@ -356,7 +375,7 @@ class RuleBasedFallback:
             evidence=[],
             recommendations=recommendations,
             next_action="Review and prioritize recommendations",
-            prioritized_actions=recommendations,
+            prioritized_actions=[r.model_dump() for r in recommendations],
         )
     
     def frontend_review(self, input_data: dict) -> AgentOutput:

@@ -1,22 +1,28 @@
 from typing import Optional
-from uuid import UUID
-from fastapi import APIRouter, HTTPException, status, BackgroundTasks
-from ai_service.app.models.agent_base import AnalyzeRequest, AnalyzeResponse, CoordinatorInput, ReviewTrioInput
-from ai_service.app.agents.coordinator import CoordinatorAgent
-from ai_service.app.agents.planning import PlanningAgent
-from ai_service.app.agents.progress import ProgressAgent
-from ai_service.app.agents.meeting_intel import MeetingIntelligenceAgent
-from ai_service.app.agents.comm_intel import CommunicationIntelligenceAgent
-from ai_service.app.agents.workload_intel import WorkloadIntelligenceAgent
-from ai_service.app.agents.risk import RiskPredictionAgent
-from ai_service.app.agents.recommendation import RecommendationAgent
-from ai_service.app.agents.frontend_review import FrontendAgent
-from ai_service.app.agents.backend_review import BackendAgent
-from ai_service.app.agents.ai_ml_review import AIMLAgent
-from ai_service.app.llm.client import GroqClient
-from ai_service.app.llm.fallback import RuleBasedFallback
-from ai_service.app.validators import validate_output
-from ai_service.app.services.agent_runner import run_full_analysis, run_single_agent, run_review_trio
+from uuid import UUID, uuid4
+from fastapi import APIRouter, HTTPException, status
+from app.models.agent_base import (
+    AnalyzeRequest,
+    AnalyzeResponse,
+    CoordinatorInput,
+    ReviewTrioInput,
+    RunAgentRequest,
+)
+from app.agents.coordinator import CoordinatorAgent
+from app.agents.planning import PlanningAgent
+from app.agents.progress import ProgressAgent
+from app.agents.meeting_intel import MeetingIntelligenceAgent
+from app.agents.comm_intel import CommunicationIntelligenceAgent
+from app.agents.workload_intel import WorkloadIntelligenceAgent
+from app.agents.risk import RiskPredictionAgent
+from app.agents.recommendation import RecommendationAgent
+from app.agents.frontend_review import FrontendAgent
+from app.agents.backend_review import BackendAgent
+from app.agents.ai_ml_review import AIMLAgent
+from app.llm.client import GroqClient
+from app.llm.fallback import RuleBasedFallback
+from app.validators import validate_output
+from app.services.agent_runner import run_full_analysis, run_single_agent, run_review_trio
 
 router = APIRouter()
 
@@ -52,42 +58,46 @@ coordinator_agent = CoordinatorAgent(
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
-async def analyze_project(
-    request: AnalyzeRequest,
-    background_tasks: BackgroundTasks,
-):
-    """Trigger full multi-agent analysis for a project"""
+async def analyze_project(request: AnalyzeRequest):
+    """Run full multi-agent analysis for a project and return the result.
+
+    Runs synchronously — the MVP has no Celery/queue (see plan Part B3), and
+    the graph-grounded pipeline is fast enough (deterministic risk scoring,
+    small witness-subgraph prompts) that there is no need for one. The AI
+    service is stateless: this id identifies the run for the caller's own
+    correlation, but persisting an AgentRun row is the backend's job — it
+    owns that table (see app.services.ai_client / snapshot_builder there).
+    """
+    agent_run_id = uuid4()
     try:
-        # Run analysis in background
-        background_tasks.add_task(
-            run_full_analysis,
+        result = await run_full_analysis(
             coordinator_agent,
             request.project_id,
             request.scope,
             request.trigger_type,
+            request.snapshot,
         )
-        
         return AnalyzeResponse(
-            agent_run_id=UUID("00000000-0000-0000-0000-000000000000"),  # Will be generated in background
-            status="started",
-            message="Analysis started in background",
+            agent_run_id=agent_run_id,
+            status="completed",
+            message="Analysis complete",
+            result=result,
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to start analysis: {str(e)}",
+            detail=f"Analysis failed: {str(e)}",
         )
 
 
 @router.post("/agents/{agent_name}")
 async def run_agent(
     agent_name: str,
-    project_id: UUID,
-    input_data: dict,
+    request: RunAgentRequest,
 ):
     """Run a single specialist agent"""
     try:
-        result = await run_single_agent(coordinator_agent, agent_name, project_id, input_data)
+        result = await run_single_agent(coordinator_agent, agent_name, request.project_id, request.input)
         
         # Validate output
         valid, errors = validate_output(agent_name, result)

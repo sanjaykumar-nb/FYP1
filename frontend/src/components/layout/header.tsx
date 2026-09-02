@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Menu, Bell, Sun, Moon, LogOut, User, Settings } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useQuery } from "@tanstack/react-query"
+import { api } from "@/lib/api"
+import { logout } from "@/lib/auth"
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -21,7 +24,19 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   const { theme, setTheme } = useTheme()
-  
+
+  const { data: me } = useQuery({
+    queryKey: ["me"],
+    queryFn: () => api.get("/auth/me").then((res) => res.data),
+    staleTime: 5 * 60 * 1000,
+  })
+  const initials = (me?.full_name || me?.email || "?")
+    .split(" ")
+    .map((s: string) => s[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
+
   return (
     <header className="sticky top-0 z-30 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -55,15 +70,15 @@ export function Header({ onMenuClick }: HeaderProps) {
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                 <Avatar className="h-9 w-9">
                   <AvatarImage src="/avatar.png" alt="User" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">John Doe</p>
-                  <p className="text-xs leading-none text-muted-foreground">john@company.com</p>
+                  <p className="text-sm font-medium leading-none">{me?.full_name || "Account"}</p>
+                  <p className="text-xs leading-none text-muted-foreground">{me?.email || ""}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -80,7 +95,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => {}}>
+              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={logout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Log out
               </DropdownMenuItem>

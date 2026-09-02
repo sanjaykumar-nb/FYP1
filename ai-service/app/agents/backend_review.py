@@ -1,8 +1,8 @@
-from ai_service.app.agents.base import BaseAgent
-from ai_service.app.models.agent_base import AgentOutput
-from ai_service.app.llm.client import GroqClient
-from ai_service.app.llm.fallback import RuleBasedFallback
-from ai_service.app.prompts.review_trio import BACKEND_REVIEW_PROMPT
+from app.agents.base import BaseAgent
+from app.models.agent_base import AgentOutput
+from app.llm.client import GroqClient
+from app.llm.fallback import RuleBasedFallback
+from app.prompts.review_trio import BACKEND_REVIEW_PROMPT
 
 
 class BackendAgent(BaseAgent[dict, AgentOutput]):

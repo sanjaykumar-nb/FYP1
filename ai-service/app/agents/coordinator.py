@@ -1,19 +1,38 @@
-from typing import Optional
-from ai_service.app.agents.base import BaseAgent
-from ai_service.app.models.agent_base import CoordinatorInput, CoordinatorOutput, AgentOutput
-from ai_service.app.llm.client import GroqClient
-from ai_service.app.llm.fallback import RuleBasedFallback
-from ai_service.app.prompts.coordinator import COORDINATOR_PROMPT
-from ai_service.app.agents.planning import PlanningAgent
-from ai_service.app.agents.progress import ProgressAgent
-from ai_service.app.agents.meeting_intel import MeetingIntelligenceAgent
-from ai_service.app.agents.comm_intel import CommunicationIntelligenceAgent
-from ai_service.app.agents.workload_intel import WorkloadIntelligenceAgent
-from ai_service.app.agents.risk import RiskPredictionAgent
-from ai_service.app.agents.recommendation import RecommendationAgent
-from ai_service.app.agents.frontend_review import FrontendAgent
-from ai_service.app.agents.backend_review import BackendAgent
-from ai_service.app.agents.ai_ml_review import AIMLAgent
+import asyncio
+
+from app.agents.base import BaseAgent
+from app.models.agent_base import AgentOutput, CoordinatorInput, CoordinatorOutput
+from app.llm.client import GroqClient
+from app.llm.fallback import RuleBasedFallback
+from app.prompts.coordinator import COORDINATOR_PROMPT
+from app.agents.planning import PlanningAgent
+from app.agents.progress import ProgressAgent
+from app.agents.meeting_intel import MeetingIntelligenceAgent
+from app.agents.comm_intel import CommunicationIntelligenceAgent
+from app.agents.workload_intel import WorkloadIntelligenceAgent
+from app.agents.risk import RiskPredictionAgent
+from app.agents.recommendation import RecommendationAgent
+from app.agents.frontend_review import FrontendAgent
+from app.agents.backend_review import BackendAgent
+from app.agents.ai_ml_review import AIMLAgent
+from app.graph import ProjectSnapshot, max_level
+from app.services.graph_pipeline import (
+    build_graph,
+    build_planning_input,
+    build_progress_input,
+    build_workload_input,
+    recommendation_output_from_graph,
+    risk_output_from_graph,
+)
+
+# Meeting Intelligence and Communication Intelligence are deferred: they need
+# a transcript / comm-event data source that does not exist in the product
+# yet (see plan Part B3), so they never receive a wrong-shaped input — they
+# are just skipped with an explicit "no data source" output.
+_GRAPH_BACKED_SPECIALISTS = ("planning", "progress", "workload")
+_DEFERRED_SPECIALISTS = ("meetings", "communication")
+
+DEFAULT_SCOPE = list(_GRAPH_BACKED_SPECIALISTS)
 
 
 class CoordinatorAgent(BaseAgent[CoordinatorInput, CoordinatorOutput]):
@@ -35,7 +54,7 @@ class CoordinatorAgent(BaseAgent[CoordinatorInput, CoordinatorOutput]):
         super().__init__("coordinator")
         self.llm = llm_client
         self.fallback = fallback
-        
+
         self.planning_agent = planning_agent
         self.progress_agent = progress_agent
         self.meeting_intel_agent = meeting_intel_agent
@@ -43,34 +62,34 @@ class CoordinatorAgent(BaseAgent[CoordinatorInput, CoordinatorOutput]):
         self.workload_intel_agent = workload_intel_agent
         self.risk_agent = risk_agent
         self.recommendation_agent = recommendation_agent
-        
+
         self.frontend_agent = frontend_agent
         self.backend_agent = backend_agent
         self.ai_ml_agent = ai_ml_agent
-    
+
     def get_system_prompt(self) -> str:
         return COORDINATOR_PROMPT
-    
+
     async def run(self, input_data: CoordinatorInput) -> CoordinatorOutput:
-        scope = input_data.scope or ["planning", "progress", "meetings", "communication", "workload"]
+        scope = input_data.scope or DEFAULT_SCOPE
         run_review = "review" in scope
-        
-        specialist_outputs = {}
-        
-        import asyncio
-        
-        tasks = []
+
+        snapshot = self._load_snapshot(input_data)
+        graph, analysis = build_graph(snapshot)
+
+        specialist_outputs: dict[str, AgentOutput] = {}
+
+        tasks: list[tuple[str, "asyncio.Future"]] = []
         if "planning" in scope:
-            tasks.append(("planning", self.planning_agent.run(input_data)))
+            planning_input = build_planning_input(input_data.project_id, snapshot, graph, analysis)
+            tasks.append(("planning", self.planning_agent.run(planning_input)))
         if "progress" in scope:
-            tasks.append(("progress", self.progress_agent.run(input_data)))
-        if "meetings" in scope:
-            tasks.append(("meetings", self.meeting_intel_agent.run(input_data)))
-        if "communication" in scope:
-            tasks.append(("communication", self.comm_intel_agent.run(input_data)))
+            progress_input = build_progress_input(input_data.project_id, snapshot, graph, analysis)
+            tasks.append(("progress", self.progress_agent.run(progress_input)))
         if "workload" in scope:
-            tasks.append(("workload", self.workload_intel_agent.run(input_data)))
-        
+            workload_input = build_workload_input(input_data.project_id, snapshot, graph, analysis)
+            tasks.append(("workload", self.workload_intel_agent.run(workload_input)))
+
         if tasks:
             results = await asyncio.gather(*[t[1] for t in tasks], return_exceptions=True)
             for (name, _), result in zip(tasks, results):
@@ -78,66 +97,66 @@ class CoordinatorAgent(BaseAgent[CoordinatorInput, CoordinatorOutput]):
                     specialist_outputs[name] = self._create_error_output(name, str(result))
                 else:
                     specialist_outputs[name] = result
-        
-        # Run risk prediction
-        from ai_service.app.models.agent_base import RiskInput
-        risk_input = RiskInput(
-            project_id=input_data.project_id,
-            specialist_outputs={k: v.model_dump() if hasattr(v, 'model_dump') else v for k, v in specialist_outputs.items()}
-        )
-        risk_output = await self.risk_agent.run(risk_input)
+
+        for name in _DEFERRED_SPECIALISTS:
+            if name in scope:
+                specialist_outputs[name] = self._create_deferred_output(name)
+
+        # Risk scores are always graph-computed (deterministic, zero tokens) —
+        # never guessed from the specialists' prose. See app.graph.metrics.
+        risk_output = risk_output_from_graph(analysis)
         specialist_outputs["risk"] = risk_output
-        
-        # Run recommendation
-        from ai_service.app.models.agent_base import RecommendationInput
-        rec_input = RecommendationInput(
-            project_id=input_data.project_id,
-            risk_scores=risk_output.risk_scores if hasattr(risk_output, 'risk_scores') else {},
-            specialist_outputs={k: v.model_dump() if hasattr(v, 'model_dump') else v for k, v in specialist_outputs.items()}
-        )
-        rec_output = await self.recommendation_agent.run(rec_input)
+
+        rec_output = recommendation_output_from_graph(analysis)
         specialist_outputs["recommendation"] = rec_output
-        
-        # Run review trio if requested
+
         if run_review and input_data.context.get("proposal"):
             proposal = input_data.context["proposal"]
             review_input = {"proposal": proposal, "project_id": str(input_data.project_id)}
-            
+
             review_tasks = [
-                ("frontend", self.frontend_agent.run(review_input)),
-                ("backend", self.backend_agent.run(review_input)),
-                ("ai_ml", self.ai_ml_agent.run(review_input)),
+                ("review_frontend", self.frontend_agent.run(review_input)),
+                ("review_backend", self.backend_agent.run(review_input)),
+                ("review_ai_ml", self.ai_ml_agent.run(review_input)),
             ]
-            review_results_raw = await asyncio.gather(*[t[1] for t in review_tasks], return_exceptions=True)
-            for (name, _), result in zip(review_tasks, review_results_raw):
+            review_results = await asyncio.gather(*[t[1] for t in review_tasks], return_exceptions=True)
+            for (name, _), result in zip(review_tasks, review_results):
                 if isinstance(result, Exception):
-                    specialist_outputs[f"review_{name}"] = self._create_error_output(name, str(result))
+                    specialist_outputs[name] = self._create_error_output(name, str(result))
                 else:
-                    specialist_outputs[f"review_{name}"] = result
-        
-        # Merge recommendations
-        merged_recs = []
-        if hasattr(rec_output, 'recommendations'):
-            merged_recs = rec_output.recommendations
-        
-        # Determine overall risk level
-        risk_levels = [o.risk_level for o in specialist_outputs.values() if hasattr(o, 'risk_level')]
-        overall_risk = self._calculate_overall_risk(risk_levels)
-        
-        # Calculate overall confidence
-        confidences = [o.confidence for o in specialist_outputs.values() if hasattr(o, 'confidence')]
+                    specialist_outputs[name] = result
+
+        confidences = [o.confidence for o in specialist_outputs.values() if hasattr(o, "confidence")]
         overall_confidence = sum(confidences) / len(confidences) if confidences else 0.5
-        
+
         return CoordinatorOutput(
             project_id=input_data.project_id,
-            overall_summary=f"Analysis complete for project {input_data.project_id}. Overall risk: {overall_risk}.",
-            overall_risk_level=overall_risk,
+            overall_summary=(
+                f"Analysis complete for project {input_data.project_id}. "
+                f"Overall risk: {analysis.overall_risk_level}. "
+                f"{len(analysis.findings)} graph finding(s)."
+            ),
+            overall_risk_level=analysis.overall_risk_level,
             overall_confidence=overall_confidence,
-            specialist_outputs={k: v.model_dump() if hasattr(v, 'model_dump') else v for k, v in specialist_outputs.items()},
-            merged_recommendations=merged_recs,
+            specialist_outputs={
+                k: v.model_dump() if hasattr(v, "model_dump") else v
+                for k, v in specialist_outputs.items()
+            },
+            merged_recommendations=rec_output.recommendations,
             next_actions=["Review recommendations", "Assign owners", "Set deadlines"],
         )
-    
+
+    @staticmethod
+    def _load_snapshot(input_data: CoordinatorInput) -> ProjectSnapshot:
+        raw = input_data.context.get("snapshot") if input_data.context else None
+        if raw:
+            return ProjectSnapshot.model_validate(raw)
+        # No snapshot supplied — an empty graph yields "low" risk everywhere
+        # with zero findings rather than crashing (see test_graph.py::
+        # test_empty_snapshot_builds), which is the honest answer to "we were
+        # given nothing to analyze".
+        return ProjectSnapshot(project_id=input_data.project_id)
+
     def _create_error_output(self, agent_name: str, error: str) -> AgentOutput:
         return AgentOutput(
             summary=f"{agent_name} agent failed: {error}",
@@ -147,13 +166,20 @@ class CoordinatorAgent(BaseAgent[CoordinatorInput, CoordinatorOutput]):
             evidence=[],
             recommendations=[],
             next_action="Investigate agent failure",
-            metadata={"error": error, "agent": agent_name}
+            metadata={"error": error, "agent": agent_name},
         )
-    
+
+    def _create_deferred_output(self, agent_name: str) -> AgentOutput:
+        return AgentOutput(
+            summary=f"{agent_name} is not available: no data source is connected yet",
+            risk_level="low",
+            confidence=0.0,
+            signals=[],
+            evidence=[],
+            recommendations=[],
+            next_action="Not applicable",
+            metadata={"deferred": True, "agent": agent_name},
+        )
+
     def _calculate_overall_risk(self, risk_levels: list[str]) -> str:
-        if not risk_levels:
-            return "low"
-        
-        risk_order = {"critical": 4, "high": 3, "medium": 2, "low": 1}
-        max_risk = max(risk_levels, key=lambda x: risk_order.get(x, 0))
-        return max_risk
+        return max_level(risk_levels)

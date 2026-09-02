@@ -1,8 +1,8 @@
-from ai_service.app.agents.base import BaseAgent
-from ai_service.app.models.agent_base import RecommendationInput, RecommendationOutput
-from ai_service.app.llm.client import GroqClient
-from ai_service.app.llm.fallback import RuleBasedFallback
-from ai_service.app.prompts.recommendation import RECOMMENDATION_PROMPT
+from app.agents.base import BaseAgent
+from app.models.agent_base import RecommendationInput, RecommendationOutput
+from app.llm.client import GroqClient
+from app.llm.fallback import RuleBasedFallback
+from app.prompts.recommendation import RECOMMENDATION_PROMPT
 
 
 class RecommendationAgent(BaseAgent[RecommendationInput, RecommendationOutput]):

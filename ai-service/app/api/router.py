@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ai_service.app.api.v1 import analyze
+from app.api.v1 import analyze
 
 api_v1_router = APIRouter()
 

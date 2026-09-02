@@ -1,5 +1,5 @@
-from ai_service.app.models.agent_base import AgentOutput
-from ai_service.app.models.agent_base import (
+from app.models.agent_base import AgentOutput
+from app.models.agent_base import (
     PlanningOutput, ProgressOutput, MeetingIntelOutput,
     CommIntelOutput, WorkloadIntelOutput, RiskOutput,
     RecommendationOutput, CoordinatorOutput, ReviewTrioOutput,

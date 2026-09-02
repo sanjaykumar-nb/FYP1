@@ -1,0 +1,185 @@
+{
+  "model": "openai/gpt-oss-120b",
+  "n_scenarios": 30,
+  "n_agent_calls": 90,
+  "schema_valid_calls": 37,
+  "schema_validity_rate": 0.4111,
+  "fallback_rate": 0.5889,
+  "per_agent_fallback_count": {
+    "progress": 21,
+    "planning": 16,
+    "workload": 16
+  },
+  "per_agent_total_calls": {
+    "planning": 30,
+    "progress": 30,
+    "workload": 30
+  },
+  "n_llm_vs_fallback_comparisons": 37,
+  "cohens_kappa_overall": 0.9533,
+  "cohens_kappa_by_risk_type": {
+    "coordination": {
+      "n": 1,
+      "kappa": 1.0
+    },
+    "delay": {
+      "n": 1,
+      "kappa": 1.0
+    },
+    "dependency": {
+      "n": 14,
+      "kappa": 1.0
+    },
+    "knowledge": {
+      "n": 12,
+      "kappa": 0.8588
+    },
+    "silent_member": {
+      "n": 1,
+      "kappa": 1.0
+    },
+    "workload": {
+      "n": 8,
+      "kappa": 1.0
+    }
+  },
+  "raw_errors_this_process": [
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "ValueError: LLM response failed schema validation: [\"Field 'sprint_readiness' should be number\", \"Field 'milestone_feasibility' should be object\", \"Field 'capacity_gaps' should be array\"]",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "ValueError: LLM response failed schema validation: [\"Field 'sprint_readiness' should be number\", \"Field 'milestone_feasibility' should be object\", \"Field 'capacity_gaps' should be array\"]",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+    "HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+  ],
+  "attempts_histogram_this_process": {
+    "1": 1,
+    "3": 2,
+    "4": 23
+  },
+  "note": "raw_errors/attempts_histogram cover only calls made in this process invocation; resumed calls from a prior checkpointed run are folded into the aggregate counts but not these two diagnostic fields.",
+  "examples": [
+    {
+      "agent": "planning",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "low",
+      "fallback_risk_level": "low"
+    },
+    {
+      "agent": "progress",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "medium",
+      "fallback_risk_level": "medium"
+    },
+    {
+      "agent": "workload",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "high",
+      "fallback_risk_level": "high"
+    },
+    {
+      "agent": "planning",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "low",
+      "fallback_risk_level": "low"
+    },
+    {
+      "agent": "progress",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "medium",
+      "fallback_risk_level": "medium"
+    },
+    {
+      "agent": "workload",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "medium",
+      "fallback_risk_level": "medium"
+    },
+    {
+      "agent": "planning",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "low",
+      "fallback_risk_level": "low"
+    },
+    {
+      "agent": "progress",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "medium",
+      "fallback_risk_level": "medium"
+    },
+    {
+      "agent": "workload",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "low",
+      "fallback_risk_level": "low"
+    },
+    {
+      "agent": "planning",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "low",
+      "fallback_risk_level": "low"
+    },
+    {
+      "agent": "progress",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "medium",
+      "fallback_risk_level": "medium"
+    },
+    {
+      "agent": "workload",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "medium",
+      "fallback_risk_level": "medium"
+    },
+    {
+      "agent": "planning",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "low",
+      "fallback_risk_level": "low"
+    },
+    {
+      "agent": "progress",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": true,
+      "llm_risk_level": "medium",
+      "fallback_risk_level": "medium"
+    },
+    {
+      "agent": "workload",
+      "scenario": "dependency:cycle_count",
+      "used_fallback": false,
+      "llm_risk_level": "low",
+      "fallback_risk_level": "low"
+    }
+  ]
+}

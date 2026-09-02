@@ -1,9 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from ai_service.app.config import get_settings
-from ai_service.app.api.v1 import analyze
-from ai_service.app.api.v1 import router as api_v1_router
+from app.config import get_settings
+from app.api.v1 import analyze_router as api_v1_router
 
 settings = get_settings()
 

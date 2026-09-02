@@ -1,0 +1,215 @@
+{
+  "detection": {
+    "n_scenarios": 180,
+    "overall": {
+      "tp": 90,
+      "fp": 0,
+      "fn": 0,
+      "tn": 90,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "accuracy": 1.0
+    },
+    "per_risk_type": {
+      "coordination": {
+        "tp": 15,
+        "fp": 0,
+        "fn": 0,
+        "tn": 15,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "delay": {
+        "tp": 15,
+        "fp": 0,
+        "fn": 0,
+        "tn": 15,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "dependency": {
+        "tp": 15,
+        "fp": 0,
+        "fn": 0,
+        "tn": 15,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "knowledge": {
+        "tp": 15,
+        "fp": 0,
+        "fn": 0,
+        "tn": 15,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "silent_member": {
+        "tp": 15,
+        "fp": 0,
+        "fn": 0,
+        "tn": 15,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "workload": {
+        "tp": 15,
+        "fp": 0,
+        "fn": 0,
+        "tn": 15,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      }
+    },
+    "examples": [
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": true,
+        "predicted": true,
+        "description": "cyclic 3-task chain among 10 tasks"
+      },
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": false,
+        "predicted": false,
+        "description": "acyclic 3-task chain among 30 tasks"
+      },
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": true,
+        "predicted": true,
+        "description": "cyclic 3-task chain among 80 tasks"
+      },
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": false,
+        "predicted": false,
+        "description": "acyclic 3-task chain among 10 tasks"
+      },
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": true,
+        "predicted": true,
+        "description": "cyclic 3-task chain among 30 tasks"
+      },
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": false,
+        "predicted": false,
+        "description": "acyclic 3-task chain among 80 tasks"
+      },
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": true,
+        "predicted": true,
+        "description": "cyclic 3-task chain among 10 tasks"
+      },
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": false,
+        "predicted": false,
+        "description": "acyclic 3-task chain among 30 tasks"
+      },
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": true,
+        "predicted": true,
+        "description": "cyclic 3-task chain among 80 tasks"
+      },
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": false,
+        "predicted": false,
+        "description": "acyclic 3-task chain among 10 tasks"
+      },
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": true,
+        "predicted": true,
+        "description": "cyclic 3-task chain among 30 tasks"
+      },
+      {
+        "risk_type": "dependency",
+        "metric": "cycle_count",
+        "label": false,
+        "predicted": false,
+        "description": "acyclic 3-task chain among 80 tasks"
+      }
+    ]
+  },
+  "tokens": {
+    "sweep": [
+      {
+        "task_count": 13,
+        "witness_nodes": 6,
+        "rendered_chars": 1066,
+        "approx_tokens": 266
+      },
+      {
+        "task_count": 53,
+        "witness_nodes": 9,
+        "rendered_chars": 1545,
+        "approx_tokens": 386
+      },
+      {
+        "task_count": 203,
+        "witness_nodes": 9,
+        "rendered_chars": 1556,
+        "approx_tokens": 389
+      },
+      {
+        "task_count": 1003,
+        "witness_nodes": 9,
+        "rendered_chars": 1558,
+        "approx_tokens": 389
+      },
+      {
+        "task_count": 2003,
+        "witness_nodes": 9,
+        "rendered_chars": 1561,
+        "approx_tokens": 390
+      }
+    ],
+    "smallest_to_largest_task_growth": 154.08,
+    "smallest_to_largest_token_growth": 1.466,
+    "old_architecture_repr_tokens_at_largest_size": 189834,
+    "new_architecture_tokens_at_largest_size": 390
+  },
+  "latency": {
+    "n_runs": 50,
+    "project_size_tasks": 203,
+    "p50_ms": 10.961,
+    "p95_ms": 13.421,
+    "max_ms": 50.576,
+    "mean_ms": 11.866
+  },
+  "grounding": {
+    "n_trials": 200,
+    "fabrications_fully_stripped": 200,
+    "enforcement_rate": 1.0
+  },
+  "note": "Schema-validity rate and fallback-vs-LLM agreement (Cohen's kappa) require a live GROQ_API_KEY and are not measured here."
+}

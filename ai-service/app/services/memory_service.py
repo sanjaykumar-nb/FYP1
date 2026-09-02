@@ -1,8 +1,8 @@
-from typing: Optional
+from typing import Optional
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from ai_service.app.config import get_settings
+from app.config import get_settings
 
 settings = get_settings()
 

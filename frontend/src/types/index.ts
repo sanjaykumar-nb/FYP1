@@ -1,0 +1,122 @@
+// Mirrors backend/app/schemas/*.py response shapes. Kept in sync by hand —
+// there is no shared package between the frontend and backend.
+
+export interface PaginatedResponse<T> {
+  items: T[]
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+}
+
+export interface Project {
+  id: string
+  organization_id: string
+  team_id: string | null
+  name: string
+  description: string | null
+  key: string
+  status: string
+  start_date: string | null
+  target_end_date: string | null
+  actual_end_date: string | null
+  health_score: number | null
+  risk_score: number | null
+  created_at: string
+}
+
+export type TaskStatus = "backlog" | "planned" | "in_progress" | "blocked" | "review" | "done"
+export type TaskPriority = "low" | "medium" | "high" | "critical"
+
+export interface Task {
+  id: string
+  project_id: string
+  milestone_id: string | null
+  parent_task_id: string | null
+  assignee_id: string | null
+  reporter_id: string
+  title: string
+  description: string | null
+  status: TaskStatus
+  priority: TaskPriority
+  story_points: number | null
+  estimated_hours: number | null
+  actual_hours: number
+  due_date: string | null
+  blocked_reason: string | null
+  position: number
+  started_at: string | null
+  completed_at: string | null
+  created_at: string
+}
+
+export const TASK_STATUSES: { value: TaskStatus; label: string }[] = [
+  { value: "backlog", label: "Backlog" },
+  { value: "planned", label: "Planned" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "blocked", label: "Blocked" },
+  { value: "review", label: "Review" },
+  { value: "done", label: "Done" },
+]
+
+export type RiskLevel = "low" | "medium" | "high" | "critical"
+
+export interface AgentSignal {
+  name: string
+  value: number | string
+  weight: number
+}
+
+export interface AgentEvidence {
+  source: string
+  reference_id: string
+  excerpt: string
+  relevance: number
+}
+
+export interface AgentRecommendation {
+  type: string
+  title: string
+  description: string
+  reasoning: string
+  priority: string
+  confidence: number
+}
+
+export interface AgentOutput {
+  summary: string
+  risk_level: RiskLevel
+  confidence: number
+  signals: AgentSignal[]
+  evidence: AgentEvidence[]
+  recommendations: AgentRecommendation[]
+  next_action: string
+  metadata: Record<string, unknown>
+  risk_scores?: Record<string, RiskLevel>
+  [key: string]: unknown
+}
+
+export interface CoordinatorOutput {
+  project_id: string
+  overall_summary: string
+  overall_risk_level: RiskLevel
+  overall_confidence: number
+  specialist_outputs: Record<string, AgentOutput>
+  merged_recommendations: AgentRecommendation[]
+  next_actions: string[]
+}
+
+export interface AgentRun {
+  id: string
+  project_id: string
+  triggered_by: string | null
+  trigger_type: string | null
+  status: "running" | "completed" | "failed"
+  coordinator_output: CoordinatorOutput | null
+  specialist_outputs: Record<string, AgentOutput> | null
+  final_recommendations: { items: AgentRecommendation[] } | null
+  execution_time_ms: number | null
+  error_message: string | null
+  created_at: string
+  completed_at: string | null
+}

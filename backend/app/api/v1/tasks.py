@@ -18,8 +18,8 @@ from app.schemas.task import (
     TaskCommentCreate,
     TaskCommentResponse,
     TaskMove,
-    PaginatedResponse,
 )
+from app.schemas.auth import PaginatedResponse
 
 router = APIRouter()
 
@@ -83,7 +83,7 @@ async def list_tasks(
     )
 
 
-@router.post("", response_model=TaskResponse)
+@router.post("", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 async def create_task(
     project_id: UUID,
     task_data: TaskCreate,
@@ -138,29 +138,36 @@ async def get_task(
     db: AsyncSession = Depends(get_db),
     org_id: UUID = Depends(get_current_org_id),
 ):
+    # subtasks/comments are lazy="dynamic" relationships, which cannot be eager
+    # loaded — they are fetched with explicit queries below.
     result = await db.execute(
         select(Task)
         .options(
             selectinload(Task.assignee),
             selectinload(Task.reporter),
-            selectinload(Task.subtasks),
-            selectinload(Task.comments),
         )
         .join(Project, Project.id == Task.project_id)
         .where(Task.id == task_id, Project.organization_id == org_id)
     )
     task = result.scalar_one_or_none()
-    
+
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Task not found",
         )
-    
+
     # Build response with relations
     task_data = TaskResponse.model_validate(task)
-    comments_count = len(task.comments) if task.comments else 0
-    
+
+    subtasks_result = await db.execute(select(Task).where(Task.parent_task_id == task_id))
+    subtasks = subtasks_result.scalars().all()
+
+    comments_count_result = await db.execute(
+        select(func.count(TaskComment.id)).where(TaskComment.task_id == task_id)
+    )
+    comments_count = comments_count_result.scalar() or 0
+
     # Count dependencies
     blocking_count_result = await db.execute(
         select(func.count(TaskDependency.id)).where(TaskDependency.blocking_task_id == task_id)
@@ -173,7 +180,7 @@ async def get_task(
         **task_data.model_dump(),
         assignee=task.assignee,
         reporter=task.reporter,
-        subtasks=[TaskResponse.model_validate(t) for t in task.subtasks] if task.subtasks else [],
+        subtasks=[TaskResponse.model_validate(t) for t in subtasks],
         comments_count=comments_count,
         dependencies_count=(blocking_count_result.scalar() or 0) + (blocked_count_result.scalar() or 0),
     )
@@ -208,7 +215,7 @@ async def update_task(
     return TaskResponse.model_validate(task)
 
 
-@router.delete("/{task_id}")
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(
     task_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -229,8 +236,6 @@ async def delete_task(
     
     await db.delete(task)
     await db.commit()
-    
-    return {"message": "Task deleted"}
 
 
 @router.patch("/{task_id}/move", response_model=TaskResponse)
@@ -282,7 +287,7 @@ async def move_task(
 
 
 # Subtasks
-@router.post("/{task_id}/subtasks", response_model=TaskResponse)
+@router.post("/{task_id}/subtasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 async def create_subtask(
     task_id: UUID,
     task_data: TaskCreate,
@@ -361,15 +366,16 @@ async def list_dependencies(
     ]
 
 
-@router.post("/{task_id}/dependencies", response_model=TaskDependencyResponse)
+@router.post("/{task_id}/dependencies", response_model=TaskDependencyResponse, status_code=status.HTTP_201_CREATED)
 async def add_dependency(
+    project_id: UUID,
     task_id: UUID,
     dep_data: TaskDependencyCreate,
     db: AsyncSession = Depends(get_db),
     org_id: UUID = Depends(get_current_org_id),
 ):
     # Verify both tasks exist and belong to org
-    for tid in [dep_data.blocking_task_id, dep_data.blocked_task_id]:
+    for tid in [dep_data.blocking_task_id, task_id]:
         result = await db.execute(
             select(Task)
             .join(Project, Project.id == Task.project_id)
@@ -380,19 +386,17 @@ async def add_dependency(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Task {tid} not found",
             )
-    
-    # Check for circular dependency
-    # Simple check: ensure we're not creating a cycle
-    if dep_data.blocking_task_id == dep_data.blocked_task_id:
+
+    if dep_data.blocking_task_id == task_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot create dependency on self",
         )
-    
+
     dep = TaskDependency(
-        project_id=(await db.execute(select(Task.project_id).where(Task.id == dep_data.blocking_task_id))).scalar(),
+        project_id=project_id,
         blocking_task_id=dep_data.blocking_task_id,
-        blocked_task_id=dep_data.blocked_task_id,
+        blocked_task_id=task_id,
         dependency_type=dep_data.dependency_type,
     )
     db.add(dep)
@@ -468,7 +472,7 @@ async def list_comments(
     )
 
 
-@router.post("/{task_id}/comments", response_model=TaskCommentResponse)
+@router.post("/{task_id}/comments", response_model=TaskCommentResponse, status_code=status.HTTP_201_CREATED)
 async def add_comment(
     task_id: UUID,
     comment_data: TaskCommentCreate,

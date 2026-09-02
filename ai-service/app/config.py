@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     
     GROQ_API_KEY: Optional[str] = None
-    AI_MODEL: str = "llama-3.1-70b-versatile"
+    AI_MODEL: str = "openai/gpt-oss-120b"  # Groq deprecated the llama-3.x family; see README Troubleshooting
     AI_TEMPERATURE: float = 0.1
     AI_MAX_TOKENS: int = 4096
     AI_TIMEOUT_SECONDS: int = 60

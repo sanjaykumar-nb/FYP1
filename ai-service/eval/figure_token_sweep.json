@@ -1,0 +1,27 @@
+[
+  {
+    "tasks": 13,
+    "graph": 266,
+    "naive": 1050
+  },
+  {
+    "tasks": 53,
+    "graph": 386,
+    "naive": 4695
+  },
+  {
+    "tasks": 203,
+    "graph": 389,
+    "naive": 18901
+  },
+  {
+    "tasks": 1003,
+    "graph": 389,
+    "naive": 94724
+  },
+  {
+    "tasks": 2003,
+    "graph": 390,
+    "naive": 189834
+  }
+]

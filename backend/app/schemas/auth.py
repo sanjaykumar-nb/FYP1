@@ -28,6 +28,16 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8)
+    organization_name: str = Field("My Organization", min_length=1, max_length=255)
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
 
 
 class UserUpdate(BaseModel):

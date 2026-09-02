@@ -14,18 +14,18 @@ httpx==0.28.0
 # LLM
 groq==0.7.0
 
+# Knowledge graph (deterministic risk computation)
+networkx==3.4.2
+
 # Utilities
 python-dotenv==1.0.1
 PyYAML==6.0.2
-
-# LangGraph for orchestration
-langgraph==0.2.0
 
 # Development
 pytest==8.3.0
 pytest-asyncio==0.24.0
 pytest-cov==6.0.0
-httpx==0.28.0
+pytest-mock==3.14.0
 
 # Type checking
 mypy==1.13.0

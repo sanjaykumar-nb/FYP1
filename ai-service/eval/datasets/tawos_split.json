@@ -1,0 +1,48 @@
+{
+  "tuning_projects": [
+    "DM",
+    "FAB",
+    "INDY",
+    "MDL",
+    "MESOS",
+    "MULE",
+    "TIMOB",
+    "TISTUD",
+    "XD"
+  ],
+  "holdout_projects": [
+    "ALOY",
+    "APIKIT",
+    "BE",
+    "CLI",
+    "CLOV",
+    "COMPASS",
+    "CONFCLOUD",
+    "CONFSERVER",
+    "CXX",
+    "DAEMON",
+    "DATACASS",
+    "DURACLOUD",
+    "IS",
+    "JAVA",
+    "JRACLOUD",
+    "JSWCLOUD",
+    "JSWSERVER",
+    "MXNET",
+    "NEXUS",
+    "STL",
+    "TIDOC",
+    "USERGRID"
+  ],
+  "tuning_stats": {
+    "n_projects": 9,
+    "n_sprints": 717,
+    "positive_rate": 0.6248
+  },
+  "holdout_stats": {
+    "n_projects": 22,
+    "n_sprints": 270,
+    "positive_rate": 0.4889
+  },
+  "overall_positive_rate": 0.5876
+}

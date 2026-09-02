@@ -1,10 +1,17 @@
 import axios from "axios"
 
+// The origin only (no /api/v1) — used directly by the raw refresh-token call
+// below, which deliberately bypasses the `api` instance to avoid re-entering
+// its own interceptors.
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  baseURL: `${API_BASE_URL}/api/v1`,
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 30000,
 })
 
 // Request interceptor to add auth token

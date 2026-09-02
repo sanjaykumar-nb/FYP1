@@ -1,5 +1,5 @@
 from sqlalchemy import String, Text, DateTime, ForeignKey, Numeric, JSON
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid as UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from app.models.base import BaseModel
@@ -58,7 +58,7 @@ class AuditLog(BaseModel):
     entity_id: Mapped[UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     old_values: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     new_values: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    metadata: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    audit_metadata: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
 
