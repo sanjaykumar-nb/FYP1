@@ -127,6 +127,23 @@ a graph of 46 nodes and 160 links, then every finding with the issues and people
 
 No language model produces any of these numbers, which is why each one can be traced back.
 
+**Act on a recommendation** — *Redistribute workload* comes with the moves that would carry it out,
+computed on the same graph as the finding. Each move takes one open task from whoever carries the most
+at that point and hands it to the teammate that leaves the pair most even:
+
+1. MESOS-8567 (3 pts) — contributor #3409 → #3415 (who had no open work)
+2. MESOS-8524 (2 pts) — contributor #3391 → #3361
+3. MESOS-8383 (3 pts) — contributor #3409 → #3569
+
+*Expected: heaviest open load falls from 9 to 6 points against a team mean of 3.8 — load skew high →
+medium.* Click **Apply** on each: the task's assignee changes on the board and the row reads
+*Applied*. Then **Run Analysis** again. Live result: **Workload — was high, now medium**, as
+predicted. The heaviest load is now contributor #3481's 6 points, and the new run suggests one more
+move (MESOS-5882 to #3389), expected to take load skew from medium to low.
+
+A suggestion can't be applied twice or against a board that has moved on: once the task changes
+hands, its row reads *Applied* or *Changed since this analysis* instead of offering the button.
+
 Also worth saying: **silent members — low.** On this real team, the people doing the work were
 also talking about it.
 
@@ -140,6 +157,7 @@ also talking about it.
 | **Dependencies** on the board: "Blocked by" markers, add/remove, circular chains refused | Editing or deleting comments |
 | **Discussion** on every task, with real authors | LLM narration (works with a Groq key; not needed for the demo) |
 | Run analysis; results persisted; dashboard and workspace reflect them; **every finding shows the tasks and people it rests on** | |
+| **Recommendations you can apply**: suggested reassignments, one-click Apply, the change marked on the next run | Suggested actions for delay, dependency and knowledge risks |
 
 ## 5. Found and fixed by testing on real data
 

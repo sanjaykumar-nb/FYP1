@@ -12,8 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { toast } from "@/hooks/use-toast"
 import { api } from "@/lib/api"
-import type { AgentRun, Member, PaginatedResponse, Project, Task } from "@/types"
-import { AgentRunPanel } from "@/components/analytics/agent-run-panel"
+import type { AgentRun, Member, PaginatedResponse, Project, RecommendedAction, Task } from "@/types"
+import { AgentRunPanel, nodeRawId } from "@/components/analytics/agent-run-panel"
 import { TeamPanel } from "@/components/team/team-panel"
 
 interface ProjectHealth {
@@ -80,6 +80,28 @@ export default function ProjectDashboardPage() {
     () => new Map((members ?? []).map((m) => [m.id, m.full_name || m.email])),
     [members]
   )
+  const taskAssignees = useMemo(
+    () => new Map((tasks?.items ?? []).map((t) => [t.id, t.assignee_id])),
+    [tasks]
+  )
+
+  const applyAction = useMutation({
+    mutationFn: (action: RecommendedAction) =>
+      api.patch(`/projects/${projectId}/tasks/${nodeRawId(action.task_id)}`, {
+        assignee_id: action.to_person ? nodeRawId(action.to_person) : null,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", projectId] })
+      toast({ title: "Task reassigned", description: "Run the analysis again to measure the effect.", variant: "success" })
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Could not reassign task",
+        description: error.response?.data?.detail || "Please try again",
+        variant: "destructive",
+      })
+    },
+  })
 
   const runAnalysis = useMutation({
     mutationFn: () => api.post<AgentRun>(`/analytics/projects/${projectId}/analyze`).then((res) => res.data),
@@ -111,6 +133,7 @@ export default function ProjectDashboardPage() {
   const riskScore = health?.risk_score ?? project.risk_score ?? 0
   const completionPct = health ? Math.round(health.completion_rate * 100) : 0
   const latestRun = runs?.[0]
+  const previousRun = runs?.slice(1).find((r) => r.status === "completed")
 
   return (
     <div className="space-y-6">
@@ -301,7 +324,15 @@ export default function ProjectDashboardPage() {
             </Button>
           </div>
           {latestRun ? (
-            <AgentRunPanel run={latestRun} taskTitles={taskTitles} memberNames={memberNames} />
+            <AgentRunPanel
+              run={latestRun}
+              taskTitles={taskTitles}
+              memberNames={memberNames}
+              taskAssignees={taskAssignees}
+              onApplyAction={(action) => applyAction.mutate(action)}
+              applyingTaskId={applyAction.isPending && applyAction.variables ? nodeRawId(applyAction.variables.task_id) : null}
+              previousRun={previousRun}
+            />
           ) : (
             <Card>
               <CardContent className="p-8 text-center">

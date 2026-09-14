@@ -21,6 +21,17 @@ class AgentEvidence(BaseModel):
     relevance: float = Field(..., ge=0, le=1)
 
 
+class RecommendedAction(BaseModel):
+    """One concrete change that carries out a recommendation. Ids are graph node
+    ids ("task:<uuid>", "person:<uuid>"), so a client can apply it directly."""
+    kind: str
+    task_id: str
+    from_person: Optional[str] = None
+    to_person: Optional[str] = None
+    points: Optional[int] = None
+    summary: str
+
+
 class AgentRecommendation(BaseModel):
     type: str
     title: str
@@ -28,6 +39,8 @@ class AgentRecommendation(BaseModel):
     reasoning: str
     priority: str
     confidence: float = Field(..., ge=0, le=1)
+    actions: list[RecommendedAction] = []
+    expected_effect: Optional[str] = None
 
 
 class AgentOutput(BaseModel):

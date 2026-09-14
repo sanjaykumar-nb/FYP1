@@ -8,6 +8,7 @@ data. See app.graph for the underlying graph, metrics, and grounding pieces.
 
 from __future__ import annotations
 
+from typing import Optional
 from uuid import UUID
 
 from app.graph import (
@@ -20,11 +21,13 @@ from app.graph import (
     SubgraphSelector,
     WitnessSubgraph,
 )
+from app.graph.actions import plan_rebalance
 from app.models.agent_base import (
     AgentRecommendation,
     PlanningInput,
     ProgressInput,
     RecommendationOutput,
+    RecommendedAction,
     RiskOutput,
     WorkloadIntelInput,
 )
@@ -155,9 +158,13 @@ def risk_output_from_graph(analysis: GraphAnalysis) -> RiskOutput:
     )
 
 
-def recommendation_output_from_graph(analysis: GraphAnalysis) -> RecommendationOutput:
+def recommendation_output_from_graph(
+    analysis: GraphAnalysis, graph: Optional[ProjectGraph] = None
+) -> RecommendationOutput:
     """One recommendation per risk type at medium+ severity, evidence-grounded
-    against real graph node ids by construction (never fabricated)."""
+    against real graph node ids by construction (never fabricated). Given the
+    graph, the workload recommendation also carries the reassignments that
+    would carry it out (app.graph.actions)."""
     severity_rank = {"critical": 4, "high": 3, "medium": 2, "low": 1}
     seen_types: set[str] = set()
     recs: list[AgentRecommendation] = []
@@ -171,14 +178,17 @@ def recommendation_output_from_graph(analysis: GraphAnalysis) -> RecommendationO
         if not template:
             continue
         seen_types.add(finding.risk_type)
-        recs.append(AgentRecommendation(
+        rec = AgentRecommendation(
             type=template["type"],
             title=template["title"],
             description=finding.title,
             reasoning=template["reasoning"],
             priority="high" if finding.severity in ("high", "critical") else "medium",
             confidence=0.75,
-        ))
+        )
+        if finding.risk_type == "workload" and graph is not None:
+            _attach_rebalance(rec, graph)
+        recs.append(rec)
 
     return RecommendationOutput(
         summary=f"Generated {len(recs)} recommendation(s) from {len(analysis.findings)} graph finding(s)",
@@ -189,4 +199,30 @@ def recommendation_output_from_graph(analysis: GraphAnalysis) -> RecommendationO
         recommendations=recs,
         next_action="Review and prioritize recommendations" if recs else "No action needed",
         prioritized_actions=[r.model_dump() for r in recs],
+    )
+
+
+def _attach_rebalance(rec: AgentRecommendation, graph: ProjectGraph) -> None:
+    plan = plan_rebalance(graph)
+    if plan is None:
+        return
+
+    def name(nid: str) -> str:
+        attrs = graph.attrs(nid)
+        return attrs.get("name") or attrs.get("title") or nid
+
+    rec.actions = [
+        RecommendedAction(
+            kind="reassign",
+            task_id=m.task_id,
+            from_person=m.from_person,
+            to_person=m.to_person,
+            points=m.points,
+            summary=f"Move {name(m.task_id)} ({m.points} pts) from {name(m.from_person)} to {name(m.to_person)}",
+        )
+        for m in plan.moves
+    ]
+    rec.expected_effect = (
+        f"Heaviest open load falls from {plan.peak_before} to {plan.peak_after} points against a "
+        f"team mean of {plan.mean:.1f} — load skew {plan.severity_before} → {plan.severity_after}."
     )

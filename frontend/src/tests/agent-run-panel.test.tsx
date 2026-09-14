@@ -1,14 +1,18 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { AgentRunPanel, citationLabel } from '@/components/analytics/agent-run-panel'
-import type { AgentEvidence, AgentRun } from '@/types'
+import type { AgentEvidence, AgentRecommendation, AgentRun, RecommendedAction, RiskLevel } from '@/types'
 
 const TASK = '11111111-1111-1111-1111-111111111111'
 const PERSON = '22222222-2222-2222-2222-222222222222'
 const taskTitles = new Map([[TASK, 'MESOS-8383: Fix the agent reconnect loop']])
 const memberNames = new Map([[PERSON, 'Contributor #3409']])
 
-function runWithRisk(metadata: Record<string, unknown>, evidence: AgentEvidence[] = []): AgentRun {
+function runWithRisk(
+  metadata: Record<string, unknown>,
+  evidence: AgentEvidence[] = [],
+  extra: { recommendations?: AgentRecommendation[]; riskScores?: Record<string, RiskLevel> } = {}
+): AgentRun {
   return {
     id: 'run-1',
     project_id: 'project-1',
@@ -26,7 +30,7 @@ function runWithRisk(metadata: Record<string, unknown>, evidence: AgentEvidence[
       overall_summary: 'Overall risk: high',
       overall_risk_level: 'high',
       overall_confidence: 0.7,
-      merged_recommendations: [],
+      merged_recommendations: extra.recommendations ?? [],
       next_actions: [],
       specialist_outputs: {
         risk: {
@@ -38,7 +42,7 @@ function runWithRisk(metadata: Record<string, unknown>, evidence: AgentEvidence[
           recommendations: [],
           next_action: '',
           metadata,
-          risk_scores: { delay: 'low', workload: 'high' },
+          risk_scores: extra.riskScores ?? { delay: 'low', workload: 'high' },
         },
       },
     },
@@ -91,5 +95,73 @@ describe('citationLabel', () => {
     expect(citationLabel(`task:${TASK}`, new Map(), new Map()).label).toBe('unknown task')
     expect(citationLabel(`person:${PERSON}`, new Map(), new Map()).label).toBe('former member')
     expect(citationLabel(`task:${TASK}`, new Map([[TASK, 'Untracked chore']]), new Map()).label).toBe('Untracked chore')
+  })
+})
+
+const OTHER = '33333333-3333-3333-3333-333333333333'
+const THIRD = '44444444-4444-4444-4444-444444444444'
+const names = new Map([[PERSON, 'Contributor #3409'], [OTHER, 'Contributor #3415']])
+const move: RecommendedAction = {
+  kind: 'reassign',
+  task_id: `task:${TASK}`,
+  from_person: `person:${PERSON}`,
+  to_person: `person:${OTHER}`,
+  points: 3,
+  summary: 'Move MESOS-8383',
+}
+const redistribute: AgentRecommendation = {
+  type: 'redistribute',
+  title: 'Redistribute workload',
+  description: 'Contributor #3409 carries 9 open points',
+  reasoning: 'Uneven workload increases delay and burnout risk',
+  priority: 'high',
+  confidence: 0.75,
+  actions: [move],
+  expected_effect: 'Heaviest open load falls from 9 to 6 points',
+}
+
+describe('AgentRunPanel suggested reassignments', () => {
+  const run = () => runWithRisk({ findings: [] }, [], { recommendations: [redistribute] })
+  const panel = (assignee: string, onApply = vi.fn()) => (
+    <AgentRunPanel
+      run={run()}
+      taskTitles={taskTitles}
+      memberNames={names}
+      taskAssignees={new Map([[TASK, assignee]])}
+      onApplyAction={onApply}
+    />
+  )
+
+  it('describes the move and applies it on request', () => {
+    const onApply = vi.fn()
+    render(panel(PERSON, onApply))
+
+    expect(screen.getByText('Move MESOS-8383 (3 pts) from Contributor #3409 to Contributor #3415')).toBeInTheDocument()
+    expect(screen.getByText(/falls from 9 to 6 points/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    expect(onApply).toHaveBeenCalledWith(move)
+  })
+
+  it('shows a move as applied once the task has the new assignee', () => {
+    render(panel(OTHER))
+    expect(screen.getByText('Applied')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument()
+    expect(screen.getByText('Run the analysis again to measure the effect.')).toBeInTheDocument()
+  })
+
+  it('will not apply a move the board has overtaken', () => {
+    render(panel(THIRD))
+    expect(screen.getByText('Changed since this analysis')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument()
+  })
+})
+
+describe('AgentRunPanel comparison with the previous run', () => {
+  it('marks the risk scores that changed', () => {
+    const previous = runWithRisk({ findings: [] }, [], { riskScores: { delay: 'low', workload: 'critical' } })
+    render(<AgentRunPanel run={runWithRisk({ findings: [] })} previousRun={previous} />)
+
+    expect(screen.getByText('was critical')).toBeInTheDocument()
+    expect(screen.queryByText('was low')).not.toBeInTheDocument()
   })
 })

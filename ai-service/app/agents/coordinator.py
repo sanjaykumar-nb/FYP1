@@ -107,7 +107,7 @@ class CoordinatorAgent(BaseAgent[CoordinatorInput, CoordinatorOutput]):
         risk_output = risk_output_from_graph(analysis)
         specialist_outputs["risk"] = risk_output
 
-        rec_output = recommendation_output_from_graph(analysis)
+        rec_output = recommendation_output_from_graph(analysis, graph)
         specialist_outputs["recommendation"] = rec_output
 
         if run_review and input_data.context.get("proposal"):

@@ -111,6 +111,16 @@ export interface GraphFinding {
   node_ids: string[]
 }
 
+// A concrete change carrying out a recommendation; ids are graph node ids.
+export interface RecommendedAction {
+  kind: string
+  task_id: string
+  from_person: string | null
+  to_person: string | null
+  points: number | null
+  summary: string
+}
+
 export interface AgentRecommendation {
   type: string
   title: string
@@ -118,6 +128,8 @@ export interface AgentRecommendation {
   reasoning: string
   priority: string
   confidence: number
+  actions?: RecommendedAction[]
+  expected_effect?: string | null
 }
 
 export interface AgentOutput {

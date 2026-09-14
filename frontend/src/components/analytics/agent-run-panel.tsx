@@ -1,7 +1,8 @@
 import { AlertTriangle, CheckCircle2, Lightbulb, Network, ShieldAlert } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { AgentRun, GraphFinding, RiskLevel } from "@/types"
+import { Button } from "@/components/ui/button"
+import type { AgentRecommendation, AgentRun, GraphFinding, RecommendedAction, RiskLevel } from "@/types"
 
 const RISK_STYLES: Record<RiskLevel, { badge: string; icon: string }> = {
   low: { badge: "bg-green-100 text-green-800 dark:bg-green-950/50 dark:text-green-400", icon: "text-green-600" },
@@ -65,14 +66,108 @@ function formatValue(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(2)
 }
 
+/** "task:<uuid>" → "<uuid>" */
+export function nodeRawId(nodeId: string) {
+  return nodeId.slice(nodeId.indexOf(":") + 1)
+}
+
+export type ActionState = "ready" | "applied" | "outdated" | "missing"
+
+const ACTION_STATE_LABELS: Record<Exclude<ActionState, "ready">, string> = {
+  applied: "Applied",
+  outdated: "Changed since this analysis",
+  missing: "Task no longer on the board",
+}
+
+/** Whether a suggested reassignment can still be applied, judged against the board as it is now. */
+export function actionState(action: RecommendedAction, taskAssignees: Map<string, string | null>): ActionState {
+  const taskId = nodeRawId(action.task_id)
+  if (!taskAssignees.has(taskId)) return "missing"
+  const current = taskAssignees.get(taskId) ?? null
+  if (action.to_person && current === nodeRawId(action.to_person)) return "applied"
+  if (!action.from_person || current !== nodeRawId(action.from_person)) return "outdated"
+  return "ready"
+}
+
+function RecommendationActions({
+  rec,
+  taskTitles,
+  memberNames,
+  taskAssignees,
+  onApplyAction,
+  applyingTaskId,
+}: {
+  rec: AgentRecommendation
+  taskTitles: Map<string, string>
+  memberNames: Map<string, string>
+  taskAssignees: Map<string, string | null>
+  onApplyAction?: (action: RecommendedAction) => void
+  applyingTaskId?: string | null
+}) {
+  const actions = (rec.actions ?? []).filter((a) => a.kind === "reassign")
+  if (actions.length === 0 && !rec.expected_effect) return null
+  const states = actions.map((a) => actionState(a, taskAssignees))
+  const person = (nodeId: string | null) =>
+    nodeId ? citationLabel(nodeId, taskTitles, memberNames).label : "nobody"
+
+  return (
+    <div className="mt-3 space-y-2">
+      {actions.length > 0 && (
+        <ul className="space-y-2">
+          {actions.map((action, i) => {
+            const task = citationLabel(action.task_id, taskTitles, memberNames)
+            const points = action.points != null ? ` (${action.points} pts)` : ""
+            const state = states[i]
+            return (
+              <li
+                key={action.task_id}
+                className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-background px-3 py-2"
+              >
+                <span className="text-sm flex-1 min-w-[12rem]" title={task.title}>
+                  {`Move ${task.label}${points} from ${person(action.from_person)} to ${person(action.to_person)}`}
+                </span>
+                {state === "ready" ? (
+                  onApplyAction && (
+                    <Button size="sm" onClick={() => onApplyAction(action)} disabled={applyingTaskId != null}>
+                      {applyingTaskId === nodeRawId(action.task_id) ? "Applying…" : "Apply"}
+                    </Button>
+                  )
+                ) : (
+                  <span className={`text-xs ${state === "applied" ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}`}>
+                    {ACTION_STATE_LABELS[state]}
+                  </span>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+      {rec.expected_effect && <p className="text-xs text-muted-foreground">Expected: {rec.expected_effect}</p>}
+      {states.includes("applied") && (
+        <p className="text-xs text-muted-foreground">Run the analysis again to measure the effect.</p>
+      )}
+    </div>
+  )
+}
+
 export function AgentRunPanel({
   run,
   taskTitles = new Map(),
   memberNames = new Map(),
+  taskAssignees = new Map(),
+  onApplyAction,
+  applyingTaskId,
+  previousRun,
 }: {
   run: AgentRun
   taskTitles?: Map<string, string>
   memberNames?: Map<string, string>
+  /** task id → current assignee id, to tell which suggested moves still apply */
+  taskAssignees?: Map<string, string | null>
+  onApplyAction?: (action: RecommendedAction) => void
+  applyingTaskId?: string | null
+  /** The analysis before this one; changed risk scores are marked against it. */
+  previousRun?: AgentRun | null
 }) {
   if (run.status === "failed") {
     return (
@@ -104,6 +199,8 @@ export function AgentRunPanel({
 
   const risk = output.specialist_outputs.risk
   const riskScores = risk?.risk_scores ?? {}
+  const previousOutput = previousRun?.coordinator_output
+  const previousScores = previousOutput?.specialist_outputs.risk?.risk_scores
   const graphStats = risk?.metadata?.graph_stats as { nodes: number; edges: number } | undefined
   const findings: Finding[] =
     (risk?.metadata?.findings as GraphFinding[] | undefined) ??
@@ -119,7 +216,12 @@ export function AgentRunPanel({
               <ShieldAlert className="h-5 w-5" />
               Overall Risk
             </CardTitle>
-            <RiskBadge level={output.overall_risk_level} />
+            <span className="flex items-center gap-2">
+              {previousOutput && previousOutput.overall_risk_level !== output.overall_risk_level && (
+                <span className="text-xs text-muted-foreground">was {previousOutput.overall_risk_level}</span>
+              )}
+              <RiskBadge level={output.overall_risk_level} />
+            </span>
           </div>
         </CardHeader>
         <CardContent>
@@ -150,9 +252,14 @@ export function AgentRunPanel({
                 {Object.entries(RISK_TYPE_LABELS)
                   .filter(([key]) => key in riskScores)
                   .map(([key, label]) => (
-                    <div key={key} className="flex items-center justify-between rounded-md border border-border px-3 py-2">
+                    <div key={key} className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2">
                       <span className="text-sm">{label}</span>
-                      <RiskBadge level={riskScores[key]} />
+                      <span className="flex items-center gap-2">
+                        {previousScores?.[key] && previousScores[key] !== riskScores[key] && (
+                          <span className="text-xs text-muted-foreground">was {previousScores[key]}</span>
+                        )}
+                        <RiskBadge level={riskScores[key]} />
+                      </span>
                     </div>
                   ))}
               </div>
@@ -255,6 +362,14 @@ export function AgentRunPanel({
                   </div>
                   <p className="text-sm text-muted-foreground">{rec.description}</p>
                   <p className="text-xs text-muted-foreground mt-1 italic">{rec.reasoning}</p>
+                  <RecommendationActions
+                    rec={rec}
+                    taskTitles={taskTitles}
+                    memberNames={memberNames}
+                    taskAssignees={taskAssignees}
+                    onApplyAction={onApplyAction}
+                    applyingTaskId={applyingTaskId}
+                  />
                 </div>
               ))}
             </div>

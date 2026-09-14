@@ -84,6 +84,24 @@ def max_level(levels) -> str:
     return max(levels, key=lambda l: _LEVEL_RANK[l])
 
 
+def open_point_loads(graph: ProjectGraph) -> tuple[dict[str, int], list[tuple[str, str, int]]]:
+    """Open-work load per person: points of their unfinished tasks, each counting at least 1.
+
+    Returns every person's load (zero included) and the open assignments behind
+    it as (person, task, weight). The workload finding and the rebalancing plan
+    (app.graph.actions) both use this, so they always agree on who carries what.
+    """
+    open_tasks = {n for n, a in graph.task_attrs().items() if not a.get("is_done")}
+    load = {p: 0 for p in graph.nodes_of(PERSON)}
+    assignments: list[tuple[str, str, int]] = []
+    for person, task, points in graph.assignment_pairs():
+        if task in open_tasks:
+            weight = max(points, 1)
+            load[person] = load.get(person, 0) + weight
+            assignments.append((person, task, weight))
+    return load, assignments
+
+
 class Finding(BaseModel):
     """One computed risk observation plus the graph nodes that witness it."""
 
@@ -247,11 +265,7 @@ class GraphMetrics:
         if len(people) < 2:
             return []
 
-        open_tasks = self._open_tasks(graph)
-        load = {p: 0 for p in people}
-        for person, task, points in graph.assignment_pairs():
-            if task in open_tasks:
-                load[person] = load.get(person, 0) + max(points, 1)
+        load, _ = open_point_loads(graph)
 
         assigned = {p: v for p, v in load.items() if v > 0}
         if not assigned:
