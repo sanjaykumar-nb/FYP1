@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -11,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { toast } from "@/hooks/use-toast"
 import { api } from "@/lib/api"
-import type { AgentRun, PaginatedResponse, Project, Task } from "@/types"
+import type { AgentRun, Member, PaginatedResponse, Project, Task } from "@/types"
 import { AgentRunPanel } from "@/components/analytics/agent-run-panel"
 import { TeamPanel } from "@/components/team/team-panel"
 
@@ -64,6 +65,21 @@ export default function ProjectDashboardPage() {
     queryFn: () =>
       api.get<AgentRun[]>(`/analytics/projects/${projectId}/agent-runs`).then((res) => res.data),
   })
+
+  const { data: members } = useQuery({
+    queryKey: ["members", projectId],
+    queryFn: () =>
+      api
+        .get<PaginatedResponse<Member>>(`/projects/${projectId}/members`, { params: { page_size: 100 } })
+        .then((res) => res.data.items),
+  })
+
+  // Lets the AI panel name the tasks and people its findings cite.
+  const taskTitles = useMemo(() => new Map((tasks?.items ?? []).map((t) => [t.id, t.title])), [tasks])
+  const memberNames = useMemo(
+    () => new Map((members ?? []).map((m) => [m.id, m.full_name || m.email])),
+    [members]
+  )
 
   const runAnalysis = useMutation({
     mutationFn: () => api.post<AgentRun>(`/analytics/projects/${projectId}/analyze`).then((res) => res.data),
@@ -285,7 +301,7 @@ export default function ProjectDashboardPage() {
             </Button>
           </div>
           {latestRun ? (
-            <AgentRunPanel run={latestRun} />
+            <AgentRunPanel run={latestRun} taskTitles={taskTitles} memberNames={memberNames} />
           ) : (
             <Card>
               <CardContent className="p-8 text-center">

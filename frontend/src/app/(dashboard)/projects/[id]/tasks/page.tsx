@@ -9,7 +9,7 @@ import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
 import { api } from "@/lib/api"
-import { TASK_STATUSES, type Member, type PaginatedResponse, type Task, type TaskStatus } from "@/types"
+import { TASK_STATUSES, type Member, type PaginatedResponse, type Task, type TaskDependency, type TaskStatus } from "@/types"
 import { TaskCard } from "@/components/tasks/task-card"
 import { TaskDialog } from "@/components/tasks/task-dialog"
 
@@ -41,6 +41,23 @@ export default function TaskBoardPage() {
   )
 
   const tasks = data?.items ?? []
+
+  const { data: dependencies } = useQuery({
+    queryKey: ["dependencies", projectId],
+    queryFn: () => api.get<TaskDependency[]>(`/projects/${projectId}/dependencies`).then((res) => res.data),
+  })
+  const openBlockers = useMemo(() => {
+    const statusById = new Map(tasks.map((t) => [t.id, t.status]))
+    const counts = new Map<string, number>()
+    for (const dep of dependencies ?? []) {
+      const blockerStatus = statusById.get(dep.blocking_task_id)
+      if (blockerStatus && blockerStatus !== "done") {
+        counts.set(dep.blocked_task_id, (counts.get(dep.blocked_task_id) ?? 0) + 1)
+      }
+    }
+    return counts
+  }, [tasks, dependencies])
+
   const columns = useMemo(() => {
     const byStatus: Record<TaskStatus, Task[]> = {
       backlog: [],
@@ -140,6 +157,7 @@ export default function TaskBoardPage() {
                         index={index}
                         onClick={() => openEditTask(task)}
                         assigneeName={task.assignee_id ? memberNames.get(task.assignee_id) : null}
+                        openBlockers={openBlockers.get(task.id)}
                       />
                     ))}
                     {provided.placeholder}

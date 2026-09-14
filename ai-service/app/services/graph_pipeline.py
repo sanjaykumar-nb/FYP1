@@ -145,7 +145,13 @@ def risk_output_from_graph(analysis: GraphAnalysis) -> RiskOutput:
         recommendations=[],
         next_action="Review risk findings and assign owners" if analysis.findings else "No action needed",
         risk_scores=dict(analysis.risk_scores),
-        metadata={"graph_stats": analysis.stats, "finding_count": len(analysis.findings)},
+        # Evidence carries one citation per finding; the full witness list lives here
+        # so a UI can show every task and person behind each finding.
+        metadata={
+            "graph_stats": analysis.stats,
+            "finding_count": len(analysis.findings),
+            "findings": [f.model_dump() for f in top],
+        },
     )
 
 

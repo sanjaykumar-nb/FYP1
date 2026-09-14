@@ -94,6 +94,7 @@ class TaskCommentResponse(BaseModel):
     id: UUID
     task_id: UUID
     user_id: UUID
+    author_name: Optional[str] = None
     content: str
     created_at: datetime
 

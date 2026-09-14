@@ -227,8 +227,10 @@ cd backend
 python -m app.scripts.import_real_sprint app/scripts/fixtures/mesos_sprint_74.json
 ```
 
-It prints a login for the imported project. The full walkthrough, including what is real and what
-the replay derives, is in [DEMO.md](DEMO.md).
+It prints a login for the imported project. On the board you can open the sprint's real blocking
+links and discussions, and **AI Insights** shows every finding with the exact issues and people it
+rests on. The full walkthrough, including what is real and what the replay derives, is in
+[DEMO.md](DEMO.md).
 
 ## Running Tests
 

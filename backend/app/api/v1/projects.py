@@ -6,8 +6,9 @@ from sqlalchemy import select, func, and_
 from sqlalchemy.orm import selectinload
 from app.api.deps import get_db, get_current_user_id, get_current_org_id, get_pagination_params
 from app.models.project import Project, ProjectMember, Milestone
-from app.models.task import Task
+from app.models.task import Task, TaskDependency
 from app.models.user import User
+from app.schemas.task import TaskDependencyResponse
 from app.schemas.auth import (
     ProjectCreate,
     ProjectUpdate,
@@ -190,6 +191,27 @@ async def delete_project(
 
 
 # Project members
+@router.get("/{project_id}/dependencies", response_model=list[TaskDependencyResponse])
+async def list_project_dependencies(
+    project_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    org_id: UUID = Depends(get_current_org_id),
+):
+    """Every blocking link in the project at once, so the board can mark blocked cards."""
+    project = await db.execute(
+        select(Project).where(Project.id == project_id, Project.organization_id == org_id)
+    )
+    if not project.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+    result = await db.execute(
+        select(TaskDependency)
+        .where(TaskDependency.project_id == project_id)
+        .order_by(TaskDependency.created_at)
+    )
+    return [TaskDependencyResponse.model_validate(d) for d in result.scalars().all()]
+
+
 @router.get("/{project_id}/members", response_model=PaginatedResponse)
 async def list_project_members(
     project_id: UUID,

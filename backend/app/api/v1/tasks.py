@@ -374,23 +374,46 @@ async def add_dependency(
     db: AsyncSession = Depends(get_db),
     org_id: UUID = Depends(get_current_org_id),
 ):
-    # Verify both tasks exist and belong to org
-    for tid in [dep_data.blocking_task_id, task_id]:
-        result = await db.execute(
-            select(Task)
-            .join(Project, Project.id == Task.project_id)
-            .where(Task.id == tid, Project.organization_id == org_id)
-        )
-        if not result.scalar_one_or_none():
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Task {tid} not found",
-            )
-
     if dep_data.blocking_task_id == task_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot create dependency on self",
+            detail="A task cannot block itself",
+        )
+
+    # Both tasks must be in this project, which must belong to the caller's org.
+    found = await db.execute(
+        select(Task.id)
+        .join(Project, Project.id == Task.project_id)
+        .where(
+            Task.id.in_([dep_data.blocking_task_id, task_id]),
+            Task.project_id == project_id,
+            Project.organization_id == org_id,
+        )
+    )
+    if len(found.scalars().all()) != 2:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Both tasks must exist in this project",
+        )
+
+    edges = await db.execute(
+        select(TaskDependency.blocking_task_id, TaskDependency.blocked_task_id)
+        .where(TaskDependency.project_id == project_id)
+    )
+    blocks: dict[UUID, set[UUID]] = {}
+    for blocking, blocked in edges.all():
+        if (blocking, blocked) == (dep_data.blocking_task_id, task_id):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This dependency already exists",
+            )
+        blocks.setdefault(blocking, set()).add(blocked)
+
+    # The new edge closes a loop if this task already (transitively) blocks its would-be blocker.
+    if _reaches(blocks, task_id, dep_data.blocking_task_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="That would create a circular dependency",
         )
 
     dep = TaskDependency(
@@ -406,28 +429,51 @@ async def add_dependency(
     return TaskDependencyResponse.model_validate(dep)
 
 
-@router.delete("/{task_id}/dependencies/{dep_id}")
+@router.delete("/{task_id}/dependencies/{dep_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_dependency(
+    project_id: UUID,
     task_id: UUID,
     dep_id: UUID,
     db: AsyncSession = Depends(get_db),
     org_id: UUID = Depends(get_current_org_id),
 ):
     result = await db.execute(
-        select(TaskDependency).where(TaskDependency.id == dep_id)
+        select(TaskDependency)
+        .join(Project, Project.id == TaskDependency.project_id)
+        .where(
+            TaskDependency.id == dep_id,
+            TaskDependency.project_id == project_id,
+            Project.organization_id == org_id,
+            or_(TaskDependency.blocking_task_id == task_id, TaskDependency.blocked_task_id == task_id),
+        )
     )
     dep = result.scalar_one_or_none()
-    
+
     if not dep:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Dependency not found",
         )
-    
+
     await db.delete(dep)
     await db.commit()
-    
-    return {"message": "Dependency removed"}
+
+
+def _reaches(blocks: dict[UUID, set[UUID]], start: UUID, target: UUID) -> bool:
+    stack, seen = [start], set()
+    while stack:
+        node = stack.pop()
+        if node == target:
+            return True
+        if node not in seen:
+            seen.add(node)
+            stack.extend(blocks.get(node, ()))
+    return False
+
+
+def _comment_response(comment: TaskComment, author: Optional[User]) -> TaskCommentResponse:
+    name = (author.full_name or author.email) if author else None
+    return TaskCommentResponse.model_validate(comment).model_copy(update={"author_name": name})
 
 
 # Comments
@@ -449,22 +495,24 @@ async def list_comments(
             detail="Task not found",
         )
     
+    # Oldest first: the list reads as a conversation.
     result = await db.execute(
-        select(TaskComment)
+        select(TaskComment, User)
+        .outerjoin(User, User.id == TaskComment.user_id)
         .where(TaskComment.task_id == task_id)
-        .order_by(TaskComment.created_at.desc())
+        .order_by(TaskComment.created_at.asc())
         .offset(pagination.offset)
         .limit(pagination.limit)
     )
-    comments = result.scalars().all()
-    
+    comments = result.all()
+
     total_result = await db.execute(
         select(func.count(TaskComment.id)).where(TaskComment.task_id == task_id)
     )
     total = total_result.scalar()
     
     return PaginatedResponse(
-        items=[TaskCommentResponse.model_validate(c) for c in comments],
+        items=[_comment_response(c, author) for c, author in comments],
         total=total,
         page=pagination.page,
         page_size=pagination.page_size,
@@ -499,5 +547,5 @@ async def add_comment(
     db.add(comment)
     await db.commit()
     await db.refresh(comment)
-    
-    return TaskCommentResponse.model_validate(comment)
+
+    return _comment_response(comment, await db.get(User, user_id))

@@ -1,5 +1,5 @@
 import { Draggable } from "@hello-pangea/dnd"
-import { Calendar, GripVertical } from "lucide-react"
+import { Calendar, GripVertical, Lock } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Task } from "@/types"
@@ -28,11 +28,14 @@ export function TaskCard({
   index,
   onClick,
   assigneeName,
+  openBlockers,
 }: {
   task: Task
   index: number
   onClick: () => void
   assigneeName?: string | null
+  /** How many unfinished tasks block this one. */
+  openBlockers?: number
 }) {
   const overdue = task.due_date && task.status !== "done" && new Date(task.due_date) < new Date()
 
@@ -69,6 +72,12 @@ export function TaskCard({
                   {new Date(task.due_date).toLocaleDateString()}
                 </span>
               )}
+              {openBlockers ? (
+                <span className="text-xs flex items-center gap-1 text-destructive" title="Waiting on unfinished tasks">
+                  <Lock className="h-3 w-3" />
+                  Blocked by {openBlockers}
+                </span>
+              ) : null}
               {assigneeName ? (
                 <span
                   title={assigneeName}

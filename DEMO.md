@@ -80,7 +80,18 @@ tasks show real issue titles, e.g. *MESOS-5882: "`os::cloexec` does not exist on
 **Task board** — all 30 issues where they stood when the sprint closed:
 Planned 4 · In Progress 15 · Review 1 · Done 10. Cards show priority, points, due date and the
 assignee (the avatar shows the contributor's number). *MESOS-7911* is unassigned — it genuinely was.
-Drag a card to change its status; click one to edit it or change its assignee.
+Drag a card to change its status.
+
+*MESOS-5814* carries a red **Blocked by 1** marker: in the real sprint it waited on *MESOS-5904*,
+which was still in progress. (*MESOS-6713* was blocked too, but its blocker was already done, so it
+has no marker.) Click any card to open it:
+
+- **Details** — status, priority, points, due date, assignee.
+- **Dependencies** — open *MESOS-5904*: it *Blocks* MESOS-5814. Try adding MESOS-5814 as a blocker
+  of MESOS-5904 — the app refuses: *"That would create a circular dependency."*
+- **Discussion** — open *MESOS-7605*: its 10 real comments by 4 contributors, oldest first. The order
+  is the real one; the times shown are when the sprint was imported, because Jira's original comment
+  dates are not carried over.
 
 **Team tab** — the 13 people who carried sprint work. **Add teammate** creates a sign-in for a new
 person and puts them on the project, so work can be assigned to them.
@@ -102,6 +113,20 @@ Recommendations, each checked against the raw sprint:
 2. **Redistribute workload** — *"contributor #3409 carries 9 open points vs a team mean of 3.8."*
    True in the data: #3409 still held MESOS-8383, MESOS-8492 and MESOS-8567 at sprint end.
 
+**Why: evidence from the project graph** — the panel that lets anyone check the verdict instead of
+trusting it. It lists the six risk scores (delay critical, workload high, the rest low), computed from
+a graph of 46 nodes and 160 links, then every finding with the issues and people it rests on:
+
+| Finding | Measure | Based on |
+|---|---|---|
+| 20 of 20 open tasks are past their due date | overdue_ratio = 1 | all 20 open issues (8 keys shown, "+12 more") |
+| #3409 carries 9 open points vs a team mean of 3.8 | workload_skew = 2.34 | contributor #3409 |
+| Critical path spans 2 chained open tasks | critical_path_share = 0.10 | MESOS-5904 → MESOS-5814 |
+| 1 of 13 assigned members have posted no comments | silent_ratio = 0.08 | contributor #3428 |
+| 1 team member has no open assigned work | idle_member_ratio = 0.08 | contributor #3415 |
+
+No language model produces any of these numbers, which is why each one can be traced back.
+
 Also worth saying: **silent members — low.** On this real team, the people doing the work were
 also talking about it.
 
@@ -112,8 +137,9 @@ also talking about it.
 | Register, sign in, organization-scoped data | Meeting and communication intelligence |
 | Create projects; **add teammates** | Fine-grained role permissions |
 | Tasks with **assignees**, points, due dates, drag-and-drop board | Notifications, real-time presence |
-| Dependencies and comments (via API) | Dependency and comment UI on the board |
-| Run analysis; results persisted; **dashboard and workspace reflect them** | LLM narration (works with a Groq key; not needed for the demo) |
+| **Dependencies** on the board: "Blocked by" markers, add/remove, circular chains refused | Editing or deleting comments |
+| **Discussion** on every task, with real authors | LLM narration (works with a Groq key; not needed for the demo) |
+| Run analysis; results persisted; dashboard and workspace reflect them; **every finding shows the tasks and people it rests on** | |
 
 ## 5. Found and fixed by testing on real data
 
@@ -129,6 +155,11 @@ None of these showed up with the invented seed data:
 - **Analysis never updated the project's risk and health scores**, so the dashboard contradicted the
   AI panel.
 - **The dashboard counted task statuses from the first page of tasks only.**
+- **Circular dependencies were accepted.** A blocks B blocks C, then C blocks A, went straight in —
+  a loop no one can ever finish. Now refused, along with duplicates and links to another project.
+- **Any signed-in user could delete any dependency** if they had its id, even in another organization.
+- **Imported discussions could read out of order.** Timestamps had one-second resolution on SQLite, and
+  the importer posts 71 comments in a few seconds. Timestamps now carry microseconds.
 
 ## 6. Known limitations to mention if asked
 

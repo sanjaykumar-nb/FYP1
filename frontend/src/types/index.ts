@@ -58,6 +58,24 @@ export interface Task {
   created_at: string
 }
 
+export interface TaskDependency {
+  id: string
+  project_id: string
+  blocking_task_id: string
+  blocked_task_id: string
+  dependency_type: string
+  created_at: string
+}
+
+export interface TaskComment {
+  id: string
+  task_id: string
+  user_id: string
+  author_name: string | null
+  content: string
+  created_at: string
+}
+
 export const TASK_STATUSES: { value: TaskStatus; label: string }[] = [
   { value: "backlog", label: "Backlog" },
   { value: "planned", label: "Planned" },
@@ -80,6 +98,17 @@ export interface AgentEvidence {
   reference_id: string
   excerpt: string
   relevance: number
+}
+
+// One graph-computed finding, stored on the risk agent's metadata. node_ids are
+// "task:<uuid>" / "person:<uuid>" references to the nodes that witness it.
+export interface GraphFinding {
+  risk_type: string
+  severity: RiskLevel
+  title: string
+  metric: string
+  value: number
+  node_ids: string[]
 }
 
 export interface AgentRecommendation {

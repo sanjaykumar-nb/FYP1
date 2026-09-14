@@ -15,6 +15,9 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TaskComments } from "@/components/tasks/task-comments"
+import { TaskDependencies } from "@/components/tasks/task-dependencies"
 import { toast } from "@/hooks/use-toast"
 import { api } from "@/lib/api"
 import { TASK_STATUSES, type Member, type PaginatedResponse, type Task, type TaskStatus } from "@/types"
@@ -127,12 +130,7 @@ export function TaskDialog({
     },
   })
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Task" : "New Task"}</DialogTitle>
-        </DialogHeader>
+  const detailsForm = (
         <form onSubmit={handleSubmit((data) => save.mutate(data))} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
@@ -194,6 +192,32 @@ export function TaskDialog({
             </Button>
           </DialogFooter>
         </form>
+  )
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className={isEdit ? "max-w-2xl max-h-[90vh] overflow-y-auto" : undefined}>
+        <DialogHeader>
+          <DialogTitle>{isEdit ? "Edit Task" : "New Task"}</DialogTitle>
+        </DialogHeader>
+        {task ? (
+          <Tabs defaultValue="details">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="dependencies">Dependencies</TabsTrigger>
+              <TabsTrigger value="discussion">Discussion</TabsTrigger>
+            </TabsList>
+            <TabsContent value="details">{detailsForm}</TabsContent>
+            <TabsContent value="dependencies">
+              <TaskDependencies projectId={projectId} task={task} />
+            </TabsContent>
+            <TabsContent value="discussion">
+              <TaskComments projectId={projectId} taskId={task.id} />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          detailsForm
+        )}
       </DialogContent>
     </Dialog>
   )
