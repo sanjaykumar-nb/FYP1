@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast"
 import { api } from "@/lib/api"
 import type { AgentRun, PaginatedResponse, Project, Task } from "@/types"
 import { AgentRunPanel } from "@/components/analytics/agent-run-panel"
+import { TeamPanel } from "@/components/team/team-panel"
 
 interface ProjectHealth {
   health_score: number
@@ -47,7 +48,9 @@ export default function ProjectDashboardPage() {
   const { data: tasks } = useQuery({
     queryKey: ["tasks", projectId],
     queryFn: () =>
-      api.get<PaginatedResponse<Task>>(`/projects/${projectId}/tasks`).then((res) => res.data),
+      api
+        .get<PaginatedResponse<Task>>(`/projects/${projectId}/tasks`, { params: { page_size: 100 } })
+        .then((res) => res.data),
   })
 
   const { data: health } = useQuery({
@@ -132,11 +135,16 @@ export default function ProjectDashboardPage() {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="team">Team</TabsTrigger>
           <TabsTrigger value="ai">AI Insights</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="team" className="space-y-6">
+          <TeamPanel projectId={projectId} />
+        </TabsContent>
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

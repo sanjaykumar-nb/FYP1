@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import selectinload
 from app.api.deps import get_db, get_current_org_id, get_current_user_id
-from app.models.project import Project
+from app.models.project import Project, ProjectMember
 from app.models.task import Task
 from app.models.meeting import Meeting
 from app.models.workload import WorkloadSnapshot, CommunicationEvent
@@ -27,6 +27,8 @@ from app.schemas.analytics import (
 )
 
 router = APIRouter()
+
+RISK_SCORE_BY_LEVEL = {"low": 0.2, "medium": 0.45, "high": 0.7, "critical": 0.9}
 
 
 @router.get("/projects/{project_id}/dashboard", response_model=ProjectHealthResponse)
@@ -366,6 +368,12 @@ async def trigger_analysis(
     run.specialist_outputs = analysis.get("specialist_outputs")
     run.final_recommendations = {"items": analysis.get("merged_recommendations", [])}
     run.completed_at = datetime.utcnow()
+    # The dashboard and workspace read these columns; without this they keep
+    # showing defaults that contradict the analysis the user just ran.
+    risk = RISK_SCORE_BY_LEVEL.get(analysis.get("overall_risk_level"))
+    if risk is not None:
+        project.risk_score = risk
+        project.health_score = round(1 - risk, 2)
     await db.commit()
     await db.refresh(run)
 

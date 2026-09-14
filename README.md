@@ -216,6 +216,20 @@ npm run dev
 Then visit http://localhost:3000 and log in with `pm@demo.com` / `password123` (or register a
 new account). Open a project → **AI Insights** tab → **Run Analysis**.
 
+### See it on a real sprint
+
+The seed data above is invented. To watch the system analyse **real project history** — sprint 74
+of Apache Mesos from the TAWOS dataset, loaded through the app's own API — run this with the backend
+and AI service up:
+
+```bash
+cd backend
+python -m app.scripts.import_real_sprint app/scripts/fixtures/mesos_sprint_74.json
+```
+
+It prints a login for the imported project. The full walkthrough, including what is real and what
+the replay derives, is in [DEMO.md](DEMO.md).
+
 ## Running Tests
 
 ```bash

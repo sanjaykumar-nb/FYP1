@@ -1,0 +1,1318 @@
+{
+ "source": "TAWOS",
+ "citation": "Tawosi, V., Al-Subaihin, A., Moussa, R., & Sarro, F. A Versatile Dataset of Agile Open Source Software Projects. MSR 2022. doi:10.1145/3524842.3528029 (Apache License 2.0)",
+ "project": {
+  "key": "MESOS",
+  "name": "Apache Mesos"
+ },
+ "sprint": {
+  "tawos_id": 379,
+  "name": "Mesosphere Sprint 74",
+  "start": "2018-02-01 18:00:46",
+  "end": "2018-02-15 18:00:00"
+ },
+ "issues": [
+  {
+   "tawos_id": 19421,
+   "key": "MESOS-5231",
+   "type": "Task",
+   "priority": "Major",
+   "status": "Accepted",
+   "resolution": null,
+   "created": "2016-04-19 04:43:01",
+   "resolved": null,
+   "story_points": 5.0,
+   "assignee": 3391,
+   "reporter": 3825,
+   "title": "\"Create Design Doc for Manage offers in allocator\"",
+   "description": ""
+  },
+  {
+   "tawos_id": 18851,
+   "key": "MESOS-5814",
+   "type": "Task",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2016-07-08 21:42:46",
+   "resolved": "2018-07-24 21:25:01",
+   "story_points": 1.0,
+   "assignee": 3481,
+   "reporter": 3481,
+   "title": "\"Port libprocess http_tests.cpp\"",
+   "description": "\"\"\"The test cases:   * HTTPTest, EndpointsHelp   * HTTPTest, EndpointsHelpRemoval   * HTTPTest, NestedGet   * -HTTPTest, QueryEncodeDecode-    Are disabled in the Windows build because they fail.\"\"\""
+  },
+  {
+   "tawos_id": 18783,
+   "key": "MESOS-5882",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2016-07-21 19:25:55",
+   "resolved": "2018-02-21 23:10:05",
+   "story_points": 2.0,
+   "assignee": 3481,
+   "reporter": 3481,
+   "title": "\"`os::cloexec` does not exist on Windows\"",
+   "description": "\"\"\"`os::cloexec` does not work on Windows. It will never work at the OS level. Because of this, there are likely many important and hard-to-detect bugs hanging around the agent.    This is extremely important to fix. Some possible solutions to investigate (some of which are _extremely_ risky):    * Abstract out file descriptors into a class, implement cloexec in that class on Windows (since we can't rely on the OS to do it).  * Refactor all the code that relies on `os::cloexec` to not rely on it.    Of the two, the first seems less risky in the short term, because the cloexec code only affects Windows. Depending on the semantics of the implementation of the `FileDescriptor` class, it is possible that this is riskier to Windows in the longer term, as the semantics of `cloexec` may have subtle difference between Linux and Windows.\"\"\""
+  },
+  {
+   "tawos_id": 18761,
+   "key": "MESOS-5904",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2016-07-25 22:20:18",
+   "resolved": "2018-07-24 21:25:18",
+   "story_points": 1.0,
+   "assignee": 3481,
+   "reporter": 3481,
+   "title": "\"Process routes implementation seems to drop routes on Windows.\"",
+   "description": "\"\"\"In several libprocess tests, the routes set up by process.cpp seem to be getting mangled/dropped on Windows. Specifically:    * HTTPTest.Endpoints help has the route '/help/(14)', but '/help/(14)/body' fails; on HTTPTest.EndpointsHelpRemoval, the former can be removed, but when the latter is attempted, it fails.  * HTTPTest.NestedGet will properly generate the route '/a/b/c', but '/a/b' is missing.  * ProcessTest.FirewallDisabledPaths, FIrewallUninstall seem to fail to create firewall rules.\"\"\""
+  },
+  {
+   "tawos_id": 17954,
+   "key": "MESOS-6713",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2016-12-05 07:50:07",
+   "resolved": "2018-02-09 21:19:51",
+   "story_points": 3.0,
+   "assignee": 3481,
+   "reporter": 3758,
+   "title": "\"Port `slave_recovery_tests.cpp`\"",
+   "description": "\"\"\"https://reviews.apache.org/r/65408/\"\"\""
+  },
+  {
+   "tawos_id": 17065,
+   "key": "MESOS-7604",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2017-06-02 01:27:12",
+   "resolved": "2018-02-09 21:20:33",
+   "story_points": 1.0,
+   "assignee": 3481,
+   "reporter": 3391,
+   "title": "\"SlaveTest.ExecutorReregistrationTimeoutFlag aborts on Windows\"",
+   "description": "\"\"\"\"\"\""
+  },
+  {
+   "tawos_id": 17064,
+   "key": "MESOS-7605",
+   "type": "Improvement",
+   "priority": "Major",
+   "status": "Reviewable",
+   "resolution": null,
+   "created": "2017-06-02 13:07:14",
+   "resolved": null,
+   "story_points": 3.0,
+   "assignee": 3408,
+   "reporter": 3418,
+   "title": "\"UCR doesn't isolate uts namespace w/ host networking\"",
+   "description": "\"\"\"Docker's {{run}} command supports a {{--hostname}} parameter which impacts container isolation, even in {{host}} network mode: (via https://docs.docker.com/engine/reference/run/)  {quote}  Even in host network mode a container has its own UTS namespace by default. As such --hostname is allowed in host network mode and will only change the hostname inside the container. Similar to --hostname, the --add-host, --dns, --dns-search, and --dns-option options can be used in host network mode.  {quote}  I see no evidence that UCR offers a similar isolation capability.    Related: the {{ContainerInfo}} protobuf has a {{hostname}} field which was initially added to support the Docker containerizer's use of the {{--hostname}} Docker {{run}} flag.\"\"\""
+  },
+  {
+   "tawos_id": 16866,
+   "key": "MESOS-7803",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2017-07-18 00:24:02",
+   "resolved": "2018-02-06 22:50:30",
+   "story_points": 2.0,
+   "assignee": 3481,
+   "reporter": 3481,
+   "title": "\"fs::list drops path components on Windows\"",
+   "description": "\"\"\"fs::list(/foo/bar/*.txt) returns a.txt, b.txt, not /foo/bar/a.txt, /foo/bar/b.txt    This breaks a ZooKeeper test on Windows.\"\"\""
+  },
+  {
+   "tawos_id": 16758,
+   "key": "MESOS-7911",
+   "type": "Bug",
+   "priority": "Critical",
+   "status": "Accepted",
+   "resolution": null,
+   "created": "2017-08-23 20:50:35",
+   "resolved": null,
+   "story_points": 5.0,
+   "assignee": null,
+   "reporter": 3363,
+   "title": "\"Non-checkpointing framework's tasks should not be marked LOST when agent disconnects.\"",
+   "description": "\"\"\"Currently, when framework with checkpointing disabled has tasks running on an agent and that agent disconnects from the master, the master will mark those tasks LOST and remove them from its memory. The assumption is that the agent is disconnecting because it terminated.    However, it's possible that this disconnection occurred due to a transient loss of connectivity and the agent re-connects while never having terminated. This case violates our assumption of there being no unknown tasks to the master:    ```   void Master::reconcileKnownSlave(   Slave* slave,   const vector<ExecutorInfo>& executors,   const vector<Task>& tasks)   {   ...    // TODO(<USER>: There's an implicit assumption here the slave   // cannot have tasks unknown to the master. This _should_ be the   // case since the causal relationship is:   // slave removes task -> master removes task   // Add error logging for any violations of this assumption!   ```    As a result, the tasks would remain on the agent but the master would not know about them!    A more appropriate action here would be:    # When an agent disconnects, mark the tasks as unreachable.  ## If the framework is not partition aware, only show it the last known task state.  ## If the framework is partition aware, let it know that it's now unreachable.  # If the agent re-connects:  ## And the agent had restarted, let the non-checkpointing framework know its tasks are GONE/LOST.  ## If the agent still holds the tasks, the tasks are restored a"
+  },
+  {
+   "tawos_id": 16286,
+   "key": "MESOS-8383",
+   "type": "Task",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Done",
+   "created": "2018-01-03 22:26:32",
+   "resolved": "2018-06-01 02:36:25",
+   "story_points": 3.0,
+   "assignee": 3409,
+   "reporter": 3415,
+   "title": "\"Add metrics for operations in Storage Local Resource Provider (SLRP).\"",
+   "description": ""
+  },
+  {
+   "tawos_id": 16206,
+   "key": "MESOS-8463",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-01-19 09:07:39",
+   "resolved": "2018-02-20 20:57:05",
+   "story_points": 3.0,
+   "assignee": 3390,
+   "reporter": 3389,
+   "title": "\"Test MasterAllocatorTest/1.SingleFramework is flaky\"",
+   "description": "\"\"\"Observed in our internal CI on a ubuntu-16 setup in a plain autotools build,  \"\"\""
+  },
+  {
+   "tawos_id": 16195,
+   "key": "MESOS-8474",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-01-22 20:47:47",
+   "resolved": "2018-02-08 06:43:21",
+   "story_points": 2.0,
+   "assignee": 3409,
+   "reporter": 3389,
+   "title": "\"Test StorageLocalResourceProviderTest.ROOT_ConvertPreExistingVolume is flaky\"",
+   "description": "\"\"\"Observed on our internal CI on ubuntu16.04 with SSL and GRPC enabled,  \"\"\""
+  },
+  {
+   "tawos_id": 16184,
+   "key": "MESOS-8485",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-01-24 19:02:32",
+   "resolved": "2018-03-07 13:03:03",
+   "story_points": 3.0,
+   "assignee": 3393,
+   "reporter": 3371,
+   "title": "\"MasterTest.RegistryGcByCount is flaky\"",
+   "description": "\"\"\"Observed this while testing Mesos 1.5.0-rc1 in ASF CI.         \"\"\""
+  },
+  {
+   "tawos_id": 16181,
+   "key": "MESOS-8488",
+   "type": "Improvement",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-01-25 01:16:45",
+   "resolved": "2018-02-14 03:17:33",
+   "story_points": 2.0,
+   "assignee": 3360,
+   "reporter": 3361,
+   "title": "\"Docker bug can cause unkillable tasks.\"",
+   "description": "\"\"\"Due to an [issue on the Moby project|https://github.com/moby/moby/issues/33820], it's possible for Docker versions 1.13 and later to fail to catch a container exit, so that the {{docker run}} command which was used to launch the container will never return. This can lead to the Docker executor becoming stuck in a state where it believes the container is still running and cannot be killed.    We should update the Docker executor to ensure that containers stuck in such a state cannot cause unkillable Docker executors/tasks.    One way to do this would be a timeout, after which the Docker executor will commit suicide if a kill task attempt has not succeeded. However, if we do this we should also ensure that in the case that the container was actually still running, either the Docker daemon or the DockerContainerizer would clean up the container when it does exit.    Another option might be for the Docker executor to directly {{wait()}} on the container's Linux PID, in order to notice when the container exits.\"\"\""
+  },
+  {
+   "tawos_id": 16177,
+   "key": "MESOS-8492",
+   "type": "Task",
+   "priority": "Blocker",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-01-25 22:09:42",
+   "resolved": "2018-04-30 23:10:35",
+   "story_points": 3.0,
+   "assignee": 3409,
+   "reporter": 3409,
+   "title": "\"Checkpoint profiles in storage local resource provider.\"",
+   "description": "\"\"\"SLRP should be able to handle missing profiles from an arbitrary disk profile module, and probably need to checkpoint them for recovery.\"\"\""
+  },
+  {
+   "tawos_id": 16158,
+   "key": "MESOS-8512",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-01-30 23:29:04",
+   "resolved": "2018-02-21 23:15:31",
+   "story_points": 2.0,
+   "assignee": 3481,
+   "reporter": 3567,
+   "title": "\"Fetcher doesn't log it's stdout/stderr properly to the log file\"",
+   "description": "\"\"\"The fetcher doesn't log it's stdout or stderr to the task's output files as it does on Linux. This makes it extraordinarily difficult to diagnose fetcher failures (bad URI, or permissions problems, or whatever).    It does not appear to be a glog issue. I added output to the fetcher via cout and cerr, and that output didn't show up in the log files either. So it appears to be a logging capture issue.    Note that the container launcher, launched from src/slave/containerizer/mesos/launcher.cpp, does appear to log properly. However, when launching the fetcher itself from src/slave/containerizer/fetcher.cpp (FetcherProcess::run), logging does not happen properly.\"\"\""
+  },
+  {
+   "tawos_id": 16146,
+   "key": "MESOS-8524",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Open",
+   "resolution": null,
+   "created": "2018-02-01 14:34:37",
+   "resolved": null,
+   "story_points": 2.0,
+   "assignee": 3391,
+   "reporter": 3405,
+   "title": "\"When `UPDATE_SLAVE` messages are received, offers might not be rescinded due to a race \"",
+   "description": "\"\"\"When an agent with enabled {{RESOURCE_PROVIDER}} capability (re-)registers with the master it sends a {{UPDATE_SLAVE}} after being (re-)registered. In the master, the agent is added (back) to the allocator, as soon as it's (re-)registered, i.e. before {{UPDATE_SLAVE}} is being send. This triggers an allocation and offers might get sent out to frameworks. When {{UPDATE_SLAVE}} is being handled in the master, these offers have to be rescinded, as they're based on an outdated agent state.  Internally, the allocator defers a offer callback in the master ({{Master::offer}}). In rare cases a {{UPDATE_SLAVE}} message might arrive at the same time and its handler in the master called before the offer callback (but after the actual allocation took place). In this case the (outdated) offer is still sent to frameworks and never rescinded.    Here's the relevant log lines, this was discovered while working on https://reviews.apache.org/r/65045/:  \"\"\""
+  },
+  {
+   "tawos_id": 16143,
+   "key": "MESOS-8527",
+   "type": "Task",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-01 18:24:37",
+   "resolved": "2018-02-02 17:34:51",
+   "story_points": null,
+   "assignee": 3415,
+   "reporter": 3415,
+   "title": "\"Add metrics about number of subscribed LRPs on the agent.\"",
+   "description": "\"\"\"Gauge: `resource_provider/subscribed`\"\"\""
+  },
+  {
+   "tawos_id": 16140,
+   "key": "MESOS-8530",
+   "type": "Bug",
+   "priority": "Critical",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-01 21:43:54",
+   "resolved": "2018-03-27 10:43:07",
+   "story_points": 5.0,
+   "assignee": 3428,
+   "reporter": 3428,
+   "title": "\"Default executor tasks can get stuck in KILLING state\"",
+   "description": "\"\"\"The default executor will transition a task to {{TASK_KILLING}} and mark its container as being killed before issuing the {{KILL_NESTED_CONTAINER}} call.    If the kill call fails, the task will get stuck in {{TASK_KILLING}}, and the executor won't allow retrying the kill.  \"\"\""
+  },
+  {
+   "tawos_id": 16134,
+   "key": "MESOS-8536",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-02 14:05:44",
+   "resolved": "2018-03-12 18:01:21",
+   "story_points": 2.0,
+   "assignee": 3389,
+   "reporter": 3389,
+   "title": "\"Pending offer operations on resource provider resources not properly accounted for in allocator\"",
+   "description": "\"\"\"The master currently does not accumulate the resources used by offer operations on master failover. While we create a datastructure to hold this information, we missed updating it.      Here {{usedByOperations}} is not updated.    This leads to problems when the operation becomes terminal and we try to recover the used resources which might not be known to the framework sorter inside the hierarchical allocator.\"\"\""
+  },
+  {
+   "tawos_id": 16131,
+   "key": "MESOS-8539",
+   "type": "Task",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-02 22:39:53",
+   "resolved": "2018-02-02 23:49:51",
+   "story_points": 2.0,
+   "assignee": 3415,
+   "reporter": 3415,
+   "title": "\"Add metrics about CSI plugin terminations.\"",
+   "description": "\"\"\"So that operators can be alerted on flapping CSI plugin container.\"\"\""
+  },
+  {
+   "tawos_id": 16124,
+   "key": "MESOS-8546",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-05 19:39:29",
+   "resolved": "2018-02-07 00:53:43",
+   "story_points": 2.0,
+   "assignee": 3390,
+   "reporter": 3390,
+   "title": "\"PythonFramework test fails with cache write failure.\"",
+   "description": "\"\"\"After some recent changes, the  {{ExamplesTest.PythonFramework}} fails on centos and ubuntu rather frequently (but not always).    The symptom always is like this (taken from an ASF CI run):      \"\"\""
+  },
+  {
+   "tawos_id": 16122,
+   "key": "MESOS-8548",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-06 05:24:19",
+   "resolved": "2018-02-08 06:44:31",
+   "story_points": 2.0,
+   "assignee": 3409,
+   "reporter": 3409,
+   "title": "\"Test StorageLocalResourceProviderTest.ROOT_Metrics is flaky\"",
+   "description": "\"\"\"The SLRP Metrics test is flaky because the agent might got two {{SlaveRegisteredMessage}}s due to its retry logic for registration, and thus it would send two {{UpdateSlaveMessage}}s. As a result, the futures waiting for these messages will be ready before the plugin is actually launched. This will lead to a race between the SIGKILL and LAUNCH_CONTAINER in the test, and if the kill happens before SLRP gets connected to the plugin, SLRP will wait for 1 minutes before giving up, which is too long for the test to wait for a second launch.\"\"\""
+  },
+  {
+   "tawos_id": 16120,
+   "key": "MESOS-8550",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-07 16:24:50",
+   "resolved": "2018-03-22 14:14:03",
+   "story_points": 2.0,
+   "assignee": 3393,
+   "reporter": 3374,
+   "title": "\"Bug in `Master::detected()` leads to coredump in `MasterZooKeeperTest.MasterInfoAddress`.\"",
+   "description": "\"\"\"  This failure is most likely caused by calling [leader->has_domain()|https://github.com/apache/mesos/blob/994213739b1afc473bbd9d15ded7c3fd26eaa924/src/master/master.cpp#L2159] on empty `leader`, from logs:  \"\"\""
+  },
+  {
+   "tawos_id": 16119,
+   "key": "MESOS-8551",
+   "type": "Task",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-07 17:47:11",
+   "resolved": "2018-03-08 01:20:45",
+   "story_points": 1.0,
+   "assignee": 3569,
+   "reporter": 3569,
+   "title": "\"Port libprocess HTTPTest.QueryEncodeDecode\"",
+   "description": "\"\"\"The test cases:   * -HTTPTest, EndpointsHelp-   * -HTTPTest, EndpointsHelpRemoval-   * -HTTPTest, NestedGet-   * HTTPTest, QueryEncodeDecode    Are disabled in the Windows build because they fail.\"\"\""
+  },
+  {
+   "tawos_id": 16105,
+   "key": "MESOS-8565",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-10 00:44:28",
+   "resolved": "2018-02-14 08:38:35",
+   "story_points": 2.0,
+   "assignee": 3360,
+   "reporter": 3360,
+   "title": "\"Persistent volumes are not visible in Mesos UI when launching a pod using default executor.\"",
+   "description": "\"\"\"When user launches a pod to use a persistent volume in DC/OS, the nested containers in the pod can access the PV successfully and the PV directory of the executor shown in Mesos UI has all the contents written by the tasks, but the PV directory of the tasks shown in DC/OS UI and Mesos UI is empty.\"\"\""
+  },
+  {
+   "tawos_id": 16103,
+   "key": "MESOS-8567",
+   "type": "Bug",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-10 02:31:26",
+   "resolved": "2018-07-13 22:46:12",
+   "story_points": 3.0,
+   "assignee": 3409,
+   "reporter": 3409,
+   "title": "\"Test UriDiskProfileTest.FetchFromHTTP is flaky.\"",
+   "description": "\"\"\"The {{UriDiskProfileTest.FetchFromHTTP}} test is flaky on Debian 9:      I also run it in repetition and got the following error log (although the test itself is passed):  \"\"\""
+  },
+  {
+   "tawos_id": 16102,
+   "key": "MESOS-8568",
+   "type": "Bug",
+   "priority": "Blocker",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-12 14:02:26",
+   "resolved": "2018-09-06 01:33:30",
+   "story_points": 5.0,
+   "assignee": 3360,
+   "reporter": 3374,
+   "title": "\"Command checks should always call `WAIT_NESTED_CONTAINER` before `REMOVE_NESTED_CONTAINER`\"",
+   "description": "\"\"\"After successful launch of a nested container via `LAUNCH_NESTED_CONTAINER_SESSION` in a checker library, it calls [waitNestedContainer |https://github.com/apache/mesos/blob/0a40243c6a35dc9dc41774d43ee3c19cdf9e54be/src/checks/checker_process.cpp#L657] for the container. Checker library [calls|https://github.com/apache/mesos/blob/0a40243c6a35dc9dc41774d43ee3c19cdf9e54be/src/checks/checker_process.cpp#L466-L487] `REMOVE_NESTED_CONTAINER` to remove a previous nested container before launching a nested container for a subsequent check. Hence, `REMOVE_NESTED_CONTAINER` call follows `WAIT_NESTED_CONTAINER` to ensure that the nested container has been terminated and can be removed/cleaned up.    In case of failure, the library [doesn't call|https://github.com/apache/mesos/blob/0a40243c6a35dc9dc41774d43ee3c19cdf9e54be/src/checks/checker_process.cpp#L627-L636] `WAIT_NESTED_CONTAINER`. Despite the failure, the container might be launched and the following attempt to remove the container without call `WAIT_NESTED_CONTAINER` leads to errors like:      The checker library should always call `WAIT_NESTED_CONTAINER` before `REMOVE_NESTED_CONTAINER`.\"\"\""
+  },
+  {
+   "tawos_id": 16098,
+   "key": "MESOS-8572",
+   "type": "Epic",
+   "priority": "Major",
+   "status": "Accepted",
+   "resolution": null,
+   "created": "2018-02-13 07:19:35",
+   "resolved": null,
+   "story_points": 13.0,
+   "assignee": 3361,
+   "reporter": 3361,
+   "title": "\"Make Docker executor/containerizer resilient to Docker daemon failures.\"",
+   "description": "\"\"\"Experience has shown that the Docker CLI can hang indefinitely at times. There are many variations of this behavior, and it occurs across many versions of Docker. For these reasons, and since many users of Mesos still make heavy use of the Docker containerizer and the Docker executor, it will improve the user experience to make the Docker containerizer/executor resilient to such Docker daemon failures.\"\"\""
+  },
+  {
+   "tawos_id": 16097,
+   "key": "MESOS-8573",
+   "type": "Improvement",
+   "priority": "Major",
+   "status": "Resolved",
+   "resolution": "Fixed",
+   "created": "2018-02-13 07:55:34",
+   "resolved": "2018-02-24 01:53:31",
+   "story_points": 3.0,
+   "assignee": 3406,
+   "reporter": 3361,
+   "title": "\"Container stuck in PULLING when Docker daemon hangs\"",
+   "description": "\"\"\"When the {{force}} argument is not set to {{true}}, {{Docker::pull}} will always perform a {{docker inspect}} call before it does a {{docker pull}}. If either of these two Docker CLI calls hangs indefinitely, the Docker container will be stuck in the PULLING state. This means that we make no further progress in the {{launch()}} call path, so the executor binary is never executed, the {{Future}} associated with the {{launch()}} call is never failed or satisfied, and {{wait()}} is never called on the container. The agent chains the executor cleanup onto that {{wait()}} call which is never made. So, when the executor registration timeout elapses, {{containerizer->destroy()}} is called on the executor container, but the rest of the executor cleanup is never performed, and no terminal task status update is sent.    This leaves the task destined for that Docker executor stuck in TASK_STAGING from the framework's perspective, and attempts to kill the task will fail.\"\"\""
+  }
+ ],
+ "links": [
+  {
+   "from": 16119,
+   "type": "Cloners",
+   "direction": "OUTBOUND",
+   "to": 18851
+  },
+  {
+   "from": 16866,
+   "type": "Blocker",
+   "direction": "OUTBOUND",
+   "to": 17954
+  },
+  {
+   "from": 17954,
+   "type": "Blocker",
+   "direction": "INBOUND",
+   "to": 16866
+  },
+  {
+   "from": 18761,
+   "type": "Blocker",
+   "direction": "OUTBOUND",
+   "to": 18851
+  },
+  {
+   "from": 18851,
+   "type": "Blocker",
+   "direction": "INBOUND",
+   "to": 18761
+  },
+  {
+   "from": 18851,
+   "type": "Cloners",
+   "direction": "INBOUND",
+   "to": 16119
+  }
+ ],
+ "comments": [
+  {
+   "tawos_id": 45308,
+   "issue": 18783,
+   "author": 3391,
+   "created": "2016-07-22 21:56:23",
+   "text": "\"Here's a list of callsites for {{os::cloexec}} and a summary of why {{os::cloexec}} matters in the callsite: || Location || Reason || | https://github.com/apache/mesos/blob/17a1e58d3f48d866ac5132cc28b2f33c2e287aac/3rdparty/libprocess/src/subprocess.cpp#L140-L144 | When we open a PIPE to a subprocess, those pipes are kept open in the parent.  We need CLOEXEC to prevent future subprocesses from inheriting these incorrectly. | | https://github.com/apache/mesos/blob/17a1e58d3f48d866ac5132cc28b2f33c2e287aac/3rdparty/libprocess/src/io.cpp#L264   https://github.com/apache/mesos/blob/17a1e58d3f48d866ac5132cc28b2f33c2e287aac/3rdparty/libprocess/src/io.cpp#L419   https://github.com/apache/mesos/blob/17a1e58d3f48d866ac5132cc28b2f33c2e287aac/3rdparty/libprocess/src/io.cpp#L476   https://github.com/apache/mesos/blob/17a1e58d3f48d866ac5132cc28b2f33c2e287aac/3rdparty/libprocess/src/io.cpp#L535 | {{io::peek}}, {{io::read}}, {{io::write}}, and {{io::redirect}} duplicate an FD to control the FD lifecycle asynchronously.  We CLOEXEC to prevent FD leaks. | | https://github.com/apache/mesos/blob/17a1e58d3f48d866ac5132cc28b2f33c2e287aac/3rdparty/libprocess/src/socket.cpp#L62 | Sockets will CLOEXEC on create to prevent leaks. | | https://github.com/apache/mesos/blob/17a1e58d3f48d866ac5132cc28b2f33c2e287aac/3rdparty/libprocess/src/libevent_ssl_socket.cpp#L490   https://github.com/apache/mesos/blob/17a1e58d3f48d866ac5132cc28b2f33c2e287aac/3rdparty/libprocess/src/libevent_ssl_socket.cpp#L827 | SSL so"
+  },
+  {
+   "tawos_id": 45309,
+   "issue": 18783,
+   "author": 3481,
+   "created": "2017-04-07 19:18:27",
+   "text": "\"Joe, we're assigning this to simply to mean \"\"follow-up with Joe\"\". We need a lot more context to understand this bug, which is likely going to come from you. Thanks!\""
+  },
+  {
+   "tawos_id": 45310,
+   "issue": 18783,
+   "author": 3391,
+   "created": "2017-04-07 20:42:26",
+   "text": "\"We use {{cloexec}} to change how subprocesses inherit file descriptors (inherited by default on Posix, which we need to change in order to not leak FDs).  In contrast, FDs are *not* inherited by default on Windows, so we've left {{cloexec}} as a no-op on Windows.  At the moment, this is fine.  However, the introduction of the IO Switchboard (for exec-ing into containers) added a case where we explicitly want to inherit FDs.  This is done with a ChildHook that unsets the {{O_CLOEXEC}} option on a specific FD before creating a subprocess: https://github.com/apache/mesos/blob/1.2.x/3rdparty/libprocess/include/process/subprocess_base.hpp#L212-L216 https://github.com/apache/mesos/blob/1.2.x/src/slave/containerizer/mesos/io/switchboard.cpp#L563-L565  This feature isn't supported in Windows, but we might want to support it at some point in the future.  That means we need to provide a way of selectively inheriting FDs on Windows.\""
+  },
+  {
+   "tawos_id": 40727,
+   "issue": 17065,
+   "author": 3391,
+   "created": "2017-06-02 01:34:52",
+   "text": "\"The agent sets the {{id}} field of the two AgentInfos to be equal prior to comparison.  But the output from the aborted test indicates that the two {{id}}s are not equal.  Temporarily disabling the test pending further investigation: \""
+  },
+  {
+   "tawos_id": 40717,
+   "issue": 17064,
+   "author": 3418,
+   "created": "2017-07-11 19:27:26",
+   "text": "\"Re-opening this ticket for further discussion.  If there are no container networks, there is no UTS namespace isolation, as per:  https://github.com/apache/mesos/blob/9b69c09310cdb6d7cfca1284f60c3f1b422c77cc/src/slave/containerizer/mesos/isolators/network/cni/cni.cpp#L655  without such isolation, calls to `sethostname` from a container will impact the host netns, as per:  https://linux.die.net/man/2/sethostname  and  https://linux.die.net/man/1/unshare  {quote} UTS namespace  setting hostname, domainname will not affect rest of the system (CLONE_NEWUTS flag), {quote}  This is distinctly different from the Docker experience. It also implies that it's impossible to give a container permission to **bind** to a host network port without also giving it permission to **change the host's network name**. This feels like a security hole to me.\""
+  },
+  {
+   "tawos_id": 40718,
+   "issue": 17064,
+   "author": 3406,
+   "created": "2017-07-11 20:05:57",
+   "text": "\"/cc [~<EMAIL>], could you take a look? ^^\""
+  },
+  {
+   "tawos_id": 40719,
+   "issue": 17064,
+   "author": 3408,
+   "created": "2017-07-12 04:00:25",
+   "text": "\"{quote} It also implies that it's impossible to give a container permission to *bind* to a host network port without also giving it permission to *change the host's network name*. This feels like a security hole to me. {quote}  The task would only have permission to change the hostname if it is privileged with the right capabilities or running as root. I think this is expected behavior, not a security hole.  The reason we didn't apply UTS namespace in host networking was because we were not sure whether to allow the kernel hostname to diverge from the hostname stored in the system files. However, thinking about this some more, I don't see any reason to not enter a UTS namespace when we are using host networking, just as a defense-in-depth measure.\""
+  },
+  {
+   "tawos_id": 40720,
+   "issue": 17064,
+   "author": 3408,
+   "created": "2017-07-12 04:16:25",
+   "text": "\"Assigning to me. What I would like to do here is simply enter a UTS namespace when using host networking. If the task is using a container image then we can probably support setting the hostname and updating the relevant config files as well.\""
+  },
+  {
+   "tawos_id": 40728,
+   "issue": 17065,
+   "author": 3481,
+   "created": "2017-09-25 23:26:53",
+   "text": "\"I traced it a bit. The current way we're copying the {{id}} results in {{\"\"latest\"\"}} being copied as the {{id}} instead of the actual {{id}}.  This patch at least resolves _that part_ of the problem, and let's the {{AgentInfo}}s appear equivalent.    But it begs the question why the first {{id}} shows up as {{\"\"latest\"\"}} instead of being resolved to the {{id}}, and also, the test will still fail later due to other problems (pending investigation).\""
+  },
+  {
+   "tawos_id": 40260,
+   "issue": 16866,
+   "author": 3481,
+   "created": "2017-09-26 18:03:50",
+   "text": "\"{noformat} 73-    foreach (const string& jar, jars.get()) { 74-#ifdef __WINDOWS__ 75-      // TODO(<USER>: `fs::list` on Windows only returns the file names, not 76:      // the full paths. Remove this work-around when MESOS-7803 is resolved. 77-      classpath += \"\";\"\" + path::join(zkHome, \"\"lib\"\", jar); 78-#else 79-      classpath += \"\":\"\" + jar; 80-#endif 81-    } {noformat}\""
+  },
+  {
+   "tawos_id": 40721,
+   "issue": 17064,
+   "author": 3408,
+   "created": "2017-09-27 20:55:44",
+   "text": "\"After thinking about this some more, there are 3 cases  1. No container image. In this case there's no container image (so we won't rewrite {{/etc/hostname}}) but we still want to enter a UTS namespace for security reasons.  2. Container image with {{network/cni}}. When we have a container image, we can consistently set the hostname inside the container.  {{network/cni}} only enters a UTS namespace when setting the hostname.  3. Container image w/ {{network/port_mapping}}. This isolator never enters a UTS namespace to set the hostname and is agnostic to whether there is a container image.  The goal here is to isolate the UTS namespace, not necessarily support per-container hostname in every configuration. Since {{network/cni}} is always enabled by default, we could have that isolator always enter a UTS namespace, however it seems unreasonable to exclude {{network/port_mapping}} users.  So what I would like to do here is add a simple {{namespaces/uts}} isolator that does nothing more than place a container tree in a new UTS namespace. To be compatible with CNI and network namespaces, all the containers in the tree should join the same UTS namespace.  Note that this would not change the semantics of how we set the hostname in containers. It merely adds an additional layer of namespace isolation in more cases. The {namespaces/uts}} isolator will not update the hostname inside the container. If that is required, then the {{network/cni}} isolator should be used.   Ping [~<USER>, "
+  },
+  {
+   "tawos_id": 40729,
+   "issue": 17065,
+   "author": 3481,
+   "created": "2017-10-26 18:43:39",
+   "text": "\"Oh, I guess I didn't add: the problem is {{realpath}} not resolving correctly.\""
+  },
+  {
+   "tawos_id": 40261,
+   "issue": 16866,
+   "author": 3481,
+   "created": "2018-01-17 22:05:39",
+   "text": "\"https://reviews.apache.org/r/65397/  https://reviews.apache.org/r/65398/\""
+  },
+  {
+   "tawos_id": 38855,
+   "issue": 16195,
+   "author": 3409,
+   "created": "2018-01-22 21:15:58",
+   "text": "\"This is caused by a race that the master may send out an offer between {{DESTRY_VOLUME}} and {{DESTROY_BLOCK}}. I'll work on a patch to fix this test, possibly by controlling the clock.\""
+  },
+  {
+   "tawos_id": 38856,
+   "issue": 16195,
+   "author": 3389,
+   "created": "2018-01-23 15:41:34",
+   "text": "\"This failed again with a different error,        I attached [the full test log|https://issues.apache.org/jira/secure/attachment/12907300/consoleText.txt].\""
+  },
+  {
+   "tawos_id": 38857,
+   "issue": 16195,
+   "author": 3409,
+   "created": "2018-01-25 02:52:02",
+   "text": "\"This is a similar issue, but now a race between {{CREATE_VOLUME}} and {{CREATE_BLOCK}}. Will implement a better synchronization logic in this test.\""
+  },
+  {
+   "tawos_id": 38858,
+   "issue": 16195,
+   "author": 3426,
+   "created": "2018-01-26 11:24:30",
+   "text": "\"Disabled the test for now.\""
+  },
+  {
+   "tawos_id": 38826,
+   "issue": 16184,
+   "author": 3393,
+   "created": "2018-01-26 16:19:14",
+   "text": "\"This is fairly reproducible when putting the test machine under heavy load (i.e. ca. 1 failure per 3000 runs when I'm compiling Mesos with 24 threads at the same time)         What happens is the following:    The test case is starting two different instances of `mesos-agent`, marking both of them as gone, and forcing one of them to be garbage collected. It expects that after this is done, one of the slaves will be marked as \"\"gone\"\" and the other be unknown. To get the agent id of the agents it registers, the following code is used:              In the failure case, the registration of the first agent works as follows:    Leading the test code to think that agent1 has the agent id of agent0, which leads to the subsequent test failure.         Mesos basically works correctly here, so the correct fix seems to be to rewrite the test to wait for a `SlaveRegisteredMessage` that is actually destined for the correct pid.          \""
+  },
+  {
+   "tawos_id": 38827,
+   "issue": 16184,
+   "author": 3393,
+   "created": "2018-01-26 18:12:49",
+   "text": "\"Review posted at: https://reviews.apache.org/r/65354\""
+  },
+  {
+   "tawos_id": 40722,
+   "issue": 17064,
+   "author": 3408,
+   "created": "2018-01-29 18:19:56",
+   "text": "\"| [r/65392|https://reviews.apache.org/r/65392] | Document the namespace/uts isolator. |  | [r/65391|https://reviews.apache.org/r/65391] | Added a UTS namespace isolator. |\""
+  },
+  {
+   "tawos_id": 40723,
+   "issue": 17064,
+   "author": 3408,
+   "created": "2018-01-29 18:20:46",
+   "text": "\"[~<USER>, [~<USER>, [~<USER> Can any of you help review?\""
+  },
+  {
+   "tawos_id": 40730,
+   "issue": 17065,
+   "author": 3481,
+   "created": "2018-01-29 20:42:20",
+   "text": "\"https://reviews.apache.org/r/65407/\""
+  },
+  {
+   "tawos_id": 45311,
+   "issue": 18783,
+   "author": 3481,
+   "created": "2018-01-29 20:42:44",
+   "text": "\"https://reviews.apache.org/r/65403/\""
+  },
+  {
+   "tawos_id": 38815,
+   "issue": 16181,
+   "author": 3360,
+   "created": "2018-01-31 14:25:50",
+   "text": "\"I think both of the two solutions mentioned in the description have problem.   # For the timeout solution, I think it can handle the issue that framework issues kill task request, but `docker stop` executed by the Docker executor can not stop the Docker container. However, there is a case that it can not handle: the Docker container exits itself, due to that Docker 1.13 issue, Docker executor will not be aware of it (i.e., `docker run` will not return), so user will see the task is still running until they issue a kill task request.   # For the wait pid solution, I do not think we can wait on the container's pid because the container process is not the direct child of the Docker executor.\""
+  },
+  {
+   "tawos_id": 40724,
+   "issue": 17064,
+   "author": 3360,
+   "created": "2018-02-01 08:50:51",
+   "text": "\"[~<USER> I reviewed your patches and have a comment: When UTS namespace isolator is enabled, a container wants to join host network and has `hostname` field set in its `ContainerInfo`, in this case, the container will have its own UTS namespace but will not have its own hostname though it has `hostname` field set in its `ContainerInfo`, this seems not correct to me. For Docker, if we run a container with `–network=host` and `–hostname=xxx`, this container will have its own UTS namespace and its own hostname which I think is the correct behavior.    My thinking is, instead of implementing a UTS namespace isolator, can we just improve the CNI isolator to ensure each container (as long as it has `ContainerInfo`) will have its own UTS namespace and its own hostname (as long as `hostname` field set in its `ContainerInfo`)? This is also consistent with what Docker does.\""
+  },
+  {
+   "tawos_id": 38736,
+   "issue": 16146,
+   "author": 3389,
+   "created": "2018-02-01 15:41:50",
+   "text": "\"This seems to likely also be an issue for even non-RP-capable agents with oversubscription enabled. \""
+  },
+  {
+   "tawos_id": 40725,
+   "issue": 17064,
+   "author": 3408,
+   "created": "2018-02-01 15:53:04",
+   "text": "\"[~<USER> That is exactly not the point of this change. CNI already supports setting the container hostname as for all containers that have an image. The point of this isolator is to guarantee that the host's UTS namespace is protected from containers (case 1) above. I kept it explicitly out of scope for this isolator to actually set the hostname, since last time I did that, we ended up moving that feature to the CNI isolator.\""
+  },
+  {
+   "tawos_id": 38888,
+   "issue": 16206,
+   "author": 3361,
+   "created": "2018-02-01 16:50:38",
+   "text": "\"[~<USER> would you have a cycle to take a look at this?\""
+  },
+  {
+   "tawos_id": 40726,
+   "issue": 17064,
+   "author": 3408,
+   "created": "2018-02-01 17:37:33",
+   "text": "\"{quote}  <USER>That is exactly not the point of this change. CNI already supports setting the container hostname as for all containers that have an image. The point of this isolator is to guarantee that the host's UTS namespace is protected from containers (case 1) above. I kept it explicitly out of scope for this isolator to actually set the hostname, since last time I did that, we ended up moving that feature to the CNI isolator.  {quote}    I believed that the CNI isolator did set up the hostname correctly when joining the host network, however [~<USER> is right that the CNI isolator doesn't clone the UTS namespace unless you join a named network.    So I agree with [~<USER> that we should make the CNI isolator clone the UTS namespace (and set the hostname) when it joins the host network and has a container image. We will still need the UTS isolator for the case where there is not a container image or the CNI isolator isn't used however.    IIRC [~<USER>'s original concern about this was that the specified hostname would not be consistent with DNS. There's 2 things we can do about this ... (1) just accept it and it's fine, (2) resolve the host's hostname and use that IP address to populate the container {{resolv.conf}}. AFAICT, Docker just does (1).\""
+  },
+  {
+   "tawos_id": 38816,
+   "issue": 16181,
+   "author": 3361,
+   "created": "2018-02-02 00:35:10",
+   "text": "\"Good point [~<USER> - adding a timeout would make sure that a user can kill the task, but it would not proactively notice that the container has already exited.    Since the Docker daemon itself does not know the container has exited, we would need to use some \"\"out-of-band\"\" method to discover this. Do you know of such a method?    If we can't come up with a good way to catch the container exit, then maybe we should settle for a timeout which allows stuck tasks to be killed. This is also a more general issue with Docker containers when the Docker daemon is hung on an agent. If the Docker daemon is not responsive, tasks launched with the Docker executor cannot be killed. If we add a timeout after which the executor commits suicide, then we could make sure that the executors for all such tasks will be killed, but I'm afraid I don't know enough yet about Docker's recovery behavior to say whether or not we could rely on the container being cleaned up, whenever the Docker daemon is successfully recovered.\""
+  },
+  {
+   "tawos_id": 38705,
+   "issue": 16134,
+   "author": 3389,
+   "created": "2018-02-02 14:08:20",
+   "text": "\"Review: https://reviews.apache.org/r/65482/\""
+  },
+  {
+   "tawos_id": 38828,
+   "issue": 16184,
+   "author": 3374,
+   "created": "2018-02-02 14:56:42",
+   "text": "\"[~<USER> Can it be stably reproduced by adding several Sleeps into tests/code?\""
+  },
+  {
+   "tawos_id": 38735,
+   "issue": 16143,
+   "author": 3415,
+   "created": "2018-02-02 17:34:43",
+   "text": "\"commit 25feb869e797b600cc6159d951fe70d4db685445 (HEAD -> master, origin/master, origin/HEAD)  Author: <USER><<EMAIL>>  Date: Thu Feb 1 15:37:35 2018 -0800    Added metrics for showing number of subscribed resource providers.    Review: https://reviews.apache.org/r/65470\""
+  },
+  {
+   "tawos_id": 38767,
+   "issue": 16158,
+   "author": 3481,
+   "created": "2018-02-02 20:13:19",
+   "text": "\"Reviews here: https://reviews.apache.org/r/65467/ and https://reviews.apache.org/r/65469/\""
+  },
+  {
+   "tawos_id": 38701,
+   "issue": 16131,
+   "author": 3415,
+   "created": "2018-02-02 23:49:51",
+   "text": "\"commit 38ab7cb0c11087bb042fb81b67923d7994581139 (*HEAD ->* *master*, *origin/master*, *origin/HEAD*)    Author: <USER><<EMAIL>>    Date:   Fri Feb 2 14:38:00 2018 -0800             Added metrics for CSI plugin terminations.             Review: https://reviews.apache.org/r/65491\""
+  },
+  {
+   "tawos_id": 38859,
+   "issue": 16195,
+   "author": 3409,
+   "created": "2018-02-03 01:41:43",
+   "text": "\"Review: https://reviews.apache.org/r/65499/\""
+  },
+  {
+   "tawos_id": 38829,
+   "issue": 16184,
+   "author": 3393,
+   "created": "2018-02-05 16:36:48",
+   "text": "\"[~<USER> I did not attempt to do that, because it requires suspending and resuming most of the involved individual processes separately, and as far as I'm aware our test tools don't provide such fine-grained control.\""
+  },
+  {
+   "tawos_id": 38830,
+   "issue": 16184,
+   "author": 3374,
+   "created": "2018-02-05 17:42:55",
+   "text": "\"[~<USER> I was able to reproduce lots of bugs using `::sleep()` function by adding it in several places like:  1) https://issues.apache.org/jira/browse/MESOS-7504?focusedCommentId=16192797&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-16192797  2) https://issues.apache.org/jira/browse/MESOS-7506?focusedCommentId=16243729&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-16243729    If it's possible to stably reproduce the issue, then your fix can be easily verified.\""
+  },
+  {
+   "tawos_id": 38687,
+   "issue": 16124,
+   "author": 3390,
+   "created": "2018-02-05 19:50:02",
+   "text": "\"* why does the cache fail to write?   ** because Pythons egg caching does not cope well with parallel processes trying to cache the very same egg.   * why did we never see this before?   ** we used to bind both, the scheduler as well as the executor egg into one module. Once the scheduler was loaded, the caching was solved. Now that the executor has its individual egg, we see this problem pop up cause the framework launches multiple tasks which in turn launch executors which will try to cache their driver egg.    * how can we solve this?   ** the individual tasks should not mutate host machine state and hence making sure that all tasks get their individual {{PYTHON_EGG_CACHE}} within the {{MESOS_SANDBOX}} seems to be a proper solution preventing concurrency problems on that end while also making sure the state can get properly GCed.\""
+  },
+  {
+   "tawos_id": 38688,
+   "issue": 16124,
+   "author": 3390,
+   "created": "2018-02-05 19:55:07",
+   "text": "\"https://reviews.apache.org/r/65512/\""
+  },
+  {
+   "tawos_id": 38817,
+   "issue": 16181,
+   "author": 3360,
+   "created": "2018-02-06 08:32:22",
+   "text": "\"[~<USER>, I had a discussion with [~<USER>, he suggests we can still go with the wait pid solution. Although the container process is not the child process of Docker executor, we can still call `process::reap()` in Docker executor to reap the container process, and once the container process exits, the Docker executor will be notified (but without the actual exit status of the container process).    Here is the RR: https://reviews.apache.org/r/65518/\""
+  },
+  {
+   "tawos_id": 38889,
+   "issue": 16206,
+   "author": 3390,
+   "created": "2018-02-06 18:18:11",
+   "text": "\"The first thing that sticks out when reading the logs is the fact that we see two scheduled re-registration attempts. The trigger here is the lack of a lower boundary for agent re-registration delay.    The first {{doReliableRegistration}} re-registration delay log entry tells us that we should just have sent a registration message to the master - our first one.       The first registration now succeeds on the master side with all bells and whistles - this is {{S0}}.      Next we see an {{addSlave}} on the allocator which will satisfy the expectation from our test for the first time (which is entirely).      Just as scheduled we see another log telling us that we hit {{doReliableRegistration}} again,    about 0.001 seconds after the first one. We now sent the second registration request to the master.      The rest of our test now quickly gets processed until it is done. Scheduler and the slave processes are shutting down.      We still have that second re-registration in progress and that succeeds eventually. It came without a {{slaveID}} so we assigned a new one in the master - this now is {{S1}}.      The entire chain of events continues until we finally reach {{addSlave}} on the allocator again which will oversaturate our expectation for the invocation count of that function now.      The lack of a re-registration delay minimum triggers the problem in combination with a strict expectation on registration-chained events of this test (and likely others as well).\""
+  },
+  {
+   "tawos_id": 38689,
+   "issue": 16124,
+   "author": 3390,
+   "created": "2018-02-07 00:53:43",
+   "text": "\"{noformat}  commit ed752784fb43fb391a8a66e1379eb51cf949ea73 (HEAD -> master, origin/master, origin/HEAD)  Author: <USER><<EMAIL>>  Date:   Wed Feb 7 01:46:51 2018 +0100        Fixed race in Python egg caching.        Python modules containing native eggs commonly get cached within the      PYTHON_EGG_CACHE folder when importing them. This caching however      fails when being concurrently invoked for the same egg.      We need our custom Python executor to be protected against concurrent      egg caching. Setting the PYTHON_EGG_CACHE towards a MESOS_SANDBOX      subfolder solves this.        Review: https://reviews.apache.org/r/65512/  {noformat}\""
+  },
+  {
+   "tawos_id": 45252,
+   "issue": 18761,
+   "author": 3569,
+   "created": "2018-02-07 16:49:32",
+   "text": "\"Cause:    Path:: dirname is used to parse the URL.  This error occurs in ProcessBase:: consume in mesos/3rdparty/libprocess/src/process.cpp at lines 3601 and 3603 (at the time of this comment).         Issue:    Path, defined in mesos/3rdparty/stout/include/stout/path.hpp, is an assortment of utilities for parsing a file path.  It is incorrectly used in this case to parse a URL path which is similar yet different from a file path.  The Path utilities use the constant variable os:: PATH_SEPARATOR as the delimiter for parsing paths.  os:: PATH_SEPARATOR is defined as '\\\\' for Windows builds and '/' for all other builds.  URL paths are not platform specific and use '/' as the delimiter.  The effect is that URLs are parsed incorrectly for Windows builds.  The Path utilities are not suitable for parsing URL paths.\""
+  },
+  {
+   "tawos_id": 45551,
+   "issue": 18851,
+   "author": 3569,
+   "created": "2018-02-07 17:44:55",
+   "text": "\"MESOS-5904 causes the failures for EndpointsHelp, EndpointsHelpRemoval, and NestedGet.         QueryEncodeDecode: Moved to MESOS-8551    Issue:    This test fails for the case where a hashmap with more than one element is passed to encode.  The problem is caused because the test case expects the items to be in a different order than encode returns them.         Background:    hashmap is a wrapper around std:: unordered_map from the STL.  The encode function iterates through the items of a hashmap and generates a string representation.  The STL unordered_list does not place requirements on the order that elements of the collection are iterated.  (The order has nothing to do with the search complexity.)  This permits different implementations of unordered_map to be implemented differently, which in turn may cause encode to return different *correct* representations of a hashmap.          \""
+  },
+  {
+   "tawos_id": 45552,
+   "issue": 18851,
+   "author": 3569,
+   "created": "2018-02-07 17:53:54",
+   "text": "\"Mesos-8551 has been created to move HTTPTest, QueryEncodeDecode to its own unrelated issue.\""
+  },
+  {
+   "tawos_id": 38673,
+   "issue": 16119,
+   "author": 3569,
+   "created": "2018-02-07 17:59:38",
+   "text": "\"QueryEncodeDecode:    Issue:    This test fails for the case where a hashmap with more than one element is passed to encode.  The problem is caused because the test case expects the items to be in a different order than encode returns them.         Background:    hashmap is a wrapper around std:: unordered_map from the STL.  The encode function iterates through the items of a hashmap and generates a string representation.  The STL unordered_list does not place requirements on the order that elements of the collection are iterated.  (The order has nothing to do with the search complexity.)  This permits different implementations of unordered_map to be implemented differently, which in turn may cause encode to return different *correct* representations of a hashmap.     \""
+  },
+  {
+   "tawos_id": 38681,
+   "issue": 16122,
+   "author": 3409,
+   "created": "2018-02-07 21:02:12",
+   "text": "\"https://reviews.apache.org/r/65523/\""
+  },
+  {
+   "tawos_id": 38860,
+   "issue": 16195,
+   "author": 3409,
+   "created": "2018-02-08 06:43:21",
+   "text": "\"{noformat}  commit 182760bd7c8611b0822d6d5fbba5e00df6363c8e  Author: <USER>  Date:   Wed Feb 7 16:03:59 2018 -0800        Fixed the flakiness of the ROOT_ConvertPreExistingVolume test.            This unit test is flaky because the master might send out an offer      before both offer operations of a previous `ACCEPT` call are finished.      This is fixed by manipulating the clock such that no offer won't be      sent out until the master receives status updates for both operations.            Review: https://reviews.apache.org/r/65499/  {noformat}\""
+  },
+  {
+   "tawos_id": 38682,
+   "issue": 16122,
+   "author": 3409,
+   "created": "2018-02-08 06:44:31",
+   "text": "\"{noformat}  commit 59c7e69c9bc4bc5dfde46535479f61dbc03c08b0  Author: <USER>  Date:   Wed Feb 7 16:04:09 2018 -0800        Fixed the flakiness in the SLRP metrics test.            The metrics test unnecessarily set up the disk profile module without      providing the profile config file. This may cause the profile module to      pull a non-existent file. Also, it could kill the plugin before SLRP      connecting to the endpoint, making SLRP wait for 1 minute.            Review: https://reviews.apache.org/r/65523/  {noformat}\""
+  },
+  {
+   "tawos_id": 38676,
+   "issue": 16120,
+   "author": 3393,
+   "created": "2018-02-08 16:52:34",
+   "text": "\"Andrei's analysis seems to be right, the code was indeed calling `leader->has_domain()` on an `Option<MasterInfo>` without checking that it was not `None` first.         I posted a fix in in the following review: https://reviews.apache.org/r/65571/\""
+  },
+  {
+   "tawos_id": 38890,
+   "issue": 16206,
+   "author": 3390,
+   "created": "2018-02-08 17:58:54",
+   "text": "\"This was fixed before on some of the allocator tests, but not all - I wonder why not all of them?    Note that the agent registers after a backoff delay.    1. pause the timer  2. advance the timer after the slave-startup by the authentication backoff-factor + registration backoff-factor  3. expect at least one {{addSlave}} on the allocator - but not exactly one - {{WillOnce(DoAll(InvokeAddSlave(&allocator);}} could do here  (4.) satisfy a future during the {{addSlave}}  invocation to allow explicit waiting for that event on the allocator -- this could ease the stress on later  awaits and hence would increase the sturdynes    For the scheduler registration, we need to do similar things - however without advancing the timer as we dont need to cover a backoff  2. expect at least one {{addFramework}} on the allocator - but again not exactly one  (3.) satisfy a future during the {{addFramework}}  invocation to allow explicit waiting for that event on the allocator\""
+  },
+  {
+   "tawos_id": 38768,
+   "issue": 16158,
+   "author": 3481,
+   "created": "2018-02-08 23:37:33",
+   "text": "\"Going to add unit tests that check for stderr/stdout output, as they would have caught this bug.\""
+  },
+  {
+   "tawos_id": 42972,
+   "issue": 17954,
+   "author": 3481,
+   "created": "2018-02-09 21:19:51",
+   "text": "\"{noformat}  commit 0bc1c8ce3  Author: <USER><EMAIL>  Date:   Wed Jan 10 14:41:51 2018 -0800  Fixed `SlaveRecoveryTest.ReconcileTasksMissingFromSlave`.    Because it is not possible to delete a file (or a folder recursively)  with open handles on Windows, we have to explicitly `reset()` the agent  before removing the framework meta directory. Otherwise, the task status  update manager will be destructed too late, and so an open handle for  `task.updates` will cause the `os::rmdir` to fail.    This is safe because we previously destructed the agent anyway, just  later in the test when it was reassigned.    Review: https://reviews.apache.org/r/65409    commit e4b319911  Author: <USER><EMAIL>  Date:   Mon Jan 29 11:32:27 2018 -0800  Windows: Ported `slave_recovery_tests.cpp`.    This commit enables the unit tests found in `slave_recovery_tests.cpp`  to test agent recovery on Windows.    Review: https://reviews.apache.org/r/65408    commit bdfee0cbc  Author: <USER><EMAIL>  Date:   Wed Nov 8 11:50:09 2017 -0800  Windows: Enabled `Flags::runtime_directory` for checkpointing.    This had previously been compiled out on Windows, but we bring it back  in order to support checkpointing.    Review: https://reviews.apache.org/r/65401    commit 42d57869b  Author: <USER><EMAIL>  Date:   Wed Jan 17 13:45:03 2018 -0800  Windows: Tied task lifetimes to executors.    To enable recovery of checkpointed tasks, the agent must be able to die  without also killing the executors and tasks, thus we c"
+  },
+  {
+   "tawos_id": 40731,
+   "issue": 17065,
+   "author": 3481,
+   "created": "2018-02-09 21:20:33",
+   "text": "\"{noformat}  commit 5c8b1e7db  Author: <USER><EMAIL>  Date:   Wed Jan 10 15:10:53 2018 -0800  Windows: Enabled tests that were blocked by MESOS-7604.    This commit enables tests that were previously disabled on Windows due  to MESOS-7604.    Review: https://reviews.apache.org/r/65407  {noformat}\""
+  },
+  {
+   "tawos_id": 38803,
+   "issue": 16177,
+   "author": 3409,
+   "created": "2018-02-10 00:48:25",
+   "text": "\"https://reviews.apache.org/r/65594/\""
+  },
+  {
+   "tawos_id": 38654,
+   "issue": 16105,
+   "author": 3360,
+   "created": "2018-02-10 00:55:03",
+   "text": "\"The root cause of this issue is, when user uses DC/OS (actually Marathon) to launch a pod and specify a PV for the container inside of the pod to use, actually the executor will have a disk resource which uses that PV and Marathon will create the PV and mount it into the executor's sandbox, and the task info created by Marathon will have a `SANDBOX_PATH` volume with type `PARENT` (like below) so the task can share the PV with the executor.    In this case, the fix to MESOS-8279 will not do the file attach since it can only handle the case of task using persistent volume disk resource, see [this code|https://github.com/apache/mesos/blob/32b85a2b06f676b68a16deaa8359ae64a1e8ead9/src/slave/slave.cpp#L1035:L1039] for details.    To fix this issue, I think we need to improve {{Slave::attachTaskVolumeDirectory}} to handle the task whose {{containerInfo}} has a `SANDBOX_PATH` volume with type `PARENT`, for such task, we should also call {{Files::attach()}} to attach the executor's volume path to the task's volume path.\""
+  },
+  {
+   "tawos_id": 38655,
+   "issue": 16105,
+   "author": 3360,
+   "created": "2018-02-10 15:00:51",
+   "text": "\"RR: https://reviews.apache.org/r/65570/\""
+  },
+  {
+   "tawos_id": 38647,
+   "issue": 16103,
+   "author": 3426,
+   "created": "2018-02-12 10:04:07",
+   "text": "\"Observed it today on Ubuntu 16.04.  \""
+  },
+  {
+   "tawos_id": 38648,
+   "issue": 16103,
+   "author": 3426,
+   "created": "2018-02-12 10:04:19",
+   "text": "\"Disabling this test for now.\""
+  },
+  {
+   "tawos_id": 38677,
+   "issue": 16120,
+   "author": 3374,
+   "created": "2018-02-12 18:34:58",
+   "text": "\"[~<USER> Did you find a shepherd for this?\""
+  },
+  {
+   "tawos_id": 38649,
+   "issue": 16103,
+   "author": 3409,
+   "created": "2018-02-12 22:56:12",
+   "text": "\"Root cause identified: {{FutureSatisfy(&secondCall)}} (and thus the second {{Clock::advance()}}) races with the dispatching of the second {{UriDiskProfileAdaptor::_poll()}}. If the second {{_poll()}} runs after the clock is advanced, the third {{_poll()}} won't be dispatched.\""
+  },
+  {
+   "tawos_id": 38650,
+   "issue": 16103,
+   "author": 3409,
+   "created": "2018-02-13 22:17:52",
+   "text": "\"Review: https://reviews.apache.org/r/65640/\""
+  },
+  {
+   "tawos_id": 38818,
+   "issue": 16181,
+   "author": 3360,
+   "created": "2018-02-14 03:17:14",
+   "text": "\"commit a7714536fad1140fd0c07c47e32b40e9ed00a3c3  Author: <USER>  Date: Mon Feb 5 20:42:07 2018 +0800    Reaped the container process directly in Docker executor.      Due to a Docker issue (https://github.com/moby/moby/issues/33820),   Docker daemon can fail to catch a container exit, i.e., the container   process has already exited but the command `docker ps` shows the   container still running, this will lead to the \"\"docker run\"\" command   that we execute in Docker executor never returning, and it will also   cause the `docker stop` command takes no effect, i.e., it will return   without error but `docker ps` shows the container still running, so   the task will stuck in `TASK_KILLING` state.      To workaround this Docker issue, in this patch we made Docker executor   reaps the container process directly so Docker executor will be notified   once the container process exits.      Review: https://reviews.apache.org/r/65518\""
+  },
+  {
+   "tawos_id": 38656,
+   "issue": 16105,
+   "author": 3406,
+   "created": "2018-02-14 08:38:35",
+   "text": "\"commit 9d4c6d9576741cc480c75f8e59cc8d1adc9849fc    Author: <USER><<EMAIL>>    Date:   Wed Feb 14 00:17:37 2018 -0800             Attached/detached volume directory for task which has volume specified.                Review: [https://reviews.apache.org/r/65570/]\""
+  },
+  {
+   "tawos_id": 38657,
+   "issue": 16105,
+   "author": 3406,
+   "created": "2018-02-14 08:46:04",
+   "text": "\"Please note that this fix addresses the issue that persistent volume is shared to nested containers by defining a `SANDBOX_PATH` volume to each nested container from the framework. So that the persistent volume would show up on the Mesos UI.    However, there is a related *limitation*: for the case of only `SANDBOX_PATH` volume being specified for a nested container (no persistent volume or any other volume is specified at the executor container level), the pure `SANDBOX_PATH` volume is not reflected on the UI yet. We should create a separate Jira for this case. /cc [~<USER>\""
+  },
+  {
+   "tawos_id": 39048,
+   "issue": 16286,
+   "author": 3409,
+   "created": "2018-02-15 04:05:45",
+   "text": "\"Reviews:  https://reviews.apache.org/r/65665/  https://reviews.apache.org/r/65666/\""
+  },
+  {
+   "tawos_id": 38769,
+   "issue": 16158,
+   "author": 3481,
+   "created": "2018-02-15 17:41:39",
+   "text": "\"Tests here: https://reviews.apache.org/r/65624/    Waiting on reviews.\""
+  },
+  {
+   "tawos_id": 45253,
+   "issue": 18761,
+   "author": 3481,
+   "created": "2018-02-15 17:42:36",
+   "text": "\"Review here: https://reviews.apache.org/r/65436/\""
+  },
+  {
+   "tawos_id": 45553,
+   "issue": 18851,
+   "author": 3481,
+   "created": "2018-02-15 17:43:06",
+   "text": "\"Review here: https://reviews.apache.org/r/65436/\""
+  },
+  {
+   "tawos_id": 38674,
+   "issue": 16119,
+   "author": 3481,
+   "created": "2018-02-15 17:43:49",
+   "text": "\"Review here: https://reviews.apache.org/r/65577/\""
+  },
+  {
+   "tawos_id": 38628,
+   "issue": 16097,
+   "author": 3406,
+   "created": "2018-02-16 18:35:50",
+   "text": "\"https://reviews.apache.org/r/65689/   [https://reviews.apache.org/r/65712/]\""
+  },
+  {
+   "tawos_id": 38732,
+   "issue": 16140,
+   "author": 3428,
+   "created": "2018-02-17 00:30:45",
+   "text": "\"https://reviews.apache.org/r/65692/  https://reviews.apache.org/r/65693/  https://reviews.apache.org/r/66232/  https://reviews.apache.org/r/65694/  https://reviews.apache.org/r/66233/  https://reviews.apache.org/r/65962/  https://reviews.apache.org/r/66234/\""
+  },
+  {
+   "tawos_id": 38891,
+   "issue": 16206,
+   "author": 3389,
+   "created": "2018-02-20 20:56:27",
+   "text": "\"Reviews:    https://reviews.apache.org/r/65581/  https://reviews.apache.org/r/65717/  \""
+  },
+  {
+   "tawos_id": 38892,
+   "issue": 16206,
+   "author": 3389,
+   "created": "2018-02-20 20:57:05",
+   "text": "\"{noformat}  commit 75dd718866675542be77696eecd7570c0a74a966  Author: <USER><<EMAIL>>  Date:   Tue Feb 20 21:45:31 2018 +0100        Made all allocator tests allow for slave backoff.            Most of the allocator tests were expecting a single invocation of      'addSlave' on the allocator when registering a slave. Due to the nature      of our slave registration backoff, a single slave possibly sends      multiple registration requests in short succession. Any event closely      connected to a slave registration will therefor be possibly invoked      multiple times over the lifetime of such a test.            We now allow multiple invocations of 'addSlave'. This patch also      enhances the timing control by introducing a paused clock over the      slave registration phase of these tests.            Review: https://reviews.apache.org/r/65581/    commit 143484edd0bc0ba890498c6a8dc7b0bdcccf0a1a  Author: <USER><<EMAIL>>  Date:   Tue Feb 20 21:45:22 2018 +0100        Updated Cluster::Slave::shutdown to support a paused clock.            Review: https://reviews.apache.org/r/65717/  {noformat}\""
+  },
+  {
+   "tawos_id": 45312,
+   "issue": 18783,
+   "author": 3481,
+   "created": "2018-02-21 23:10:05",
+   "text": "\"{noformat}  commit faba7dfae  Author: <USER><<EMAIL>>  Date:   Mon Jan 22 12:25:06 2018 -0800    Windows: Disabled `O_CLOEXEC` semantic mapping on Windows.    Previously we mapped `O_CLOEXEC` to `O_NOINHERIT`, which is close to the  intended semantics, but not close enough. Instead, we want all Windows  handles by default to be non-inheritable, and not tie any Windows  inheritance semantics to the close-on-exec semantics. So, we define  `O_CLOEXEC` on Windows to be `0`, and remove the logging from the  `os::cloexec` family of functions because do not ever intend to  implement them.    We achieve the \"\"close\"\" part of the semantics by making all handles  non-inheritable, as the intent is to avoid leaking handles.    Review: https://reviews.apache.org/r/65403  {noformat}\""
+  },
+  {
+   "tawos_id": 38770,
+   "issue": 16158,
+   "author": 3481,
+   "created": "2018-02-21 23:15:31",
+   "text": "\"{noformat}  commit c422c97fb  Author: <USER><EMAIL>  Date:   Thu Feb 1 14:34:05 2018 -0800    Windows: Added `internal::windows::set_inherit(WindowsFD, bool)`.    This function is used on Windows to explicitly enable or disable  inheritance on a handle.    Review: https://reviews.apache.org/r/65467    commit f946e53a0  Author: <USER><<EMAIL>>  Date:   Thu Feb 8 10:11:43 2018 -0800        Windows: Fixed handle inheritance in `create_process` wrapper.        The primary change in this patch is that `create_process` now enables      inheritance for the `pipe` handles passed before starting the child      process. This is required, otherwise the child process will behave      incorrectly (for example, it will write to `stdout` but that will go      nowhere, as the redirection silently failed). After the process is      created, inheritance is disabled to prevent further calls to      `create_process` from inheriting the wrong handles.        The `std::tuple<os::WindowsFD, ...>` type was changed to a      `std::array<os::WindowsFD, 3>` as it is significantly easier to work      with (it supports iteration).        Review: https://reviews.apache.org/r/65574    commit b1e9d4232  Author: <USER><<EMAIL>>  Date:   Thu Feb 8 10:41:19 2018 -0800        Windows: Updated `internal::process:createChildProcess`.        The interface of `internal::windows:create_process` was changed to      accept a `std::array<os::WindowsFD, 3>` instead of a `std::tuple`.        Furthermore, the error handl"
+  },
+  {
+   "tawos_id": 38629,
+   "issue": 16097,
+   "author": 3361,
+   "created": "2018-02-23 22:30:21",
+   "text": "\"The following test probes this failure scenario: https://reviews.apache.org/r/65750\""
+  },
+  {
+   "tawos_id": 38630,
+   "issue": 16097,
+   "author": 3361,
+   "created": "2018-02-24 01:49:08",
+   "text": "\"{code}  commit 28ab19b11ca369751f21e921cc4594e00ca667cb  Author: <USER><<EMAIL>>  Date:   Fri Feb 23 16:41:51 2018 -0800        Added test for hung 'docker inspect' call during container pull.        Review: https://reviews.apache.org/r/65750/  {code}\""
+  },
+  {
+   "tawos_id": 38631,
+   "issue": 16097,
+   "author": 3361,
+   "created": "2018-02-24 01:52:35",
+   "text": "\"This issue is resolved by MESOS-8575, and verified by the test in the commit cited above.\""
+  },
+  {
+   "tawos_id": 38819,
+   "issue": 16181,
+   "author": 3481,
+   "created": "2018-03-03 02:16:18",
+   "text": "\"Commit 1daf6cb03  Author: <USER><EMAIL>  Date:   Sun Feb 25 13:37:42 2018 -0800  Windows: Fixed flaky Docker command health check test.    The `DockerContainerizerHealthCheckTest.ROOT_DOCKER_  DockerHealthStatusChange` test was flaky on Windows, because  the Docker executor manually reaps the container exit code in  case that `docker run` fails to get the exit code. This logic  doesn't work on Windows, since the process might not be visible to  the container host machine, causing `TASK_FAILED` to get sent. By  removing the reaping logic on Windows, the test is much more reliable.    Review: https://reviews.apache.org/r/65733/\""
+  },
+  {
+   "tawos_id": 38733,
+   "issue": 16140,
+   "author": 3428,
+   "created": "2018-03-06 18:30:49",
+   "text": "\"[~<USER> hey, do you think you'll have time to review the chain this week?\""
+  },
+  {
+   "tawos_id": 38831,
+   "issue": 16184,
+   "author": 3426,
+   "created": "2018-03-07 13:03:03",
+   "text": "\"{noformat}  commit cece83f37bea2ec3e78efeb5db4aea1bbaa4b8d5  Author:     <USER><<EMAIL>>  AuthorDate: Wed Mar 7 14:00:26 2018 +0100  Commit:     <USER><<EMAIL>>  CommitDate: Wed Mar 7 14:00:26 2018 +0100        Fixed flakyness in MasterTest.RegistryGcByCount.            The test could fail on very slow hosts due to a timeout      in the agent waiting for the registration and a subsequent      re-sent `SlaveRegisteredMessage. See MESOS-8485.            Review: https://reviews.apache.org/r/65354/  {noformat}\""
+  },
+  {
+   "tawos_id": 38675,
+   "issue": 16119,
+   "author": 3481,
+   "created": "2018-03-08 01:20:45",
+   "text": "\"commit 66bae088d  Author: <USER><<EMAIL>>  Date:   Wed Mar 7 16:29:24 2018 -0800        Fixed `HTTPTest.QueryEncodeDecode`.        This commit fixes MESOS-8551.        Stout's `hashmap` is a wrapper around `std::unordered_map`. The      Standard Template Library places no restriction on the iteration order      for the elements of an `unordered_map`. Because of this, different      implementations of `unordered_map` can and do iterate the elements in      different orders. The implementation of `http::query::encode` uses the      iteration order of `std::unordered_map` to encode the elements.        The test case has two items in the `unordered_map`, which makes it      possible for `encode` to return either of two different orders. The      solution in this fix tests that the return value from `encode` matches      either of the possible orders. This was not previously an issue      because the implementations of GCC and Clang were consistent; however,      MSVC happens to encode in the order. This is not incorrect, just      different.        This patch also added a second test to ensure that either possible      output of `encode` would correctly decode.        Review: https://reviews.apache.org/r/65577/\""
+  },
+  {
+   "tawos_id": 38706,
+   "issue": 16134,
+   "author": 3389,
+   "created": "2018-03-12 18:01:21",
+   "text": "\"{noformat}  commit 8adb5fcb1f6c451bc9ad7ecdc6e39bc170fdcd65  Author: <USER><<EMAIL>>  Date: Mon Mar 12 18:07:24 2018 +0100    Improved handling of non-terminal operations after master failover.    This patch fixes the handling of non-terminal operations learned by a  newly elected master after a master failover, so that only these  operations are counted as using resources. Previously we did not count  any operations as using resources which by accident produced expected  behavior if the operation was already terminal when the master learned  about them.    We do not address the issue of being unable to properly account for  operations triggered by frameworks unknown to the master, see  MESOS-8582. Instead we emit a warning for now since the master might  continue to abort due to assertion failures due to incomplete resource  accounting.    Review: https://reviews.apache.org/r/65482/    commit 35f2847245a79ebd17218dbe421bdd38f107960c  Author: <USER><<EMAIL>>  Date: Mon Mar 12 18:07:24 2018 +0100    Improved handling of non-terminal operations after master failover.    This patch fixes the handling of non-terminal operations learned by a  newly elected master after a master failover, so that only these  operations are counted as using resources. Previously we did not count  any operations as using resources which by accident produced expected  behavior if the operation was already terminal when the master learned  about them.    We do not address the issue of being unable to "
+  },
+  {
+   "tawos_id": 38893,
+   "issue": 16206,
+   "author": 3390,
+   "created": "2018-03-20 00:14:22",
+   "text": "\"The solution above was too invasive and not matching the problem - needs to be updated. See MESOS-8613    In fact, options (1) and (2) shall be ignored for now while reducing this fix towards (3) implemented by      One problematic area are the multi-slave tests - we can not simply use the above pattern for those and thus they remain flaky in their design.\""
+  },
+  {
+   "tawos_id": 38632,
+   "issue": 16098,
+   "author": 3426,
+   "created": "2018-03-20 10:50:14",
+   "text": "\"[~<USER> reports a similar issue. Below is my loose translation of the message he sent over private channels.    \"\"Sometimes docker task does not finish correctly on {{docker stop}}. For example in https://pastebin.com/NwgA7d7M, {{docker stop}} hung 10 days (!). Manually issued {{docker stop}} from terminal hangs for 20-30 seconds and then exits cleanly, but does not stop the container. However, if {{kill -9}} is sent to the corresponding {{mesos-docker-executor}}, the whole process tree terminates correctly and {{docker ps}} does not list the container any more.    The hypothesis is that docker cannot terminate a container while someone is listening to its stdin/stderr. Hence it might make sense to send {{SIGTERM}} followed by {{SIGKILL}} instead of retrying {{docker stop}}.\"\"\""
+  },
+  {
+   "tawos_id": 38651,
+   "issue": 16103,
+   "author": 3426,
+   "created": "2018-03-21 15:37:23",
+   "text": "\"[~<USER> With your patch, can we also re-enable the {{UriDiskProfileTest.DISABLED_FetchFromFile}} test?\""
+  },
+  {
+   "tawos_id": 38652,
+   "issue": 16103,
+   "author": 3409,
+   "created": "2018-03-21 20:03:44",
+   "text": "\"Already did in my patch :)\""
+  },
+  {
+   "tawos_id": 38804,
+   "issue": 16177,
+   "author": 3409,
+   "created": "2018-03-21 20:40:45",
+   "text": "\"Split the patch into the following:  https://reviews.apache.org/r/66156/ (Committed)  https://reviews.apache.org/r/65974/  https://reviews.apache.org/r/65594/\""
+  },
+  {
+   "tawos_id": 38678,
+   "issue": 16120,
+   "author": 3426,
+   "created": "2018-03-22 14:14:03",
+   "text": "\"{noformat}  commit 972f31752dd99a59903370b9ebcf078501fa8ffc  Author:     <USER><<EMAIL>>  AuthorDate: Thu Mar 22 15:10:30 2018 +0100  Commit:     <USER><<EMAIL>>  CommitDate: Thu Mar 22 15:10:30 2018 +0100        Handled 'None' passed from the MasterDetector in 'Master::detect()'.            The function `MasterDetector::detect()` returns a value of type      `Future<Option<MasterInfo>>`, which, according to its documentation,      can be `None` if an election occured and no master is elected.            However, the code in `Master::detected()` was only handling the      cases of a failed future or a valid `MasterInfo` object.            *NOTE*: This commit does not add a corresponding unit test, since      that would require starting a non-leading master. For the      ZooKeeperMasterDetector, this is blocked by MESOS-2976, and an API      change to make this possible with the StandaloneMasterDetector      would add a lot of complexity to the `cluster::Master::start()`      function for a feature that is unlikely to be re-used in any other      test.            Review: https://reviews.apache.org/r/65571/  {noformat}\""
+  },
+  {
+   "tawos_id": 38679,
+   "issue": 16120,
+   "author": 3426,
+   "created": "2018-03-22 14:40:33",
+   "text": "\"Backport to 1.5.x:  \""
+  },
+  {
+   "tawos_id": 38680,
+   "issue": 16120,
+   "author": 3426,
+   "created": "2018-03-22 14:55:34",
+   "text": "\"Backport to 1.4.x:  \""
+  },
+  {
+   "tawos_id": 38734,
+   "issue": 16140,
+   "author": 3426,
+   "created": "2018-03-27 10:43:07",
+   "text": "\"{noformat}  commit 73766e635c6619efe94eeef8fa8b7002ee2b6f50  Author:     Gaston Kleiman <<EMAIL>>  AuthorDate: Tue Mar 27 11:36:29 2018 +0200  Commit:     <USER><<EMAIL>>  CommitDate: Tue Mar 27 11:36:29 2018 +0200        Changed the signature of a DefaultExecutor kill method.            This method is being passed the container to be killed as      `Owned<Container>`.            The container object is owned by the executor and stored      in `LinkedHashMap<TaskID, Owner<Container>> containers`.            We should pass around raw pointers and not make copies of      the stored `Owned` object, so this patch changes the      signature of the `kill` method.            Review: https://reviews.apache.org/r/65692/  {noformat}  {noformat}  commit 1e9bfbf3705cc9668a0a40829d311493a679712d  Author:     Gaston Kleiman <<EMAIL>>  AuthorDate: Tue Mar 27 11:37:06 2018 +0200  Commit:     <USER><<EMAIL>>  CommitDate: Tue Mar 27 11:37:06 2018 +0200        Made the default executor fail kills if the response isn't \"\"200 OK\"\".            The default executor's `Future<Nothing> kill(const ContainerID&, int)`      method returns `Nothing()` if the agent responded to the      `KILL_NESTED_CONTAINER` call, regardless of the response.            This patch updates the method, so that it returns a failure if the      response is not \"\"200 OK\"\".            Review: https://reviews.apache.org/r/65693/  {noformat}  {noformat}  commit 801aee6b9c95f695d3d33b8ee444e2b875347786  Author:     Gaston Kleima"
+  },
+  {
+   "tawos_id": 38894,
+   "issue": 16206,
+   "author": 3426,
+   "created": "2018-04-06 19:11:14",
+   "text": "\"{noformat}  commit c526016e80396e95dbaee79eb3dedfbf216bce52  Author:     <USER><<EMAIL>>  AuthorDate: Fri Apr 6 20:05:51 2018 +0200  Commit:     <USER><<EMAIL>>  CommitDate: Fri Apr 6 20:07:31 2018 +0200        Re-fixed many master allocator tests.            When the slave has a very short lifetime, its scheduled registration      retry might occur when the test is tearing down. These unintuitively      motivated registrations in turn cause additional invocations of      `AddSlave` on the allocator.      Additionally, this also reverts the newly introduced Clock pauses as      they have shown to be problematic.            Review: https://reviews.apache.org/r/66165/  {noformat}\""
+  },
+  {
+   "tawos_id": 38737,
+   "issue": 16146,
+   "author": 3406,
+   "created": "2018-04-17 23:44:20",
+   "text": "\"[~<USER>[~<USER>, do we still want to land it in 1.5.1?\""
+  },
+  {
+   "tawos_id": 38805,
+   "issue": 16177,
+   "author": 3409,
+   "created": "2018-04-24 03:00:36",
+   "text": "\"Split the ticket into two parts: checkpointing profiles (this one) and remove storage pools if their profiles no longer exist (https://issues.apache.org/jira/browse/MESOS-8825).\""
+  },
+  {
+   "tawos_id": 38806,
+   "issue": 16177,
+   "author": 3409,
+   "created": "2018-04-30 23:10:35",
+   "text": "\"{noformat}  commit fd49c4a968b71045de686ded37aa539efa11fc19  Author: <USER><<EMAIL>>  Date:   Mon Apr 30 14:20:06 2018 -0700        Added comments and made some renaming in SLRP.        Review: https://reviews.apache.org/r/65974/  {noformat}  {noformat}  commit 7b768a9120bc7e6f8dd9095d3f965d5f9b7352dd  Author: <USER><<EMAIL>>  Date:   Mon Apr 30 14:20:10 2018 -0700        Checkpointed profiles in storage local resource provider.        SLRP now checkpoints profiles associated with storage pools, and does      not depend on the `DiskProfileAdaptor` module to return the set of      previously-known profiles during recovery.        Review: https://reviews.apache.org/r/65594/  {noformat}\""
+  },
+  {
+   "tawos_id": 39049,
+   "issue": 16286,
+   "author": 3409,
+   "created": "2018-06-01 02:36:13",
+   "text": "\"{noformat}  commit 70b407df0aaeef171014d3453c3efb762b2c21f6  Author: <USER><<EMAIL>>  Date: Thu May 17 17:44:29 2018 -0700    Added operation state metrics in SLRP.    This patch adds `operations_pending`, `operations_finished`,  `operations_failed`, and `operations_dropped` metrics to count the  occurances of these operation states.    Additionally, An error log in `_applyOperation()` is removed because the  error is already logged at the call site.    Review: https://reviews.apache.org/r/65665{noformat}  {noformat}  commit 5bdea1951a63b92dacc4b97ca5dd8b2e86467f98  Author: <USER><<EMAIL>>  Date: Thu May 17 17:45:06 2018 -0700    Added a unit test for SLRP operation state metrics.    This patch adds the `ROOT_OperationStateMetrics` test that issues a  `CREATE_VOLUME` followed by two `DESTROY_VOLUME`s. The first one will  fail due to an out-of-band deletion of the actual volume, and the second  one will fail due to modifying the resource version.    Review: https://reviews.apache.org/r/65666/{noformat}\""
+  },
+  {
+   "tawos_id": 38635,
+   "issue": 16102,
+   "author": 3390,
+   "created": "2018-06-28 00:08:58",
+   "text": "\"Raised priority to blocker - we had multiple major Mesos users reaching out to us for help getting this fixed as it gets their disks stuffed with containers never getting properly cleaned up.\""
+  },
+  {
+   "tawos_id": 38653,
+   "issue": 16103,
+   "author": 3409,
+   "created": "2018-07-13 22:46:12",
+   "text": "\"{noformat}  commit afd1647b96abdc9352864f0a8e2f4c24a2f0c7d7  Author: <USER><<EMAIL>>  Date: Tue Feb 13 14:08:00 2018 -0800    Fixed a race condition in `UriDiskProfileAdaptorTests`.    There was a race between `Clock::advance()` in the `FetchFromHTTP` test  and `delay()` in `UriDiskProfileAdaptorProcess::_poll`. This patch  avoids the race by enforcing an order between the dispatch of the  `__poll` function (previously `_poll`) and the clock manipulation  in the test.    Review: https://reviews.apache.org/r/65640{noformat}\""
+  },
+  {
+   "tawos_id": 45554,
+   "issue": 18851,
+   "author": 3481,
+   "created": "2018-07-17 23:28:16",
+   "text": "\"New reviews here: https://reviews.apache.org/r/67951/ https://reviews.apache.org/r/67952/\""
+  },
+  {
+   "tawos_id": 45254,
+   "issue": 18761,
+   "author": 3481,
+   "created": "2018-07-17 23:28:19",
+   "text": "\"New reviews here: https://reviews.apache.org/r/67951/ https://reviews.apache.org/r/67952/\""
+  },
+  {
+   "tawos_id": 45555,
+   "issue": 18851,
+   "author": 3481,
+   "created": "2018-07-24 21:25:01",
+   "text": "\"commit 3e06a4866  Author: <USER>  Date:   Tue Jul 17 15:16:09 2018 -0700        Windows: Ported remaining tests in the `HTTPTest` suite.            These were enabled by fixing the use of `Path()` in `process.cpp` to      explicitly use '/' as the separator, as it's being used to manipulate      URLs, not filesystem paths, and previously this failed due the Windows      path separator being '\\'.            Review: https://reviews.apache.org/r/67952/\""
+  },
+  {
+   "tawos_id": 45255,
+   "issue": 18761,
+   "author": 3481,
+   "created": "2018-07-24 21:25:18",
+   "text": "\"commit de4917a3c  Author: <USER>  Date:   Tue Jul 17 15:00:46 2018 -0700        Added optional `path_separator` parameter to `Path` constructor.            This defaults to `os::PATH_SEPARATOR` and so by default retains the      previous behavior. However, now `Path` can be arbitrarily used with,      e.g., URLs on Windows by providing `/` as the separator.            Review: https://reviews.apache.org/r/67951/    commit 3e06a4866  Author: <USER>  Date:   Tue Jul 17 15:16:09 2018 -0700        Windows: Ported remaining tests in the `HTTPTest` suite.            These were enabled by fixing the use of `Path()` in `process.cpp` to      explicitly use '/' as the separator, as it's being used to manipulate      URLs, not filesystem paths, and previously this failed due the Windows      path separator being '\\'.            Review: https://reviews.apache.org/r/67952/\""
+  },
+  {
+   "tawos_id": 38636,
+   "issue": 16102,
+   "author": 3405,
+   "created": "2018-08-14 12:18:14",
+   "text": "\"I've linked MESOS-9131, as it's very similar: Calling {{REMOVE_NESTED_CONTAINER}} while that container is being destroyed seems to result in a race condition, though it isn't yet clear why.\""
+  },
+  {
+   "tawos_id": 38637,
+   "issue": 16102,
+   "author": 3405,
+   "created": "2018-08-14 13:41:34",
+   "text": "\"-No, the {{REMOVE_NESTED_CONTAINER}} shouldn't be a problem here. This particular 500 return code is actually a no-op in the containerizer. We don't need to call {{WAIT_NESTED_CONTAINER}} here.-\""
+  },
+  {
+   "tawos_id": 38638,
+   "issue": 16102,
+   "author": 3405,
+   "created": "2018-08-15 12:02:12",
+   "text": "\"Scratch my older comment. {{REMOVE_NESTED_CONTAINER}} has to called on a destroyed container, because as part of this call, the containers runtime directory will be removed. I.e., if this call isn't successful, it will leak the containers runtime directory. This is the case in the scenario above. Hence, the checker has to call {{WAIT_NESTED_CONTAINER}} to make sure that it's not calling {{REMOVE_NESTED_CONTAINER}} on a container that is currently being destroyed.\""
+  },
+  {
+   "tawos_id": 38639,
+   "issue": 16102,
+   "author": 3360,
+   "created": "2018-08-22 15:55:51",
+   "text": "\"Reproduce steps:    1. To simulate the failure of launching nested container via health check, change `CgroupsIsolatorProcess::isolate` a bit:    2. Start Mesos master and agent.    3. Launch a nested container with check enabled.    5. After a few minutes, there will be a lot of check container's sandbox directories not removed.     And in the default executor's stderr, we see a lot of warning messages.    So every time when the default executor called `REMOVE_NESTED_CONTAINER` to remove the previous check container, the call failed with a 500 error. The reason that this call failed is the check container has not terminated yet (still in `DESTROYING` state), the agent log below also proved this.    Agent started to destroy the check container at 07:37:45 but the check container was eventually destroyed at 07:37:50 because I/O switchboard server process was stilling running during this 5 seconds (it terminated at 07:37:50 when `IOSwitchboard::cleanup` sent `SIGTERM` to it), and default executor called `REMOVE_NESTED_CONTAINER` at 07:37:48 (because I set `interval_seconds` to 3 in the TaskInfo) while the check container was still in `DESTROYING` state, so the call failed and the check container's sandbox directory and runtime directory will not be removed.\""
+  },
+  {
+   "tawos_id": 38640,
+   "issue": 16102,
+   "author": 3371,
+   "created": "2018-08-23 17:51:51",
+   "text": "\"Great repro!    One orthogonal question though, it seems unfortunate that IOSwitchboard takes 5s to complete its cleanup for a container that has failed to launch. IIRC there was a 5s timeout in IOSwitchboard for some unexpected corner cases which is what we seem to be hitting here, but this is an *expected* case in some sense.  Is there anyway we can speed that up?\""
+  },
+  {
+   "tawos_id": 38641,
+   "issue": 16102,
+   "author": 3360,
+   "created": "2018-08-24 04:17:47",
+   "text": "\"[~<USER> Yeah, I noticed that as well. When the I/O switchboard server process is launched, it just [waits on a promise|https://github.com/apache/mesos/blob/1.6.1/src/slave/containerizer/mesos/io/switchboard.cpp#L1181], and that promise will only be set when a `ATTACH_CONTAINER_OUTPUT` call is made or a `SIGTERM` is sent. In this case, `ATTACH_CONTAINER_OUTPUT` will never be made since the check container was failed to launch, so we have to wait 5s for the `SIGTERM`.    I am not quite sure which cases that [SIGTERM & 5s timeout|https://github.com/apache/mesos/blob/1.6.1/src/slave/containerizer/mesos/io/switchboard.cpp#L810:L818] is for, maybe [~<USER> and [~<USER> have more info?\""
+  },
+  {
+   "tawos_id": 38642,
+   "issue": 16102,
+   "author": 3360,
+   "created": "2018-08-24 04:21:10",
+   "text": "\"RR: https://reviews.apache.org/r/68495/\""
+  },
+  {
+   "tawos_id": 38643,
+   "issue": 16102,
+   "author": 3360,
+   "created": "2018-08-24 08:04:59",
+   "text": "\"I ran the exactly same reproduce steps with the above patch applied, and found this issue was gone, there is only one check container's sandbox directory at any time.    Here is the agent log, we can see `WAIT_NESTED_CONTAINER` was called before `REMOVE_NESTED_CONTAINER` was called.    Here is the default executor's stderr, we do not see any failed `REMOVE_NESTED_CONTAINER` calls.     \""
+  },
+  {
+   "tawos_id": 38644,
+   "issue": 16102,
+   "author": 3371,
+   "created": "2018-08-30 23:56:48",
+   "text": "\"[~<USER> Can you please set the affects and target versions?\""
+  },
+  {
+   "tawos_id": 38645,
+   "issue": 16102,
+   "author": 3360,
+   "created": "2018-08-31 04:15:16",
+   "text": "\"[~<USER> Done.\""
+  },
+  {
+   "tawos_id": 38646,
+   "issue": 16102,
+   "author": 3360,
+   "created": "2018-09-05 22:09:02",
+   "text": "\"commit ba370822c94c8e9881eff3f63a02b38e18335ae4  Author: <USER>  Date: Thu Aug 23 17:44:53 2018 +0800    Made command check always waits before removing the nested container.      Review: [https://reviews.apache.org/r/68495]         commit b5c43f40b41b44ccae05d61e4aba8d004678cde1  Author: <USER>  Date: Wed Aug 29 11:22:41 2018 +0800    Made checker library retry to remove the previous check container.      Previously when checker library fails to remove the previous check   container, it will discard the promise and launch a new check container   which will cause two problems:   1. The discarded promise is used to launch the new check container,   that means even the new check container is launched successfully,   we still have no chance to process its check result since the   promise has already been discarded.   2. The previous check container will never get a chance to be removed   which is leak, i.e., its runtime directory and sandbox directory   will not be removed.      Now in this patch, when checker library fails to remove the previous   check container, we make it remove the previous check container again.      Review: https://reviews.apache.org/r/68555\""
+  }
+ ]
+}

@@ -11,7 +11,29 @@ const PRIORITY_STYLES: Record<string, string> = {
   critical: "bg-red-100 text-red-800 dark:bg-red-950/50 dark:text-red-400",
 }
 
-export function TaskCard({ task, index, onClick }: { task: Task; index: number; onClick: () => void }) {
+function initials(name: string) {
+  // Anonymised imports ("… contributor #3409") share every word but the number.
+  const trailingNumber = name.match(/(\d+)\s*$/)
+  if (trailingNumber) return trailingNumber[1].slice(-2)
+  return name
+    .split(/[\s@._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]!.toUpperCase())
+    .join("")
+}
+
+export function TaskCard({
+  task,
+  index,
+  onClick,
+  assigneeName,
+}: {
+  task: Task
+  index: number
+  onClick: () => void
+  assigneeName?: string | null
+}) {
   const overdue = task.due_date && task.status !== "done" && new Date(task.due_date) < new Date()
 
   return (
@@ -46,6 +68,16 @@ export function TaskCard({ task, index, onClick }: { task: Task; index: number; 
                   <Calendar className="h-3 w-3" />
                   {new Date(task.due_date).toLocaleDateString()}
                 </span>
+              )}
+              {assigneeName ? (
+                <span
+                  title={assigneeName}
+                  className="ml-auto h-6 w-6 rounded-full bg-primary/10 text-primary text-[10px] font-semibold flex items-center justify-center"
+                >
+                  {initials(assigneeName)}
+                </span>
+              ) : (
+                <span className="ml-auto text-[10px] text-muted-foreground">Unassigned</span>
               )}
             </div>
           </CardContent>

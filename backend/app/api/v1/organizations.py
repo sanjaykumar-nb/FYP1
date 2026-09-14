@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 from app.api.deps import get_db, get_current_user, get_current_user_id, get_current_org_id, get_pagination_params
+from app.core.security import get_password_hash
 from app.models.organization import Organization
 from app.models.user import User
 from app.models.role import Role, UserRole
@@ -21,6 +22,7 @@ from app.schemas.auth import (
     TeamResponse,
     PaginatedResponse,
     UserResponse,
+    MemberCreate,
 )
 
 router = APIRouter()
@@ -182,22 +184,55 @@ async def update_organization(
     return OrganizationResponse.model_validate(org)
 
 
-@router.post("/{org_id}/invite")
-async def invite_member(
+@router.post("/{org_id}/members", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def add_member(
     org_id: UUID,
-    email: str,
-    role_id: UUID,
+    member: MemberCreate,
     db: AsyncSession = Depends(get_db),
     current_org_id: UUID = Depends(get_current_org_id),
 ):
+    """Create a teammate's account inside this organization.
+
+    Registration always creates a new organization, so without this there is no
+    way to put a second person in an existing org — and therefore nobody to
+    assign tasks to. The creator supplies an initial password and shares it.
+    """
     if org_id != current_org_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied",
         )
-    
-    # TODO: Implement invitation logic
-    return {"message": "Invitation sent"}
+
+    existing = await db.execute(select(User).where(User.email == member.email))
+    if existing.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already registered",
+        )
+
+    role_result = await db.execute(
+        select(Role).where(Role.organization_id == org_id, Role.name == member.role)
+    )
+    role = role_result.scalar_one_or_none()
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown role '{member.role}'",
+        )
+
+    user = User(
+        organization_id=org_id,
+        email=member.email,
+        password_hash=get_password_hash(member.password),
+        full_name=member.full_name,
+    )
+    db.add(user)
+    await db.flush()
+    db.add(UserRole(user_id=user.id, role_id=role.id, organization_id=org_id, project_id=None))
+    await db.commit()
+    await db.refresh(user)
+
+    return UserResponse.model_validate(user)
 
 
 @router.get("/{org_id}/members", response_model=PaginatedResponse)

@@ -9,7 +9,7 @@ import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
 import { api } from "@/lib/api"
-import { TASK_STATUSES, type PaginatedResponse, type Task, type TaskStatus } from "@/types"
+import { TASK_STATUSES, type Member, type PaginatedResponse, type Task, type TaskStatus } from "@/types"
 import { TaskCard } from "@/components/tasks/task-card"
 import { TaskDialog } from "@/components/tasks/task-dialog"
 
@@ -27,6 +27,18 @@ export default function TaskBoardPage() {
     queryFn: () =>
       api.get<PaginatedResponse<Task>>(`/projects/${projectId}/tasks`, { params: { page_size: 100 } }).then((res) => res.data),
   })
+
+  const { data: members } = useQuery({
+    queryKey: ["members", projectId],
+    queryFn: () =>
+      api
+        .get<PaginatedResponse<Member>>(`/projects/${projectId}/members`, { params: { page_size: 100 } })
+        .then((res) => res.data.items),
+  })
+  const memberNames = useMemo(
+    () => new Map((members ?? []).map((m) => [m.id, m.full_name || m.email])),
+    [members]
+  )
 
   const tasks = data?.items ?? []
   const columns = useMemo(() => {
@@ -122,7 +134,13 @@ export default function TaskBoardPage() {
                       </span>
                     </div>
                     {columns[value].map((task, index) => (
-                      <TaskCard key={task.id} task={task} index={index} onClick={() => openEditTask(task)} />
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        index={index}
+                        onClick={() => openEditTask(task)}
+                        assigneeName={task.assignee_id ? memberNames.get(task.assignee_id) : null}
+                      />
                     ))}
                     {provided.placeholder}
                     <button

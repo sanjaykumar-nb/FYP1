@@ -31,6 +31,11 @@ class UserCreate(UserBase):
     organization_name: str = Field("My Organization", min_length=1, max_length=255)
 
 
+class MemberCreate(UserBase):
+    password: str = Field(..., min_length=8)
+    role: str = "developer"
+
+
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
@@ -57,6 +62,15 @@ class UserResponse(UserBase):
 
     class Config:
         from_attributes = True
+
+
+class ProjectMemberResponse(UserResponse):
+    role: str
+
+
+class ProjectMemberAdd(BaseModel):
+    user_id: UUID
+    role: str = "developer"
 
 
 class OrganizationBase(BaseModel):

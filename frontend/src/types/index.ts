@@ -25,6 +25,14 @@ export interface Project {
   created_at: string
 }
 
+export interface Member {
+  id: string
+  organization_id: string
+  email: string
+  full_name: string | null
+  role?: string
+}
+
 export type TaskStatus = "backlog" | "planned" | "in_progress" | "blocked" | "review" | "done"
 export type TaskPriority = "low" | "medium" | "high" | "critical"
 

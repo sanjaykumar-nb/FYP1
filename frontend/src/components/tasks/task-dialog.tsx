@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/hooks/use-toast"
 import { api } from "@/lib/api"
-import { TASK_STATUSES, type Task, type TaskStatus } from "@/types"
+import { TASK_STATUSES, type Member, type PaginatedResponse, type Task, type TaskStatus } from "@/types"
 
 const taskSchema = z.object({
   title: z.string().min(1, "Title is required").max(500),
@@ -26,6 +26,7 @@ const taskSchema = z.object({
   priority: z.enum(["low", "medium", "high", "critical"]),
   story_points: z.string().optional(),
   due_date: z.string().optional(),
+  assignee_id: z.string().optional(),
 })
 type TaskForm = z.infer<typeof taskSchema>
 
@@ -47,6 +48,15 @@ export function TaskDialog({
 }) {
   const queryClient = useQueryClient()
   const isEdit = !!task
+
+  const { data: members } = useQuery({
+    queryKey: ["members", projectId],
+    queryFn: () =>
+      api
+        .get<PaginatedResponse<Member>>(`/projects/${projectId}/members`, { params: { page_size: 100 } })
+        .then((res) => res.data.items),
+    enabled: open,
+  })
 
   const {
     register,
@@ -72,6 +82,7 @@ export function TaskDialog({
               priority: task.priority,
               story_points: task.story_points != null ? String(task.story_points) : "",
               due_date: task.due_date ? task.due_date.slice(0, 10) : "",
+              assignee_id: task.assignee_id ?? "",
             }
           : {
               title: "",
@@ -80,6 +91,7 @@ export function TaskDialog({
               priority: "medium",
               story_points: "",
               due_date: "",
+              assignee_id: "",
             }
       )
     }
@@ -94,6 +106,8 @@ export function TaskDialog({
         priority: data.priority,
         story_points: data.story_points ? Number(data.story_points) : undefined,
         due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
+        // On edit, an empty choice must clear the assignee rather than leave it unchanged.
+        assignee_id: data.assignee_id || (isEdit ? null : undefined),
       }
       return isEdit
         ? api.patch(`/projects/${projectId}/tasks/${task!.id}`, payload)
@@ -149,6 +163,20 @@ export function TaskDialog({
                 <option value="critical">Critical</option>
               </select>
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="assignee_id">Assignee</Label>
+            <select id="assignee_id" className={selectClass} {...register("assignee_id")}>
+              <option value="">Unassigned</option>
+              {(members ?? []).map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.full_name || m.email}
+                </option>
+              ))}
+            </select>
+            {members && members.length === 0 && (
+              <p className="text-xs text-muted-foreground">Add teammates from the project&apos;s Team tab to assign work.</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

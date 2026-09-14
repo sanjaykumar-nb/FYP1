@@ -116,6 +116,22 @@ class TestAnalysisPersistence:
         assert matched["status"] == "completed"
         assert matched["coordinator_output"]["overall_risk_level"] == "medium"
 
+    async def test_analysis_updates_project_risk_and_health(
+        self, client: AsyncClient, auth_headers, test_project, test_task
+    ):
+        with patch(
+            "app.api.v1.analytics.ai_client.analyze_project", new_callable=AsyncMock
+        ) as mock_analyze:
+            mock_analyze.return_value = _FAKE_AI_RESULT
+            await client.post(
+                f"/api/v1/analytics/projects/{test_project.id}/analyze",
+                headers=auth_headers,
+            )
+
+        project = (await client.get(f"/api/v1/projects/{test_project.id}", headers=auth_headers)).json()
+        assert project["risk_score"] == 0.45
+        assert project["health_score"] == 0.55
+
     async def test_ai_service_failure_is_persisted_not_swallowed(
         self, client: AsyncClient, auth_headers, test_project
     ):

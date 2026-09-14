@@ -37,7 +37,8 @@ class RuleBasedFallback:
         sprint_readiness = milestones_with_tasks / max(len(milestones), 1) if milestones else 0.5
         
         # Check capacity
-        total_points = sum(t.get('story_points', 0) for t in tasks)
+        # An unestimated task has story_points=None (key present), which .get(k, 0) would pass through.
+        total_points = sum(t.get('story_points') or 0 for t in tasks)
         capacity = team_capacity.get('total_points', total_points * 1.2)
         capacity_gap = max(0, total_points - capacity)
         
@@ -225,7 +226,7 @@ class RuleBasedFallback:
         user_loads = {}
         for a in assignments:
             user_id = a.get('assignee_id')
-            points = a.get('story_points', 0)
+            points = a.get('story_points') or 0
             if user_id:
                 user_loads[user_id] = user_loads.get(user_id, 0) + points
         

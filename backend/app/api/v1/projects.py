@@ -17,6 +17,8 @@ from app.schemas.auth import (
     MilestoneResponse,
     PaginatedResponse,
     UserResponse,
+    ProjectMemberAdd,
+    ProjectMemberResponse,
 )
 
 router = APIRouter()
@@ -219,11 +221,10 @@ async def list_project_members(
     )
     total = total_result.scalar()
     
-    items = []
-    for pm, user in members:
-        user_resp = UserResponse.model_validate(user)
-        user_resp.role = pm.role  # Add project role
-        items.append(user_resp)
+    items = [
+        ProjectMemberResponse(**UserResponse.model_validate(user).model_dump(), role=pm.role)
+        for pm, user in members
+    ]
     
     return PaginatedResponse(
         items=items,
@@ -234,14 +235,14 @@ async def list_project_members(
     )
 
 
-@router.post("/{project_id}/members")
+@router.post("/{project_id}/members", status_code=status.HTTP_201_CREATED)
 async def add_project_member(
     project_id: UUID,
-    user_id: UUID,
-    role: str = "developer",
+    data: ProjectMemberAdd,
     db: AsyncSession = Depends(get_db),
     org_id: UUID = Depends(get_current_org_id),
 ):
+    user_id, role = data.user_id, data.role
     project_result = await db.execute(
         select(Project).where(Project.id == project_id, Project.organization_id == org_id)
     )

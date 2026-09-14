@@ -61,6 +61,21 @@ class TestPlanningFallback:
 
         assert result.sprint_readiness == 0.5
 
+    def test_planning_tolerates_unestimated_tasks(self, fallback):
+        # Real trackers are full of issues with no estimate; they must not crash the agent.
+        input_data = PlanningInput(
+            project_id=uuid4(),
+            milestones=[{"id": "m1", "name": "Sprint 1"}],
+            tasks=[
+                {"id": "t1", "milestone_id": "m1", "story_points": None, "status": "backlog"},
+                {"id": "t2", "milestone_id": "m1", "story_points": 30, "status": "backlog"},
+            ],
+            team_capacity={"total_points": 20},
+        )
+        result = fallback.planning_analysis(input_data)
+
+        assert "Gap of 10 points" in result.capacity_gaps[0]
+
 
 @pytest.mark.mvp
 class TestProgressFallback:
@@ -192,6 +207,20 @@ class TestWorkloadFallback:
         assert len(result.overloaded_members) == 0
         assert len(result.underutilized_members) == 0
         assert result.risk_level == "low"
+
+    def test_workload_tolerates_unestimated_assignments(self, fallback):
+        input_data = WorkloadIntelInput(
+            project_id=uuid4(),
+            assignments=[
+                {"assignee_id": "u1", "story_points": None},
+                {"assignee_id": "u1", "story_points": 20},
+                {"assignee_id": "u2", "story_points": 5},
+            ],
+            story_points={},
+        )
+        result = fallback.workload_intel_analysis(input_data)
+
+        assert result.overloaded_members[0]["user_id"] == "u1"
 
 
 @pytest.mark.mvp
