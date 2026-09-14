@@ -125,6 +125,8 @@ every number: [IEEE_PAPER_REPORT.md](IEEE_PAPER_REPORT.md).
 
 **Product**
 - Organization-based multi-tenancy with JWT auth and refresh rotation
+- Role-based permissions (owner, admin, project manager, developer, viewer) checked on every
+  change; nobody can grant a role above their own
 - Projects with milestones, health/risk scores, and a drag-and-drop Kanban board
 - Task dependencies (with real multi-hop cycle detection), subtasks, comments
 - Real-time updates via WebSocket
@@ -139,7 +141,7 @@ every number: [IEEE_PAPER_REPORT.md](IEEE_PAPER_REPORT.md).
 
 **Deliberately deferred** (documented scope, not a hidden gap): Meeting Intelligence and
 Communication Intelligence (no transcript/chat data source exists in the product yet), a
-multi-agent Review Trio, Organizational Memory/RAG, fine-grained RBAC, persistent graph storage.
+multi-agent Review Trio, Organizational Memory/RAG, per-project roles, persistent graph storage.
 
 ## Technology Stack
 
@@ -285,8 +287,8 @@ python -m eval.make_figures                  # regenerate every figure in docs/i
 
 Stated explicitly rather than left implicit:
 
-- **Fine-grained RBAC is not enforced.** The guarantee is *authenticated + org-scoped*; role
-  permissions beyond that are defined but not yet checked. Covered by a tenant-isolation test.
+- **Roles are organization-wide.** Every change is checked against the caller's role, but a role
+  applies to all projects in the organization; per-project roles are not implemented.
 - **Only one of six risk types has real-world (non-synthetic) validation** — delay prediction,
   validated on TAWOS. The other five are validated against deterministic synthetic scenarios,
   which check implementation correctness, not real-world generalization.
@@ -318,7 +320,7 @@ The full, unabridged threats-to-validity list (ten items) is in
 - Communication Intelligence (chat/email ingestion, evaluated against the Enron Email Corpus)
 - Bootstrapped confidence intervals on the held-out evaluation
 - A human evaluation of explanation quality/usefulness
-- Fine-grained RBAC enforcement
+- Per-project roles
 
 ## License
 

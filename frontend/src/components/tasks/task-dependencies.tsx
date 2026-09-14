@@ -15,7 +15,15 @@ const selectClass =
 
 const STATUS_LABELS = new Map(TASK_STATUSES.map((s) => [s.value, s.label]))
 
-export function TaskDependencies({ projectId, task }: { projectId: string; task: Task }) {
+export function TaskDependencies({
+  projectId,
+  task,
+  canEdit = true,
+}: {
+  projectId: string
+  task: Task
+  canEdit?: boolean
+}) {
   const queryClient = useQueryClient()
   const [blockerId, setBlockerId] = useState("")
 
@@ -74,15 +82,17 @@ export function TaskDependencies({ projectId, task }: { projectId: string; task:
                   {STATUS_LABELS.get(linked.status) ?? linked.status}
                 </Badge>
               )}
-              <button
-                type="button"
-                onClick={() => remove.mutate(dep)}
-                disabled={remove.isPending}
-                aria-label={`Remove dependency on ${title}`}
-                className="text-muted-foreground hover:text-destructive shrink-0"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              {canEdit && (
+                <button
+                  type="button"
+                  onClick={() => remove.mutate(dep)}
+                  disabled={remove.isPending}
+                  aria-label={`Remove dependency on ${title}`}
+                  className="text-muted-foreground hover:text-destructive shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </li>
           )
         })}
@@ -104,6 +114,7 @@ export function TaskDependencies({ projectId, task }: { projectId: string; task:
         <DependencyList items={blocks} other={(d) => d.blocked_task_id} />
       </section>
 
+      {canEdit && (
       <form
         className="space-y-2 border-t border-border pt-4"
         onSubmit={(e) => {
@@ -129,6 +140,7 @@ export function TaskDependencies({ projectId, task }: { projectId: string; task:
           Blocking links feed the dependency and critical-path analysis. Circular chains are refused.
         </p>
       </form>
+      )}
     </div>
   )
 }

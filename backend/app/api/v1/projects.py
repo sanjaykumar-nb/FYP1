@@ -4,7 +4,16 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import selectinload
-from app.api.deps import get_db, get_current_user_id, get_current_org_id, get_pagination_params
+from app.api.deps import (
+    CurrentRole,
+    get_current_org_id,
+    get_current_role,
+    get_current_user_id,
+    get_db,
+    get_pagination_params,
+    require_permission,
+)
+from app.core.permissions import ROLE_RANK, can_grant
 from app.models.project import Project, ProjectMember, Milestone
 from app.models.task import Task, TaskDependency
 from app.models.user import User
@@ -64,7 +73,8 @@ async def list_projects(
     )
 
 
-@router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(require_permission("project:create"))])
 async def create_project(
     project_data: ProjectCreate,
     db: AsyncSession = Depends(get_db),
@@ -136,7 +146,8 @@ async def get_project(
     return ProjectResponse.model_validate(project)
 
 
-@router.patch("/{project_id}", response_model=ProjectResponse)
+@router.patch("/{project_id}", response_model=ProjectResponse,
+              dependencies=[Depends(require_permission("project:update"))])
 async def update_project(
     project_id: UUID,
     project_data: ProjectUpdate,
@@ -166,7 +177,8 @@ async def update_project(
     return ProjectResponse.model_validate(project)
 
 
-@router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT,
+               dependencies=[Depends(require_permission("project:delete"))])
 async def delete_project(
     project_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -257,14 +269,27 @@ async def list_project_members(
     )
 
 
-@router.post("/{project_id}/members", status_code=status.HTTP_201_CREATED)
+def _check_grantable(actor: CurrentRole, role: str) -> None:
+    if role not in ROLE_RANK:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unknown role '{role}'")
+    if not can_grant(actor.name, role):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"A {actor.name.replace('_', ' ')} cannot grant the {role.replace('_', ' ')} role",
+        )
+
+
+@router.post("/{project_id}/members", status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(require_permission("member:invite"))])
 async def add_project_member(
     project_id: UUID,
     data: ProjectMemberAdd,
     db: AsyncSession = Depends(get_db),
     org_id: UUID = Depends(get_current_org_id),
+    actor: CurrentRole = Depends(get_current_role),
 ):
     user_id, role = data.user_id, data.role
+    _check_grantable(actor, role)
     project_result = await db.execute(
         select(Project).where(Project.id == project_id, Project.organization_id == org_id)
     )
@@ -304,18 +329,23 @@ async def add_project_member(
     return {"message": "Member added"}
 
 
-@router.patch("/{project_id}/members/{user_id}")
+@router.patch("/{project_id}/members/{user_id}", dependencies=[Depends(require_permission("member:update_role"))])
 async def update_project_member(
     project_id: UUID,
     user_id: UUID,
     role: str,
     db: AsyncSession = Depends(get_db),
     org_id: UUID = Depends(get_current_org_id),
+    actor: CurrentRole = Depends(get_current_role),
 ):
+    _check_grantable(actor, role)
     result = await db.execute(
-        select(ProjectMember).where(
+        select(ProjectMember)
+        .join(Project, Project.id == ProjectMember.project_id)
+        .where(
             ProjectMember.project_id == project_id,
             ProjectMember.user_id == user_id,
+            Project.organization_id == org_id,
         )
     )
     member = result.scalar_one_or_none()
@@ -332,7 +362,7 @@ async def update_project_member(
     return {"message": "Member role updated"}
 
 
-@router.delete("/{project_id}/members/{user_id}")
+@router.delete("/{project_id}/members/{user_id}", dependencies=[Depends(require_permission("member:remove"))])
 async def remove_project_member(
     project_id: UUID,
     user_id: UUID,
@@ -340,9 +370,12 @@ async def remove_project_member(
     org_id: UUID = Depends(get_current_org_id),
 ):
     result = await db.execute(
-        select(ProjectMember).where(
+        select(ProjectMember)
+        .join(Project, Project.id == ProjectMember.project_id)
+        .where(
             ProjectMember.project_id == project_id,
             ProjectMember.user_id == user_id,
+            Project.organization_id == org_id,
         )
     )
     member = result.scalar_one_or_none()
@@ -399,7 +432,8 @@ async def list_milestones(
     )
 
 
-@router.post("/{project_id}/milestones", response_model=MilestoneResponse)
+@router.post("/{project_id}/milestones", response_model=MilestoneResponse,
+             dependencies=[Depends(require_permission("project:update"))])
 async def create_milestone(
     project_id: UUID,
     milestone_data: MilestoneCreate,
@@ -428,7 +462,8 @@ async def create_milestone(
     return MilestoneResponse.model_validate(milestone)
 
 
-@router.patch("/{project_id}/milestones/{milestone_id}", response_model=MilestoneResponse)
+@router.patch("/{project_id}/milestones/{milestone_id}", response_model=MilestoneResponse,
+              dependencies=[Depends(require_permission("project:update"))])
 async def update_milestone(
     project_id: UUID,
     milestone_id: UUID,

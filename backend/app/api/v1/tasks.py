@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, or_
 from sqlalchemy.orm import selectinload
-from app.api.deps import get_db, get_current_user_id, get_current_org_id, get_pagination_params
+from app.api.deps import get_db, get_current_user_id, get_current_org_id, get_pagination_params, require_permission
 from app.models.project import Project
 from app.models.task import Task, TaskDependency, TaskComment
 from app.models.user import User
@@ -83,7 +83,8 @@ async def list_tasks(
     )
 
 
-@router.post("", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=TaskResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(require_permission("task:create"))])
 async def create_task(
     project_id: UUID,
     task_data: TaskCreate,
@@ -186,7 +187,8 @@ async def get_task(
     )
 
 
-@router.patch("/{task_id}", response_model=TaskResponse)
+@router.patch("/{task_id}", response_model=TaskResponse,
+              dependencies=[Depends(require_permission("task:update"))])
 async def update_task(
     task_id: UUID,
     task_data: TaskUpdate,
@@ -215,7 +217,8 @@ async def update_task(
     return TaskResponse.model_validate(task)
 
 
-@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT,
+               dependencies=[Depends(require_permission("task:delete"))])
 async def delete_task(
     task_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -238,7 +241,8 @@ async def delete_task(
     await db.commit()
 
 
-@router.patch("/{task_id}/move", response_model=TaskResponse)
+@router.patch("/{task_id}/move", response_model=TaskResponse,
+              dependencies=[Depends(require_permission("task:update"))])
 async def move_task(
     task_id: UUID,
     move_data: TaskMove,
@@ -287,7 +291,8 @@ async def move_task(
 
 
 # Subtasks
-@router.post("/{task_id}/subtasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{task_id}/subtasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(require_permission("task:create"))])
 async def create_subtask(
     task_id: UUID,
     task_data: TaskCreate,
@@ -366,7 +371,8 @@ async def list_dependencies(
     ]
 
 
-@router.post("/{task_id}/dependencies", response_model=TaskDependencyResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{task_id}/dependencies", response_model=TaskDependencyResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(require_permission("task:update"))])
 async def add_dependency(
     project_id: UUID,
     task_id: UUID,
@@ -429,7 +435,8 @@ async def add_dependency(
     return TaskDependencyResponse.model_validate(dep)
 
 
-@router.delete("/{task_id}/dependencies/{dep_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{task_id}/dependencies/{dep_id}", status_code=status.HTTP_204_NO_CONTENT,
+               dependencies=[Depends(require_permission("task:update"))])
 async def remove_dependency(
     project_id: UUID,
     task_id: UUID,
@@ -520,7 +527,8 @@ async def list_comments(
     )
 
 
-@router.post("/{task_id}/comments", response_model=TaskCommentResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{task_id}/comments", response_model=TaskCommentResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(require_permission("task:update"))])
 async def add_comment(
     task_id: UUID,
     comment_data: TaskCommentCreate,

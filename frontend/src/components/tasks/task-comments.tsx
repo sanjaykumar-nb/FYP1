@@ -13,7 +13,15 @@ export function parseServerTime(value: string): Date {
   return new Date(/(Z|[+-]\d\d:?\d\d)$/i.test(value) ? value : `${value}Z`)
 }
 
-export function TaskComments({ projectId, taskId }: { projectId: string; taskId: string }) {
+export function TaskComments({
+  projectId,
+  taskId,
+  canComment = true,
+}: {
+  projectId: string
+  taskId: string
+  canComment?: boolean
+}) {
   const queryClient = useQueryClient()
   const [content, setContent] = useState("")
 
@@ -66,6 +74,7 @@ export function TaskComments({ projectId, taskId }: { projectId: string; taskId:
         <p className="text-xs text-muted-foreground">Showing the first {comments.length} of {data.total} comments.</p>
       )}
 
+      {canComment && (
       <form
         className="space-y-2 border-t border-border pt-4"
         onSubmit={(e) => {
@@ -87,6 +96,7 @@ export function TaskComments({ projectId, taskId }: { projectId: string; taskId:
           </Button>
         </div>
       </form>
+      )}
     </div>
   )
 }

@@ -29,6 +29,7 @@ export function TaskCard({
   onClick,
   assigneeName,
   openBlockers,
+  dragDisabled = false,
 }: {
   task: Task
   index: number
@@ -36,11 +37,13 @@ export function TaskCard({
   assigneeName?: string | null
   /** How many unfinished tasks block this one. */
   openBlockers?: number
+  /** For people whose role cannot change tasks. */
+  dragDisabled?: boolean
 }) {
   const overdue = task.due_date && task.status !== "done" && new Date(task.due_date) < new Date()
 
   return (
-    <Draggable draggableId={task.id} index={index}>
+    <Draggable draggableId={task.id} index={index} isDragDisabled={dragDisabled}>
       {(provided, snapshot) => (
         <Card
           ref={provided.innerRef}
@@ -52,7 +55,10 @@ export function TaskCard({
         >
           <CardContent className="p-3 space-y-2">
             <div className="flex items-start gap-2">
-              <span {...provided.dragHandleProps} className="mt-0.5 text-muted-foreground/50 hover:text-muted-foreground">
+              <span
+                {...provided.dragHandleProps}
+                className={`mt-0.5 text-muted-foreground/50 hover:text-muted-foreground ${dragDisabled ? "invisible" : ""}`}
+              >
                 <GripVertical className="h-4 w-4" />
               </span>
               <p className="text-sm font-medium flex-1">{task.title}</p>

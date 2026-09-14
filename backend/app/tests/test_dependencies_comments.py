@@ -1,7 +1,9 @@
 import pytest
 from httpx import AsyncClient
 
+from app.core.permissions import default_roles
 from app.core.security import create_access_token, get_password_hash
+from app.models.role import UserRole
 from app.models.organization import Organization
 from app.models.project import Project
 from app.models.task import Task
@@ -91,11 +93,16 @@ class TestDependencies:
         org = Organization(name="Other Org", slug="other-org", settings={})
         db_session.add(org)
         await db_session.commit()
+        roles = default_roles(org.id)
         intruder = User(
             organization_id=org.id, email="intruder@example.com",
             password_hash=get_password_hash("password123"), full_name="Intruder", is_active=True,
         )
-        db_session.add(intruder)
+        db_session.add_all([*roles, intruder])
+        await db_session.commit()
+        # An owner of their own organization: tenancy, not role, is what must stop them.
+        owner = next(r for r in roles if r.name == "owner")
+        db_session.add(UserRole(user_id=intruder.id, role_id=owner.id, organization_id=org.id))
         await db_session.commit()
         intruder_headers = {
             "Authorization": f"Bearer {create_access_token({'sub': str(intruder.id), 'org_id': str(org.id)})}"

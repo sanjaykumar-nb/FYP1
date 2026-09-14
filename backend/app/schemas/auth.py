@@ -68,6 +68,11 @@ class ProjectMemberResponse(UserResponse):
     role: str
 
 
+class MeResponse(UserResponse):
+    role: str
+    permissions: list[str]
+
+
 class ProjectMemberAdd(BaseModel):
     user_id: UUID
     role: str = "developer"

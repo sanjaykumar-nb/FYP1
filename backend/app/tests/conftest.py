@@ -11,7 +11,10 @@ from app.models.user import User
 from app.models.organization import Organization
 from app.models.project import Project, ProjectMember
 from app.models.task import Task
+from app.models.role import Role, UserRole
+from app.core.permissions import default_roles
 from app.core.security import get_password_hash, create_access_token
+from sqlalchemy import select
 from uuid import uuid4
 from datetime import datetime
 
@@ -58,7 +61,17 @@ async def test_org(db_session: AsyncSession):
     db_session.add(org)
     await db_session.commit()
     await db_session.refresh(org)
+    db_session.add_all(default_roles(org.id))
+    await db_session.commit()
     return org
+
+
+async def assign_role(db_session: AsyncSession, user: User, org: Organization, role_name: str) -> None:
+    role = (
+        await db_session.execute(select(Role).where(Role.organization_id == org.id, Role.name == role_name))
+    ).scalar_one()
+    db_session.add(UserRole(user_id=user.id, role_id=role.id, organization_id=org.id))
+    await db_session.commit()
 
 
 @pytest_asyncio.fixture
@@ -73,6 +86,7 @@ async def test_user(db_session: AsyncSession, test_org: Organization):
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
+    await assign_role(db_session, user, test_org, "owner")
     return user
 
 
@@ -80,6 +94,27 @@ async def test_user(db_session: AsyncSession, test_org: Organization):
 async def auth_headers(test_user: User):
     token = create_access_token({"sub": str(test_user.id), "org_id": str(test_user.organization_id)})
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest_asyncio.fixture
+async def user_with_role(db_session: AsyncSession, test_org: Organization):
+    """Factory: a signed-in teammate in test_org holding the given role; returns auth headers."""
+
+    async def create(role_name: str) -> dict:
+        user = User(
+            organization_id=test_org.id,
+            email=f"{role_name}@example.com",
+            password_hash=get_password_hash("password123"),
+            full_name=role_name.replace("_", " ").title(),
+            is_active=True,
+        )
+        db_session.add(user)
+        await db_session.commit()
+        await assign_role(db_session, user, test_org, role_name)
+        token = create_access_token({"sub": str(user.id), "org_id": str(test_org.id)})
+        return {"Authorization": f"Bearer {token}"}
+
+    return create
 
 
 @pytest_asyncio.fixture

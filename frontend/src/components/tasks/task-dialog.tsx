@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TaskComments } from "@/components/tasks/task-comments"
 import { TaskDependencies } from "@/components/tasks/task-dependencies"
 import { toast } from "@/hooks/use-toast"
+import { usePermissions } from "@/hooks/use-permissions"
 import { api } from "@/lib/api"
 import { TASK_STATUSES, type Member, type PaginatedResponse, type Task, type TaskStatus } from "@/types"
 
@@ -51,6 +52,8 @@ export function TaskDialog({
 }) {
   const queryClient = useQueryClient()
   const isEdit = !!task
+  const { can } = usePermissions()
+  const readOnly = isEdit && !can("task:update")
 
   const { data: members } = useQuery({
     queryKey: ["members", projectId],
@@ -132,6 +135,7 @@ export function TaskDialog({
 
   const detailsForm = (
         <form onSubmit={handleSubmit((data) => save.mutate(data))} className="space-y-4">
+          <fieldset disabled={readOnly} className="space-y-4 min-w-0">
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input id="title" {...register("title")} />
@@ -186,10 +190,15 @@ export function TaskDialog({
               <Input id="due_date" type="date" {...register("due_date")} />
             </div>
           </div>
+          </fieldset>
           <DialogFooter>
-            <Button type="submit" disabled={save.isPending}>
-              {save.isPending ? "Saving…" : isEdit ? "Save Changes" : "Create Task"}
-            </Button>
+            {readOnly ? (
+              <p className="text-sm text-muted-foreground">View only: your role can&apos;t change tasks.</p>
+            ) : (
+              <Button type="submit" disabled={save.isPending}>
+                {save.isPending ? "Saving…" : isEdit ? "Save Changes" : "Create Task"}
+              </Button>
+            )}
           </DialogFooter>
         </form>
   )
@@ -198,7 +207,7 @@ export function TaskDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={isEdit ? "max-w-2xl max-h-[90vh] overflow-y-auto" : undefined}>
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Task" : "New Task"}</DialogTitle>
+          <DialogTitle>{readOnly ? "Task" : isEdit ? "Edit Task" : "New Task"}</DialogTitle>
         </DialogHeader>
         {task ? (
           <Tabs defaultValue="details">
@@ -209,10 +218,10 @@ export function TaskDialog({
             </TabsList>
             <TabsContent value="details">{detailsForm}</TabsContent>
             <TabsContent value="dependencies">
-              <TaskDependencies projectId={projectId} task={task} />
+              <TaskDependencies projectId={projectId} task={task} canEdit={!readOnly} />
             </TabsContent>
             <TabsContent value="discussion">
-              <TaskComments projectId={projectId} taskId={task.id} />
+              <TaskComments projectId={projectId} taskId={task.id} canComment={!readOnly} />
             </TabsContent>
           </Tabs>
         ) : (

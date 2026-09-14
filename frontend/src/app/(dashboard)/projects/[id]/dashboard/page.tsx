@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { toast } from "@/hooks/use-toast"
+import { usePermissions } from "@/hooks/use-permissions"
 import { api } from "@/lib/api"
 import type { AgentRun, Member, PaginatedResponse, Project, RecommendedAction, Task } from "@/types"
 import { AgentRunPanel, nodeRawId } from "@/components/analytics/agent-run-panel"
@@ -40,6 +41,7 @@ export default function ProjectDashboardPage() {
   const params = useParams()
   const projectId = params.id as string
   const queryClient = useQueryClient()
+  const { can } = usePermissions()
 
   const { data: project } = useQuery({
     queryKey: ["project", projectId],
@@ -152,16 +154,20 @@ export default function ProjectDashboardPage() {
           {project.description && <p className="text-muted-foreground mt-1">{project.description}</p>}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => runAnalysis.mutate()} disabled={runAnalysis.isPending}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${runAnalysis.isPending ? "animate-spin" : ""}`} />
-            {runAnalysis.isPending ? "Analyzing…" : "Run Analysis"}
-          </Button>
-          <Link href={`/projects/${projectId}/tasks`}>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              New Task
+          {can("analytics:run") && (
+            <Button variant="outline" onClick={() => runAnalysis.mutate()} disabled={runAnalysis.isPending}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${runAnalysis.isPending ? "animate-spin" : ""}`} />
+              {runAnalysis.isPending ? "Analyzing…" : "Run Analysis"}
             </Button>
-          </Link>
+          )}
+          {can("task:create") && (
+            <Link href={`/projects/${projectId}/tasks`}>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                New Task
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -318,10 +324,12 @@ export default function ProjectDashboardPage() {
         <TabsContent value="ai" className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold">AI Insights</h2>
-            <Button variant="outline" onClick={() => runAnalysis.mutate()} disabled={runAnalysis.isPending}>
-              <RefreshCw className={`mr-2 h-4 w-4 ${runAnalysis.isPending ? "animate-spin" : ""}`} />
-              {runAnalysis.isPending ? "Analyzing…" : "Run Analysis"}
-            </Button>
+            {can("analytics:run") && (
+              <Button variant="outline" onClick={() => runAnalysis.mutate()} disabled={runAnalysis.isPending}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${runAnalysis.isPending ? "animate-spin" : ""}`} />
+                {runAnalysis.isPending ? "Analyzing…" : "Run Analysis"}
+              </Button>
+            )}
           </div>
           {latestRun ? (
             <AgentRunPanel
@@ -329,7 +337,7 @@ export default function ProjectDashboardPage() {
               taskTitles={taskTitles}
               memberNames={memberNames}
               taskAssignees={taskAssignees}
-              onApplyAction={(action) => applyAction.mutate(action)}
+              onApplyAction={can("task:update") ? (action) => applyAction.mutate(action) : undefined}
               applyingTaskId={applyAction.isPending && applyAction.variables ? nodeRawId(applyAction.variables.task_id) : null}
               previousRun={previousRun}
             />
@@ -341,10 +349,14 @@ export default function ProjectDashboardPage() {
                 <p className="text-muted-foreground mb-4">
                   Run the multi-agent analysis to get predictive risk scores and recommendations.
                 </p>
-                <Button onClick={() => runAnalysis.mutate()} disabled={runAnalysis.isPending}>
-                  <RefreshCw className={`mr-2 h-4 w-4 ${runAnalysis.isPending ? "animate-spin" : ""}`} />
-                  {runAnalysis.isPending ? "Analyzing…" : "Run Analysis Now"}
-                </Button>
+                {can("analytics:run") ? (
+                  <Button onClick={() => runAnalysis.mutate()} disabled={runAnalysis.isPending}>
+                    <RefreshCw className={`mr-2 h-4 w-4 ${runAnalysis.isPending ? "animate-spin" : ""}`} />
+                    {runAnalysis.isPending ? "Analyzing…" : "Run Analysis Now"}
+                  </Button>
+                ) : (
+                  <p className="text-sm text-muted-foreground">A project manager can run it.</p>
+                )}
               </CardContent>
             </Card>
           )}

@@ -12,6 +12,7 @@ from app.models.workload import WorkloadSnapshot, CommunicationEvent
 from app.models.risk import RiskScore, Recommendation, AgentRun
 from app.models.memory import OrganizationMemory, AuditLog, Notification
 from app.services.ai_client import ai_client
+from app.api.deps import require_permission
 from app.services.snapshot_builder import build_project_snapshot
 from app.core.exceptions import AIServiceError
 from app.schemas.analytics import (
@@ -312,7 +313,8 @@ async def get_intelligence_index(
     )
 
 
-@router.post("/projects/{project_id}/analyze", response_model=AgentRunResponse)
+@router.post("/projects/{project_id}/analyze", response_model=AgentRunResponse,
+             dependencies=[Depends(require_permission("analytics:run"))])
 async def trigger_analysis(
     project_id: UUID,
     db: AsyncSession = Depends(get_db),

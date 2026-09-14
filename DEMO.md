@@ -96,6 +96,15 @@ has no marker.) Click any card to open it:
 **Team tab** — the 13 people who carried sprint work. **Add teammate** creates a sign-in for a new
 person and puts them on the project, so work can be assigned to them.
 
+**Roles** — the role chosen in *Add teammate* is enforced. Add someone as **Viewer** and sign in as
+them: they can read everything (the board, discussions, AI Insights with its evidence and suggested
+moves), but there is no *New Task*, *Run Analysis*, *Apply* or *Add teammate*, cards don't drag, and
+the task dialog is read-only with no comment box. The API refuses too: an edit sent directly returns
+`403 — Your role (viewer) does not allow this`. A **developer** can create, edit and discuss tasks and
+apply suggested moves, but not run the analysis, delete tasks or manage the team. A **project
+manager** can do all of that and add teammates up to their own role, but never make anyone an admin
+or owner.
+
 **AI Insights → Run Analysis** — live result on this sprint:
 
 | Agent | Verdict | Output |
@@ -152,7 +161,7 @@ also talking about it.
 | Working now | Later |
 |---|---|
 | Register, sign in, organization-scoped data | Meeting and communication intelligence |
-| Create projects; **add teammates** | Fine-grained role permissions |
+| Create projects; **add teammates with a role that is enforced** (viewer, developer, project manager) | Per-project roles (a role applies across the organization) |
 | Tasks with **assignees**, points, due dates, drag-and-drop board | Notifications, real-time presence |
 | **Dependencies** on the board: "Blocked by" markers, add/remove, circular chains refused | Editing or deleting comments |
 | **Discussion** on every task, with real authors | LLM narration (works with a Groq key; not needed for the demo) |
@@ -178,6 +187,11 @@ None of these showed up with the invented seed data:
 - **Any signed-in user could delete any dependency** if they had its id, even in another organization.
 - **Imported discussions could read out of order.** Timestamps had one-second resolution on SQLite, and
   the importer posts 71 comments in a few seconds. Timestamps now carry microseconds.
+- **Roles were decorative.** The Team tab let you pick Viewer or Developer, but the API never checked
+  it: a viewer could delete tasks, add people or run the analysis. Every change is now checked against
+  the caller's role, and nobody can grant a role above their own.
+- **A project member's role could be changed, or the member removed, from another organization**
+  by anyone who knew the ids.
 
 ## 6. Known limitations to mention if asked
 

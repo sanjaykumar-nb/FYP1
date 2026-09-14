@@ -15,6 +15,9 @@ from app.core.security import (
 from app.models.user import User
 from app.models.organization import Organization
 from app.models.role import Role, UserRole
+from app.api.deps import CurrentRole, get_current_role
+from app.core.permissions import default_roles
+from app.schemas.auth import MeResponse
 from app.schemas.auth import (
     Token,
     LoginRequest,
@@ -59,32 +62,7 @@ async def register(
     await db.flush()
     
     # Create default roles
-    roles = [
-        Role(organization_id=org.id, name="owner", permissions=["*"]),
-        Role(organization_id=org.id, name="admin", permissions=[
-            "organization:read", "organization:update", "organization:delete",
-            "project:create", "project:read", "project:update", "project:delete",
-            "task:create", "task:read", "task:update", "task:delete",
-            "member:invite", "member:remove", "member:update_role",
-            "analytics:read", "settings:read", "settings:update",
-        ]),
-        Role(organization_id=org.id, name="project_manager", permissions=[
-            "project:read", "project:update",
-            "task:create", "task:read", "task:update", "task:delete",
-            "member:invite", "member:update_role",
-            "analytics:read", "meeting:create", "meeting:read", "meeting:update",
-        ]),
-        Role(organization_id=org.id, name="developer", permissions=[
-            "project:read",
-            "task:create", "task:read", "task:update",
-            "meeting:read",
-        ]),
-        Role(organization_id=org.id, name="viewer", permissions=[
-            "project:read",
-            "task:read",
-            "meeting:read",
-        ]),
-    ]
+    roles = default_roles(org.id)
     db.add_all(roles)
     await db.flush()
     
@@ -183,11 +161,17 @@ async def refresh_token(
     return Token(access_token=new_access_token, refresh_token=new_refresh_token)
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me", response_model=MeResponse)
 async def get_current_user_info(
     current_user: User = Depends(get_current_user),
+    role: CurrentRole = Depends(get_current_role),
 ):
-    return current_user
+    # The role lets the UI hide what this person cannot do; the API still enforces it.
+    return MeResponse(
+        **UserResponse.model_validate(current_user).model_dump(),
+        role=role.name,
+        permissions=role.permissions,
+    )
 
 
 @router.patch("/me", response_model=UserResponse)

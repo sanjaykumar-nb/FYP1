@@ -3,16 +3,7 @@ from uuid import uuid4
 import pytest
 from httpx import AsyncClient
 
-from app.models.role import Role
-
 pytestmark = pytest.mark.mvp
-
-
-async def _create_role(db_session, org, name="developer"):
-    role = Role(organization_id=org.id, name=name, permissions=[])
-    db_session.add(role)
-    await db_session.commit()
-    return role
 
 
 def _member(email="dev@example.com", role="developer"):
@@ -21,7 +12,6 @@ def _member(email="dev@example.com", role="developer"):
 
 class TestOrganizationMembers:
     async def test_added_member_can_sign_in(self, client: AsyncClient, auth_headers, test_org, db_session):
-        await _create_role(db_session, test_org)
 
         response = await client.post(
             f"/api/v1/organizations/{test_org.id}/members", headers=auth_headers, json=_member()
@@ -35,7 +25,6 @@ class TestOrganizationMembers:
         assert login.status_code == 200
 
     async def test_duplicate_email_rejected(self, client: AsyncClient, auth_headers, test_org, db_session):
-        await _create_role(db_session, test_org)
         url = f"/api/v1/organizations/{test_org.id}/members"
         assert (await client.post(url, headers=auth_headers, json=_member())).status_code == 201
         assert (await client.post(url, headers=auth_headers, json=_member())).status_code == 409
@@ -57,7 +46,6 @@ class TestProjectMembers:
     async def test_add_then_list_members_with_roles(
         self, client: AsyncClient, auth_headers, test_org, test_project, db_session
     ):
-        await _create_role(db_session, test_org)
         created = await client.post(
             f"/api/v1/organizations/{test_org.id}/members", headers=auth_headers, json=_member()
         )

@@ -8,6 +8,7 @@ import { DragDropContext, Droppable, type DropResult } from "@hello-pangea/dnd"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
+import { usePermissions } from "@/hooks/use-permissions"
 import { api } from "@/lib/api"
 import { TASK_STATUSES, type Member, type PaginatedResponse, type Task, type TaskDependency, type TaskStatus } from "@/types"
 import { TaskCard } from "@/components/tasks/task-card"
@@ -17,6 +18,7 @@ export default function TaskBoardPage() {
   const params = useParams()
   const projectId = params.id as string
   const queryClient = useQueryClient()
+  const { can } = usePermissions()
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined)
@@ -123,10 +125,12 @@ export default function TaskBoardPage() {
           </Link>
           <h1 className="text-3xl font-bold tracking-tight">Task Board</h1>
         </div>
-        <Button onClick={() => openNewTask("backlog")}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Task
-        </Button>
+        {can("task:create") && (
+          <Button onClick={() => openNewTask("backlog")}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Task
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -158,16 +162,19 @@ export default function TaskBoardPage() {
                         onClick={() => openEditTask(task)}
                         assigneeName={task.assignee_id ? memberNames.get(task.assignee_id) : null}
                         openBlockers={openBlockers.get(task.id)}
+                        dragDisabled={!can("task:update")}
                       />
                     ))}
                     {provided.placeholder}
-                    <button
-                      onClick={() => openNewTask(value)}
-                      className="w-full text-xs text-muted-foreground hover:text-foreground py-1.5 flex items-center justify-center gap-1 rounded border border-dashed border-border hover:border-foreground/30 transition-colors"
-                    >
-                      <Plus className="h-3 w-3" />
-                      Add task
-                    </button>
+                    {can("task:create") && (
+                      <button
+                        onClick={() => openNewTask(value)}
+                        className="w-full text-xs text-muted-foreground hover:text-foreground py-1.5 flex items-center justify-center gap-1 rounded border border-dashed border-border hover:border-foreground/30 transition-colors"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Add task
+                      </button>
+                    )}
                   </div>
                 )}
               </Droppable>

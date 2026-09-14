@@ -31,6 +31,7 @@ export interface Member {
   email: string
   full_name: string | null
   role?: string
+  permissions?: string[]
 }
 
 export type TaskStatus = "backlog" | "planned" | "in_progress" | "blocked" | "review" | "done"

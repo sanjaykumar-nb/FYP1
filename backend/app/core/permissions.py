@@ -1,93 +1,68 @@
-from functools import wraps
-from typing import Callable
-from fastapi import Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from app.core.security import get_user_id_from_token, get_org_id_from_token
-from app.database import get_db
-from app.models.role import Role, UserRole
-from app.models.user import User
+"""Role-based permission policy.
 
+The built-in roles and what each may do are defined here, once: registration
+seeds an organization's roles from PERMISSIONS, and app.api.deps.require_permission
+checks requests against it. A custom role (created per organization) falls back to
+the permission list stored on its Role row.
 
-# Permission definitions
-PERMISSIONS = {
+Roles are organization-wide — a person's role applies to every project in the
+organization. Reads are gated by organization membership; every endpoint that
+changes state names the permission it needs.
+"""
+
+from uuid import UUID
+
+from app.models.role import Role
+
+PERMISSIONS: dict[str, list[str]] = {
     "owner": ["*"],
     "admin": [
         "organization:read", "organization:update", "organization:delete",
         "project:create", "project:read", "project:update", "project:delete",
         "task:create", "task:read", "task:update", "task:delete",
         "member:invite", "member:remove", "member:update_role",
-        "analytics:read", "settings:read", "settings:update",
+        "analytics:read", "analytics:run", "settings:read", "settings:update",
+        "meeting:create", "meeting:read", "meeting:update",
     ],
     "project_manager": [
         "project:read", "project:update",
         "task:create", "task:read", "task:update", "task:delete",
         "member:invite", "member:update_role",
-        "analytics:read", "meeting:create", "meeting:read", "meeting:update",
+        "analytics:read", "analytics:run",
+        "meeting:create", "meeting:read", "meeting:update",
     ],
     "developer": [
         "project:read",
         "task:create", "task:read", "task:update",
-        "meeting:read",
+        "analytics:read", "meeting:read",
     ],
     "viewer": [
-        "project:read",
-        "task:read",
-        "meeting:read",
+        "project:read", "task:read", "analytics:read", "meeting:read",
     ],
 }
 
+# Nobody may grant a role ranked above their own.
+ROLE_RANK = {"viewer": 0, "developer": 1, "project_manager": 2, "admin": 3, "owner": 4}
 
-def has_permission(user_role: str, permission: str) -> bool:
-    role_permissions = PERMISSIONS.get(user_role, [])
-    return "*" in role_permissions or permission in role_permissions
-
-
-async def get_current_user_role(
-    project_id: str,
-    db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_user_id_from_token),
-    org_id: str = Depends(get_org_id_from_token),
-) -> str:
-    # Check user role for project
-    result = await db.execute(
-        select(UserRole.role_id)
-        .where(UserRole.user_id == user_id)
-        .where(UserRole.organization_id == org_id)
-        .where(UserRole.project_id == project_id)
-    )
-    user_role_id = result.scalar_one_or_none()
-    
-    if user_role_id:
-        role_result = await db.execute(select(Role).where(Role.id == user_role_id))
-        role = role_result.scalar_one_or_none()
-        if role:
-            return role.name
-    
-    # Check org-level role
-    result = await db.execute(
-        select(UserRole.role_id)
-        .where(UserRole.user_id == user_id)
-        .where(UserRole.organization_id == org_id)
-        .where(UserRole.project_id.is_(None))
-    )
-    user_role_id = result.scalar_one_or_none()
-    
-    if user_role_id:
-        role_result = await db.execute(select(Role).where(Role.id == user_role_id))
-        role = role_result.scalar_one_or_none()
-        if role:
-            return role.name
-    
-    return "viewer"
+# Someone with no role assignment gets the least privilege.
+DEFAULT_ROLE = "viewer"
 
 
-def require_permission(permission: str):
-    def decorator(func: Callable):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            # This would need to be implemented with proper dependency injection
-            # For now, we'll rely on the service layer for permission checks
-            return await func(*args, **kwargs)
-        return wrapper
-    return decorator
+def default_roles(organization_id: UUID) -> list[Role]:
+    return [
+        Role(organization_id=organization_id, name=name, permissions=list(granted))
+        for name, granted in PERMISSIONS.items()
+    ]
+
+
+def permissions_for(role_name: str, stored: list[str] | None = None) -> list[str]:
+    return PERMISSIONS.get(role_name, stored or [])
+
+
+def has_permission(granted: list[str], permission: str) -> bool:
+    return "*" in granted or permission in granted
+
+
+def can_grant(actor_role: str, role_name: str) -> bool:
+    """Custom roles have no rank: only an owner may grant them, and they grant nothing."""
+    return ROLE_RANK.get(actor_role, -1) >= ROLE_RANK.get(role_name, ROLE_RANK["owner"])

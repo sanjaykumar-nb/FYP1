@@ -9,6 +9,8 @@ from app.core.security import get_password_hash
 from app.models.organization import Organization
 from app.models.user import User
 from app.models.role import Role, UserRole
+from app.api.deps import CurrentRole, get_current_role, require_permission
+from app.core.permissions import can_grant, default_roles
 from app.models.team import Team, TeamMember
 from app.schemas.auth import (
     OrganizationCreate,
@@ -79,32 +81,7 @@ async def create_organization(
     await db.flush()
     
     # Create default roles
-    roles = [
-        Role(organization_id=org.id, name="owner", permissions=["*"]),
-        Role(organization_id=org.id, name="admin", permissions=[
-            "organization:read", "organization:update", "organization:delete",
-            "project:create", "project:read", "project:update", "project:delete",
-            "task:create", "task:read", "task:update", "task:delete",
-            "member:invite", "member:remove", "member:update_role",
-            "analytics:read", "settings:read", "settings:update",
-        ]),
-        Role(organization_id=org.id, name="project_manager", permissions=[
-            "project:read", "project:update",
-            "task:create", "task:read", "task:update", "task:delete",
-            "member:invite", "member:update_role",
-            "analytics:read", "meeting:create", "meeting:read", "meeting:update",
-        ]),
-        Role(organization_id=org.id, name="developer", permissions=[
-            "project:read",
-            "task:create", "task:read", "task:update",
-            "meeting:read",
-        ]),
-        Role(organization_id=org.id, name="viewer", permissions=[
-            "project:read",
-            "task:read",
-            "meeting:read",
-        ]),
-    ]
+    roles = default_roles(org.id)
     db.add_all(roles)
     await db.flush()
     
@@ -153,7 +130,8 @@ async def get_organization(
     return OrganizationResponse.model_validate(org)
 
 
-@router.patch("/{org_id}", response_model=OrganizationResponse)
+@router.patch("/{org_id}", response_model=OrganizationResponse,
+              dependencies=[Depends(require_permission("organization:update"))])
 async def update_organization(
     org_id: UUID,
     org_data: OrganizationUpdate,
@@ -184,12 +162,14 @@ async def update_organization(
     return OrganizationResponse.model_validate(org)
 
 
-@router.post("/{org_id}/members", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{org_id}/members", response_model=UserResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(require_permission("member:invite"))])
 async def add_member(
     org_id: UUID,
     member: MemberCreate,
     db: AsyncSession = Depends(get_db),
     current_org_id: UUID = Depends(get_current_org_id),
+    actor: CurrentRole = Depends(get_current_role),
 ):
     """Create a teammate's account inside this organization.
 
@@ -218,6 +198,11 @@ async def add_member(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Unknown role '{member.role}'",
+        )
+    if not can_grant(actor.name, role.name):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"A {actor.name.replace('_', ' ')} cannot grant the {role.name.replace('_', ' ')} role",
         )
 
     user = User(
@@ -270,7 +255,7 @@ async def list_members(
     )
 
 
-@router.patch("/{org_id}/members/{user_id}")
+@router.patch("/{org_id}/members/{user_id}", dependencies=[Depends(require_permission("member:update_role"))])
 async def update_member_role(
     org_id: UUID,
     user_id: UUID,
@@ -278,11 +263,29 @@ async def update_member_role(
     project_id: Optional[UUID] = None,
     db: AsyncSession = Depends(get_db),
     current_org_id: UUID = Depends(get_current_org_id),
+    actor: CurrentRole = Depends(get_current_role),
 ):
     if org_id != current_org_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied",
+        )
+
+    new_role = (
+        await db.execute(select(Role).where(Role.id == role_id, Role.organization_id == org_id))
+    ).scalar_one_or_none()
+    if not new_role:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unknown role")
+    held = await db.execute(
+        select(Role.name)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .where(UserRole.user_id == user_id, UserRole.organization_id == org_id)
+    )
+    # Neither grant a role above your own nor change the role of someone above you.
+    if not all(can_grant(actor.name, name) for name in [new_role.name, *held.scalars().all()]):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot grant a role above your own or change the role of someone above you",
         )
     
     # Find existing user role
@@ -311,7 +314,7 @@ async def update_member_role(
     return {"message": "Role updated"}
 
 
-@router.delete("/{org_id}/members/{user_id}")
+@router.delete("/{org_id}/members/{user_id}", dependencies=[Depends(require_permission("member:remove"))])
 async def remove_member(
     org_id: UUID,
     user_id: UUID,
@@ -379,7 +382,8 @@ async def list_teams(
     )
 
 
-@router.post("/{org_id}/teams", response_model=TeamResponse)
+@router.post("/{org_id}/teams", response_model=TeamResponse,
+             dependencies=[Depends(require_permission("member:invite"))])
 async def create_team(
     org_id: UUID,
     team_data: TeamCreate,
@@ -400,7 +404,7 @@ async def create_team(
     return TeamResponse.model_validate(team)
 
 
-@router.post("/{org_id}/teams/{team_id}/members")
+@router.post("/{org_id}/teams/{team_id}/members", dependencies=[Depends(require_permission("member:invite"))])
 async def add_team_member(
     org_id: UUID,
     team_id: UUID,
@@ -440,7 +444,8 @@ async def list_roles(
     return [RoleResponse.model_validate(role) for role in roles]
 
 
-@router.post("/{org_id}/roles", response_model=RoleResponse)
+@router.post("/{org_id}/roles", response_model=RoleResponse,
+             dependencies=[Depends(require_permission("settings:update"))])
 async def create_role(
     org_id: UUID,
     role_data: RoleCreate,
