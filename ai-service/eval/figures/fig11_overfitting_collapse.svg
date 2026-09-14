@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380pt" height="230pt" viewBox="0 0 380 230">
+<rect width="380" height="230" fill="#ffffff"/>
+
+<line x1="50" y1="190.0" x2="320" y2="190.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="44.0" y="192.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.00</text>
+<line x1="50" y1="147.5" x2="320" y2="147.5" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="44.0" y="150.3" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.25</text>
+<line x1="50" y1="105.0" x2="320" y2="105.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="44.0" y="107.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.50</text>
+<line x1="50" y1="62.5" x2="320" y2="62.5" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="44.0" y="65.3" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.75</text>
+<line x1="50" y1="20.0" x2="320" y2="20.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="44.0" y="22.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">1.00</text>
+<line x1="125.6" y1="51.3" x2="244.4" y2="89.2" stroke="#1a5490" stroke-width="1.8"/>
+<circle cx="125.6" cy="51.3" r="4" fill="#1a5490" stroke="#ffffff" stroke-width="1"/>
+<circle cx="244.4" cy="89.2" r="4" fill="#1a5490" stroke="#ffffff" stroke-width="1"/>
+<text x="119.6" y="54.3" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#1a5490" text-anchor="end" font-weight="bold" font-style="normal">0.816</text>
+<text x="250.4" y="92.2" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#1a5490" text-anchor="start" font-weight="bold" font-style="normal">0.593</text>
+<text x="250.4" y="102.2" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#5c5c5c" text-anchor="start" font-weight="normal" font-style="normal">F1</text>
+<line x1="125.6" y1="39.2" x2="244.4" y2="78.2" stroke="#d2691e" stroke-width="1.8"/>
+<circle cx="125.6" cy="39.2" r="4" fill="#d2691e" stroke="#ffffff" stroke-width="1"/>
+<circle cx="244.4" cy="78.2" r="4" fill="#d2691e" stroke="#ffffff" stroke-width="1"/>
+<text x="119.6" y="42.2" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#d2691e" text-anchor="end" font-weight="bold" font-style="normal">0.887</text>
+<text x="250.4" y="81.2" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#d2691e" text-anchor="start" font-weight="bold" font-style="normal">0.657</text>
+<text x="250.4" y="91.2" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#5c5c5c" text-anchor="start" font-weight="normal" font-style="normal">AUC</text>
+<text x="125.6" y="206.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Cross-validated (tuning)</text>
+<text x="244.4" y="206.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Held-out (unseen)</text>
+<line x1="50" y1="190" x2="320" y2="190" stroke="#5c5c5c" stroke-width="0.8"/>
+<line x1="50" y1="20" x2="50" y2="190" stroke="#5c5c5c" stroke-width="0.8"/>
+<g transform="translate(13,105.0) rotate(-90)"><text x="0.0" y="0.0" font-family="Helvetica, Arial, sans-serif" font-size="8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Score</text></g>
+<text x="190.0" y="14.0" font-family="Helvetica, Arial, sans-serif" font-size="8" fill="#5c5c5c" text-anchor="middle" font-weight="normal" font-style="italic">Tuned composite model: tuning vs. held-out</text>
+</svg>

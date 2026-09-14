@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260pt" height="210pt" viewBox="0 0 260 210">
+<rect width="260" height="210" fill="#ffffff"/>
+
+<defs></defs>
+<line x1="46" y1="164.0" x2="246" y2="164.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="166.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0%</text>
+<line x1="46" y1="131.5" x2="246" y2="131.5" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="134.3" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">26%</text>
+<line x1="46" y1="99.0" x2="246" y2="99.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="101.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">52%</text>
+<line x1="46" y1="66.5" x2="246" y2="66.5" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="69.3" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">79%</text>
+<line x1="46" y1="34.0" x2="246" y2="34.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="36.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">105%</text>
+<rect x="75.3" y="40.2" width="41.5" height="123.8" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="96.0" y="37.2" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">100%</text>
+<text x="96.0" y="177.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Stripped</text>
+<rect x="175.3" y="164.0" width="41.5" height="0.0" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="196.0" y="177.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Survived</text>
+<line x1="46" y1="164" x2="246" y2="164" stroke="#5c5c5c" stroke-width="0.8"/>
+<line x1="46" y1="34" x2="46" y2="164" stroke="#5c5c5c" stroke-width="0.8"/>
+<g transform="translate(13,99.0) rotate(-90)"><text x="0.0" y="0.0" font-family="Helvetica, Arial, sans-serif" font-size="8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Fraction of trials</text></g>
+<rect x="50" y="38" width="9" height="7" fill="#1a5490" stroke="#1a5490" stroke-width="0.5"/>
+<text x="63.0" y="43.5" font-family="Helvetica, Arial, sans-serif" font-size="7.3" fill="#1a1a1a" text-anchor="start" font-weight="normal" font-style="normal">Trials</text>
+<text x="254.0" y="205.0" font-family="Helvetica, Arial, sans-serif" font-size="6.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="italic">n=200 synthetically fabricated evidence references</text>
+</svg>

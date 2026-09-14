@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340pt" height="210pt" viewBox="0 0 340 210">
+<rect width="340" height="210" fill="#ffffff"/>
+
+<defs></defs>
+<line x1="46" y1="164.0" x2="326" y2="164.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="166.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.0</text>
+<line x1="46" y1="131.5" x2="326" y2="131.5" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="134.3" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">15.8</text>
+<line x1="46" y1="99.0" x2="326" y2="99.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="101.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">31.6</text>
+<line x1="46" y1="66.5" x2="326" y2="66.5" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="69.3" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">47.4</text>
+<line x1="46" y1="34.0" x2="326" y2="34.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="36.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">63.2</text>
+<rect x="66.8" y="141.5" width="28.4" height="22.5" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="81.0" y="138.5" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">11.0</text>
+<text x="81.0" y="177.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">p50</text>
+<rect x="136.8" y="136.4" width="28.4" height="27.6" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="151.0" y="133.4" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">13.4</text>
+<text x="151.0" y="177.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">p95</text>
+<rect x="206.8" y="139.6" width="28.4" height="24.4" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="221.0" y="136.6" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">11.9</text>
+<text x="221.0" y="177.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">mean</text>
+<rect x="276.8" y="60.0" width="28.4" height="104.0" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="291.0" y="57.0" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">50.6</text>
+<text x="291.0" y="177.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">max</text>
+<line x1="46" y1="164" x2="326" y2="164" stroke="#5c5c5c" stroke-width="0.8"/>
+<line x1="46" y1="34" x2="46" y2="164" stroke="#5c5c5c" stroke-width="0.8"/>
+<g transform="translate(13,99.0) rotate(-90)"><text x="0.0" y="0.0" font-family="Helvetica, Arial, sans-serif" font-size="8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Milliseconds</text></g>
+<rect x="50" y="38" width="9" height="7" fill="#1a5490" stroke="#1a5490" stroke-width="0.5"/>
+<text x="63.0" y="43.5" font-family="Helvetica, Arial, sans-serif" font-size="7.3" fill="#1a1a1a" text-anchor="start" font-weight="normal" font-style="normal">Latency (ms)</text>
+<text x="334.0" y="205.0" font-family="Helvetica, Arial, sans-serif" font-size="6.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="italic">deterministic path (build+metrics+select), 203 tasks, n=50 runs</text>
+</svg>

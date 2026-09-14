@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400pt" height="240pt" viewBox="0 0 400 240">
+<rect width="400" height="240" fill="#ffffff"/>
+
+<line x1="50" y1="204.0" x2="384" y2="204.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="44.0" y="206.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.00</text>
+<line x1="50" y1="157.0" x2="384" y2="157.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="44.0" y="159.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.25</text>
+<line x1="50" y1="110.0" x2="384" y2="110.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="44.0" y="112.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.50</text>
+<line x1="50" y1="63.0" x2="384" y2="63.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="44.0" y="65.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.75</text>
+<line x1="50" y1="16.0" x2="384" y2="16.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="44.0" y="18.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">1.00</text>
+<line x1="91.8" y1="121.6" x2="91.8" y2="75.1" stroke="#1a5490" stroke-width="1.6"/>
+<line x1="85.8" y1="121.6" x2="97.8" y2="121.6" stroke="#1a5490" stroke-width="1.4"/>
+<line x1="85.8" y1="75.1" x2="97.8" y2="75.1" stroke="#1a5490" stroke-width="1.4"/>
+<circle cx="91.8" cy="100.2" r="4" fill="#d2691e" stroke="#ffffff" stroke-width="1"/>
+<text x="91.8" y="68.1" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">0.552</text>
+<text x="91.8" y="133.6" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#5c5c5c" text-anchor="middle" font-weight="normal" font-style="normal">[0.44, 0.69]</text>
+<text x="91.8" y="218.0" font-family="Helvetica, Arial, sans-serif" font-size="8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Precision</text>
+<line x1="175.2" y1="16.0" x2="175.2" y2="16.0" stroke="#1a5490" stroke-width="1.6"/>
+<line x1="169.2" y1="16.0" x2="181.2" y2="16.0" stroke="#1a5490" stroke-width="1.4"/>
+<line x1="169.2" y1="16.0" x2="181.2" y2="16.0" stroke="#1a5490" stroke-width="1.4"/>
+<circle cx="175.2" cy="16.0" r="4" fill="#d2691e" stroke="#ffffff" stroke-width="1"/>
+<text x="175.2" y="9.0" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.000</text>
+<text x="175.2" y="28.0" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#5c5c5c" text-anchor="middle" font-weight="italic" font-style="normal">degenerate (=1.0)</text>
+<text x="175.2" y="218.0" font-family="Helvetica, Arial, sans-serif" font-size="8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Recall</text>
+<line x1="258.8" y1="89.4" x2="258.8" y2="51.0" stroke="#1a5490" stroke-width="1.6"/>
+<line x1="252.8" y1="89.4" x2="264.8" y2="89.4" stroke="#1a5490" stroke-width="1.4"/>
+<line x1="252.8" y1="51.0" x2="264.8" y2="51.0" stroke="#1a5490" stroke-width="1.4"/>
+<circle cx="258.8" cy="70.2" r="4" fill="#d2691e" stroke="#ffffff" stroke-width="1"/>
+<text x="258.8" y="44.0" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">0.712</text>
+<text x="258.8" y="101.4" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#5c5c5c" text-anchor="middle" font-weight="normal" font-style="normal">[0.61, 0.81]</text>
+<text x="258.8" y="218.0" font-family="Helvetica, Arial, sans-serif" font-size="8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">F1</text>
+<line x1="342.2" y1="106.8" x2="342.2" y2="68.9" stroke="#1a5490" stroke-width="1.6"/>
+<line x1="336.2" y1="106.8" x2="348.2" y2="106.8" stroke="#1a5490" stroke-width="1.4"/>
+<line x1="336.2" y1="68.9" x2="348.2" y2="68.9" stroke="#1a5490" stroke-width="1.4"/>
+<circle cx="342.2" cy="90.5" r="4" fill="#d2691e" stroke="#ffffff" stroke-width="1"/>
+<text x="342.2" y="61.9" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">0.604</text>
+<text x="342.2" y="118.8" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#5c5c5c" text-anchor="middle" font-weight="normal" font-style="normal">[0.52, 0.72]</text>
+<text x="342.2" y="218.0" font-family="Helvetica, Arial, sans-serif" font-size="8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Accuracy</text>
+<line x1="50" y1="204" x2="384" y2="204" stroke="#5c5c5c" stroke-width="0.8"/>
+<line x1="50" y1="16" x2="50" y2="204" stroke="#5c5c5c" stroke-width="0.8"/>
+<text x="394.0" y="236.0" font-family="Helvetica, Arial, sans-serif" font-size="6.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="italic">cluster bootstrap by project, n=2000 resamples, 95% CI</text>
+</svg>

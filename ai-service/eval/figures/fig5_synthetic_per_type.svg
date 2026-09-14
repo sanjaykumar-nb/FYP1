@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="516pt" height="220pt" viewBox="0 0 516 220">
+<rect width="516" height="220" fill="#ffffff"/>
+
+<defs><pattern id="hatchA" width="4" height="4" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#6a4c93"/><line x1="0" y1="0" x2="0" y2="4" stroke="#ffffff" stroke-width="1.4"/></pattern></defs>
+<line x1="46" y1="174.0" x2="502" y2="174.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="176.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.00</text>
+<line x1="46" y1="139.0" x2="502" y2="139.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="141.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.26</text>
+<line x1="46" y1="104.0" x2="502" y2="104.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="106.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.53</text>
+<line x1="46" y1="69.0" x2="502" y2="69.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="71.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">0.79</text>
+<line x1="46" y1="34.0" x2="502" y2="34.0" stroke="#d8d8d8" stroke-width="0.5"/>
+<text x="40.0" y="36.8" font-family="Helvetica, Arial, sans-serif" font-size="7.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="normal">1.05</text>
+<rect x="58.5" y="40.7" width="15.7" height="133.3" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="66.3" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="76.2" y="40.7" width="15.7" height="133.3" fill="#d2691e" stroke="#d2691e" stroke-width="0.6" rx="1.5"/>
+<text x="84.0" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="93.8" y="40.7" width="15.7" height="133.3" fill="url(#hatchA)" stroke="#6a4c93" stroke-width="0.6" rx="1.5"/>
+<text x="101.7" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<text x="84.0" y="187.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Depend.</text>
+<rect x="134.5" y="40.7" width="15.7" height="133.3" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="142.3" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="152.2" y="40.7" width="15.7" height="133.3" fill="#d2691e" stroke="#d2691e" stroke-width="0.6" rx="1.5"/>
+<text x="160.0" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="169.8" y="40.7" width="15.7" height="133.3" fill="url(#hatchA)" stroke="#6a4c93" stroke-width="0.6" rx="1.5"/>
+<text x="177.7" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<text x="160.0" y="187.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Knowl.</text>
+<rect x="210.5" y="40.7" width="15.7" height="133.3" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="218.3" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="228.2" y="40.7" width="15.7" height="133.3" fill="#d2691e" stroke="#d2691e" stroke-width="0.6" rx="1.5"/>
+<text x="236.0" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="245.8" y="40.7" width="15.7" height="133.3" fill="url(#hatchA)" stroke="#6a4c93" stroke-width="0.6" rx="1.5"/>
+<text x="253.7" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<text x="236.0" y="187.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Workload</text>
+<rect x="286.5" y="40.7" width="15.7" height="133.3" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="294.3" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="304.2" y="40.7" width="15.7" height="133.3" fill="#d2691e" stroke="#d2691e" stroke-width="0.6" rx="1.5"/>
+<text x="312.0" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="321.8" y="40.7" width="15.7" height="133.3" fill="url(#hatchA)" stroke="#6a4c93" stroke-width="0.6" rx="1.5"/>
+<text x="329.7" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<text x="312.0" y="187.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Delay</text>
+<rect x="362.5" y="40.7" width="15.7" height="133.3" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="370.3" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="380.2" y="40.7" width="15.7" height="133.3" fill="#d2691e" stroke="#d2691e" stroke-width="0.6" rx="1.5"/>
+<text x="388.0" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="397.8" y="40.7" width="15.7" height="133.3" fill="url(#hatchA)" stroke="#6a4c93" stroke-width="0.6" rx="1.5"/>
+<text x="405.7" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<text x="388.0" y="187.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Silent</text>
+<rect x="438.5" y="40.7" width="15.7" height="133.3" fill="#1a5490" stroke="#1a5490" stroke-width="0.6" rx="1.5"/>
+<text x="446.3" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="456.2" y="40.7" width="15.7" height="133.3" fill="#d2691e" stroke="#d2691e" stroke-width="0.6" rx="1.5"/>
+<text x="464.0" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<rect x="473.8" y="40.7" width="15.7" height="133.3" fill="url(#hatchA)" stroke="#6a4c93" stroke-width="0.6" rx="1.5"/>
+<text x="481.7" y="37.7" font-family="Helvetica, Arial, sans-serif" font-size="6.8" fill="#1a1a1a" text-anchor="middle" font-weight="bold" font-style="normal">1.00</text>
+<text x="464.0" y="187.0" font-family="Helvetica, Arial, sans-serif" font-size="7.8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Coord.</text>
+<line x1="46" y1="174" x2="502" y2="174" stroke="#5c5c5c" stroke-width="0.8"/>
+<line x1="46" y1="34" x2="46" y2="174" stroke="#5c5c5c" stroke-width="0.8"/>
+<g transform="translate(13,104.0) rotate(-90)"><text x="0.0" y="0.0" font-family="Helvetica, Arial, sans-serif" font-size="8" fill="#1a1a1a" text-anchor="middle" font-weight="normal" font-style="normal">Score</text></g>
+<rect x="50" y="38" width="9" height="7" fill="#1a5490" stroke="#1a5490" stroke-width="0.5"/>
+<text x="63.0" y="43.5" font-family="Helvetica, Arial, sans-serif" font-size="7.3" fill="#1a1a1a" text-anchor="start" font-weight="normal" font-style="normal">Precision</text>
+<rect x="50" y="49" width="9" height="7" fill="#d2691e" stroke="#d2691e" stroke-width="0.5"/>
+<text x="63.0" y="54.5" font-family="Helvetica, Arial, sans-serif" font-size="7.3" fill="#1a1a1a" text-anchor="start" font-weight="normal" font-style="normal">Recall</text>
+<rect x="50" y="60" width="9" height="7" fill="url(#hatchA)" stroke="#6a4c93" stroke-width="0.5"/>
+<text x="63.0" y="65.5" font-family="Helvetica, Arial, sans-serif" font-size="7.3" fill="#1a1a1a" text-anchor="start" font-weight="normal" font-style="normal">F1</text>
+<text x="510.0" y="215.0" font-family="Helvetica, Arial, sans-serif" font-size="6.5" fill="#5c5c5c" text-anchor="end" font-weight="normal" font-style="italic">n=180 synthetic scenarios, 30 per risk type; deterministically injected ground truth</text>
+</svg>
