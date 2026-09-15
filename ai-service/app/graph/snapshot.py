@@ -37,6 +37,7 @@ class TaskSnapshot(BaseModel):
     reporter_id: Optional[UUID] = None
     milestone_id: Optional[UUID] = None
     parent_task_id: Optional[UUID] = None
+    component: Optional[str] = None  # the code area or module the task touches
     due_date: Optional[datetime] = None
     created_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None

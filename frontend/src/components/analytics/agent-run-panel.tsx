@@ -59,6 +59,11 @@ export function citationLabel(
     const name = memberNames.get(id)
     return name ? { label: name, title: name } : { label: "former member" }
   }
+  // Named components are "area:<name>"; a milestone standing in for one only has an id.
+  if (kind === "component" && id.startsWith("area:")) {
+    const name = id.slice("area:".length)
+    return { label: name, title: `Component: ${name}` }
+  }
   return { label: kind || nodeId, title: nodeId }
 }
 

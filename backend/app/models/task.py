@@ -39,6 +39,8 @@ class Task(BaseModel):
     )
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # The code area or module the task touches; drives the knowledge and coordination risks.
+    component: Mapped[str | None] = mapped_column(String(100), nullable=True)
     status: Mapped[str] = mapped_column(String(50), default="backlog", nullable=False, index=True)
     priority: Mapped[str] = mapped_column(String(20), default="medium", nullable=False)
     story_points: Mapped[int | None] = mapped_column(Integer, nullable=True)

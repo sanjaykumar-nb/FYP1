@@ -129,6 +129,8 @@ every number: [IEEE_PAPER_REPORT.md](IEEE_PAPER_REPORT.md).
   change; nobody can grant a role above their own
 - Projects with sprints (start and end dates, work done against time elapsed), health/risk scores,
   and a drag-and-drop Kanban board that filters by sprint
+- Task components (the code area a task touches), which drive the knowledge-concentration and
+  coordination risks
 - Task dependencies (with real multi-hop cycle detection), subtasks, comments
 - Real-time updates via WebSocket
 

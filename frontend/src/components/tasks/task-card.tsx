@@ -63,6 +63,7 @@ export function TaskCard({
               </span>
               <p className="text-sm font-medium flex-1">{task.title}</p>
             </div>
+            {task.component && <p className="pl-6 text-xs text-muted-foreground">{task.component}</p>}
             <div className="flex items-center justify-between flex-wrap gap-2 pl-6">
               <Badge className={PRIORITY_STYLES[task.priority] || ""} variant="outline">
                 {task.priority}

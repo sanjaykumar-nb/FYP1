@@ -38,7 +38,10 @@ async def get_db() -> AsyncSession:
 # an existing table, so a database created before them would fail on every query
 # that touches the table; each is added once, if missing. (The MVP has no Alembic
 # migrations yet; these belong there once it does.)
-_ADDED_COLUMNS = [("milestones", "start_date", "DATE")]
+_ADDED_COLUMNS = [
+    ("milestones", "start_date", "DATE"),
+    ("tasks", "component", "VARCHAR(100)"),
+]
 
 
 def _add_missing_columns(sync_conn) -> None:

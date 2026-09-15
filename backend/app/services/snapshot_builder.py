@@ -53,6 +53,7 @@ async def build_project_snapshot(db: AsyncSession, project: Project) -> dict:
         {
             "id": str(t.id),
             "title": t.title,
+            "component": t.component,
             "status": t.status,
             "priority": t.priority,
             "story_points": t.story_points,

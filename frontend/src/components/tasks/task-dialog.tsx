@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -32,6 +32,7 @@ const taskSchema = z.object({
   due_date: z.string().optional(),
   assignee_id: z.string().optional(),
   milestone_id: z.string().optional(),
+  component: z.string().max(100).optional(),
 })
 type TaskForm = z.infer<typeof taskSchema>
 
@@ -68,6 +69,18 @@ export function TaskDialog({
     enabled: open,
   })
 
+  // Components already used in the project, offered as suggestions so one area keeps one name.
+  const { data: projectTasks } = useQuery({
+    queryKey: ["tasks", projectId],
+    queryFn: () =>
+      api.get<PaginatedResponse<Task>>(`/projects/${projectId}/tasks`, { params: { page_size: 100 } }).then((res) => res.data),
+    enabled: open,
+  })
+  const knownComponents = useMemo(
+    () => Array.from(new Set((projectTasks?.items ?? []).map((t) => t.component).filter((c): c is string => !!c))).sort(),
+    [projectTasks]
+  )
+
   const { data: milestones } = useQuery({
     queryKey: ["milestones", projectId],
     queryFn: () =>
@@ -103,6 +116,7 @@ export function TaskDialog({
               due_date: task.due_date ? task.due_date.slice(0, 10) : "",
               assignee_id: task.assignee_id ?? "",
               milestone_id: task.milestone_id ?? "",
+              component: task.component ?? "",
             }
           : {
               title: "",
@@ -113,6 +127,7 @@ export function TaskDialog({
               due_date: "",
               assignee_id: "",
               milestone_id: defaultMilestoneId ?? "",
+              component: "",
             }
       )
     }
@@ -130,6 +145,7 @@ export function TaskDialog({
         // On edit, an empty choice must clear the assignee rather than leave it unchanged.
         assignee_id: data.assignee_id || (isEdit ? null : undefined),
         milestone_id: data.milestone_id || (isEdit ? null : undefined),
+        component: data.component?.trim() || (isEdit ? null : undefined),
       }
       return isEdit
         ? api.patch(`/projects/${projectId}/tasks/${task!.id}`, payload)
@@ -195,6 +211,20 @@ export function TaskDialog({
             {members && members.length === 0 && (
               <p className="text-xs text-muted-foreground">Add teammates from the project&apos;s Team tab to assign work.</p>
             )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="component">Component</Label>
+            <Input
+              id="component"
+              list="component-options"
+              placeholder="The code area or module, e.g. Scheduler"
+              {...register("component")}
+            />
+            <datalist id="component-options">
+              {knownComponents.map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
           </div>
           <div className="space-y-2">
             <Label htmlFor="milestone_id">Sprint</Label>

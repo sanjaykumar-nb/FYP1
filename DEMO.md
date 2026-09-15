@@ -181,6 +181,13 @@ pace 100% will still be open at the deadline"*, cites exactly the tasks you move
 **Re-plan before the deadline**. A sprint without a start date says so, since the analysis needs one
 to judge pace. Only roles that can update the project see the create and edit forms.
 
+**Components — what the knowledge risk is about.** Give tasks a **Component**: the code area they
+touch, with names already in use offered as suggestions. Set "Windows port" on two of contributor
+#3481's tasks and re-run the analysis. AI Insights reads *"1 component(s) have a single owner: Apache
+Mesos contributor #3481"*: knowledge concentration rises to high, citing that component and that
+person. Sprints never count as components, so moving work between sprints leaves these scores alone,
+and people whose work names no component are not reported as isolated.
+
 ## 4. What the prototype covers
 
 | Working now | Later |
@@ -224,9 +231,11 @@ None of these showed up with the invented seed data:
 
 - The **coordination** measure only links people through assigned work; someone who only reviews
   and comments looks unconnected. This is why reporters/commenters are not project members here.
-- **A sprint doubles as the "component"** the knowledge and coordination measures group work by. Splitting
-  work across sprints therefore changes those scores: moving three tasks into a new sprint raised both
-  from low to medium. Real component data (labels, code areas) would remove this coupling.
+- The **knowledge and coordination** measures need to know which area of the code each task touches:
+  set a task's **Component** for that. A sprint is never treated as one, so organising work into sprints
+  does not move those scores. A milestone without a start date still stands in when tasks name no
+  component, which is what the imported sprint relies on. With no component information at all,
+  coordination gives no verdict rather than calling everyone isolated.
 - Recall-first: the delay signal flags every unfinished sprint and some finished ones.
 - Only the deterministic path is demonstrated; the language-model narration is optional.
 

@@ -38,6 +38,11 @@ def node_id(kind: str, raw_id: UUID | str) -> str:
     return f"{kind}:{raw_id}"
 
 
+def component_key(label: str) -> str:
+    """Identity for a free-text component name, ignoring case and spacing."""
+    return " ".join(label.split()).lower()
+
+
 class ProjectGraph:
     """A knowledge graph over one project's state.
 
@@ -159,8 +164,11 @@ class GraphBuilder:
                 role=m.role,
             )
 
-        # A milestone stands in as the "component" a task touches. When richer
-        # component data exists (labels, code areas), this is where it plugs in.
+        # Components are the areas of knowledge a task touches (see _derive_knows_edges).
+        # A task's own `component` names one; failing that, an *unscheduled* milestone
+        # stands in for it. A scheduled milestone is a sprint, a time box rather than an
+        # area of knowledge, so it never does: splitting work across sprints must not
+        # change who appears to own what.
         for ms in sorted(snapshot.milestones, key=lambda x: str(x.id)):
             g.add_node(
                 node_id(MILESTONE, ms.id),
@@ -170,7 +178,8 @@ class GraphBuilder:
                 target_date=ms.target_date,
                 status=ms.status,
             )
-            g.add_node(node_id(COMPONENT, ms.id), kind=COMPONENT, name=ms.name)
+            if ms.start_date is None:
+                g.add_node(node_id(COMPONENT, ms.id), kind=COMPONENT, name=ms.name)
 
         for t in sorted(snapshot.tasks, key=lambda x: str(x.id)):
             tid = node_id(TASK, t.id)
@@ -195,12 +204,18 @@ class GraphBuilder:
                 rid = node_id(PERSON, t.reporter_id)
                 if g.has_node(rid):
                     g.add_edge(rid, tid, key=REPORTED, kind=REPORTED)
+            if t.component:
+                cid = node_id(COMPONENT, f"area:{component_key(t.component)}")
+                if not g.has_node(cid):
+                    g.add_node(cid, kind=COMPONENT, name=" ".join(t.component.split()))
+                g.add_edge(tid, cid, key=TOUCHES, kind=TOUCHES)
             if t.milestone_id is not None:
                 mid = node_id(MILESTONE, t.milestone_id)
-                cid = node_id(COMPONENT, t.milestone_id)
                 if g.has_node(mid):
                     g.add_edge(tid, mid, key=PART_OF, kind=PART_OF)
-                if g.has_node(cid):
+                # Only an unscheduled milestone exists as a component (see above).
+                cid = node_id(COMPONENT, t.milestone_id)
+                if not t.component and g.has_node(cid):
                     g.add_edge(tid, cid, key=TOUCHES, kind=TOUCHES)
             if t.parent_task_id is not None:
                 parent = node_id(TASK, t.parent_task_id)

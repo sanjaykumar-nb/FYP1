@@ -60,6 +60,8 @@ export interface Task {
   reporter_id: string
   title: string
   description: string | null
+  /** The code area or module the task touches. */
+  component?: string | null
   status: TaskStatus
   priority: TaskPriority
   story_points: number | null

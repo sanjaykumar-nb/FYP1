@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Literal, Optional
 from datetime import datetime
 from uuid import UUID
@@ -8,9 +8,20 @@ TaskStatus = Literal["backlog", "planned", "in_progress", "blocked", "review", "
 TaskPriority = Literal["low", "medium", "high", "critical"]
 
 
+def _clean_component(value: Optional[str]) -> Optional[str]:
+    """Blank means no component; inner spacing is normalised."""
+    return (" ".join(value.split()) or None) if value else None
+
+
 class TaskBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=500)
     description: Optional[str] = None
+    component: Optional[str] = Field(None, max_length=100)
+
+    @field_validator("component")
+    @classmethod
+    def _component(cls, value: Optional[str]) -> Optional[str]:
+        return _clean_component(value)
     status: TaskStatus = "backlog"
     priority: TaskPriority = "medium"
     story_points: Optional[int] = None
@@ -30,6 +41,12 @@ class TaskCreate(TaskBase):
 class TaskUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=500)
     description: Optional[str] = None
+    component: Optional[str] = Field(None, max_length=100)
+
+    @field_validator("component")
+    @classmethod
+    def _component(cls, value: Optional[str]) -> Optional[str]:
+        return _clean_component(value)
     status: Optional[TaskStatus] = None
     priority: Optional[TaskPriority] = None
     story_points: Optional[int] = None

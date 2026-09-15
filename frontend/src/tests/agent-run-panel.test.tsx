@@ -96,6 +96,13 @@ describe('citationLabel', () => {
     expect(citationLabel(`person:${PERSON}`, new Map(), new Map()).label).toBe('former member')
     expect(citationLabel(`task:${TASK}`, new Map([[TASK, 'Untracked chore']]), new Map()).label).toBe('Untracked chore')
   })
+
+  it('names a component by its area', () => {
+    expect(citationLabel('component:area:windows port', new Map(), new Map())).toEqual({
+      label: 'windows port',
+      title: 'Component: windows port',
+    })
+  })
 })
 
 const OTHER = '33333333-3333-3333-3333-333333333333'

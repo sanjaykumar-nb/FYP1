@@ -437,10 +437,15 @@ class GraphMetrics:
     # -- risk: coordination ----------------------------------------------
 
     def _coordination(self, graph: ProjectGraph) -> list[Finding]:
-        collab = graph.collaboration_graph()
-        people = graph.nodes_of(PERSON)
+        # Shared work context is judged through components, so only people with work in
+        # at least one component can be judged. Someone with no assigned work, or whose
+        # tasks name no component, is not evidence of a silo; idle members are the
+        # workload measure's concern. With no component data at all, nobody is judged.
+        known = {person for person, _ in graph.edges_of_kind(KNOWS)}
+        people = [p for p in graph.nodes_of(PERSON) if p in known]
         if len(people) < 3:
             return []
+        collab = graph.collaboration_graph().subgraph(people)
 
         components = [sorted(c) for c in nx.connected_components(collab)]
         components.sort()

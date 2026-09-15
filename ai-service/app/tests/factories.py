@@ -45,6 +45,7 @@ def task(
     milestone_label: Optional[str] = None,
     due_in_days: Optional[int] = None,
     priority: str = "medium",
+    component: Optional[str] = None,
 ) -> TaskSnapshot:
     return TaskSnapshot(
         id=uid(label),
@@ -54,6 +55,7 @@ def task(
         story_points=points,
         assignee_id=uid(assignee) if assignee else None,
         milestone_id=uid(milestone_label) if milestone_label else None,
+        component=component,
         due_date=NOW + timedelta(days=due_in_days) if due_in_days is not None else None,
     )
 
