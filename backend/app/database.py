@@ -1,3 +1,4 @@
+from sqlalchemy import inspect, text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from app.config import get_settings
@@ -33,9 +34,24 @@ async def get_db() -> AsyncSession:
             await session.close()
 
 
+# Nullable columns added after their table first shipped. create_all never alters
+# an existing table, so a database created before them would fail on every query
+# that touches the table; each is added once, if missing. (The MVP has no Alembic
+# migrations yet; these belong there once it does.)
+_ADDED_COLUMNS = [("milestones", "start_date", "DATE")]
+
+
+def _add_missing_columns(sync_conn) -> None:
+    inspector = inspect(sync_conn)
+    for table, column, ddl_type in _ADDED_COLUMNS:
+        if inspector.has_table(table) and column not in {c["name"] for c in inspector.get_columns(table)}:
+            sync_conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {ddl_type}"))
+
+
 async def init_db() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(_add_missing_columns)
 
 
 async def close_db() -> None:

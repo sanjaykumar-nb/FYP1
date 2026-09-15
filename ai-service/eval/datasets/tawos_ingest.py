@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import sqlite3
 import uuid
+from datetime import datetime
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator, Optional
@@ -32,6 +33,7 @@ from app.graph.snapshot import (
     CommentSnapshot,
     DependencySnapshot,
     MemberSnapshot,
+    MilestoneSnapshot,
     ProjectSnapshot,
     TaskSnapshot,
 )
@@ -63,10 +65,15 @@ class SprintCase:
     unresolved_fraction: float
     label_delayed: bool
     snapshot: ProjectSnapshot
+    as_of: Optional[str] = None  # when the snapshot was taken: sprint end, or the checkpoint
 
 
 def _uuid_for(label: str) -> uuid.UUID:
     return uuid.uuid5(_NAMESPACE, label)
+
+
+def _parse_ts(value: str) -> datetime:
+    return datetime.fromisoformat(value.replace("Z", "")[:19])
 
 
 def connect() -> sqlite3.Connection:
@@ -112,7 +119,7 @@ def _map_priority(raw: Optional[str]) -> str:
 def _eligible_sprints(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return conn.execute(
         """
-        SELECT s.id, s.jira_id, s.project_id, s.end_date, s.complete_date, p.project_key,
+        SELECT s.id, s.jira_id, s.project_id, s.start_date, s.end_date, s.complete_date, p.project_key,
                COUNT(i.id) as n_issues
         FROM sprint s
         JOIN project p ON p.id = s.project_id
@@ -125,26 +132,47 @@ def _eligible_sprints(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     ).fetchall()
 
 
-def build_sprint_cases(conn: sqlite3.Connection, limit: Optional[int] = None) -> Iterator[SprintCase]:
+def build_sprint_cases(
+    conn: sqlite3.Connection, limit: Optional[int] = None, checkpoint: Optional[float] = None
+) -> Iterator[SprintCase]:
+    """Yield one case per eligible sprint.
+
+    By default each snapshot is taken at sprint end. With `checkpoint` (e.g. 0.5)
+    it is taken that far through the sprint's start -> end window instead: only
+    issues created by then are in scope, only those resolved by then are done, and
+    the sprint becomes a milestone carrying its start and end dates, so the pace
+    signal can project it. The label is always the sprint's real outcome at its end.
+    """
     sprints = _eligible_sprints(conn)
     if limit:
         sprints = sprints[:limit]
 
     for sprint_row in sprints:
         sprint_end = sprint_row["end_date"] or sprint_row["complete_date"]
+        as_of, milestone_id = sprint_end, None
+        if checkpoint is not None:
+            start, end = _parse_ts(sprint_row["start_date"]), _parse_ts(sprint_end)
+            as_of = (start + (end - start) * checkpoint).strftime("%Y-%m-%d %H:%M:%S")
+            milestone_id = _uuid_for(f"sprint:{sprint_row['id']}")
 
         issues = conn.execute("SELECT * FROM issue WHERE sprint_id = ?", (sprint_row["id"],)).fetchall()
-        issue_ids = {row["id"] for row in issues}
+        issue_ids: set[int] = set()
 
         members_seen: dict[int, MemberSnapshot] = {}
         tasks: list[TaskSnapshot] = []
         n_unresolved_by_end = 0
 
         for row in issues:
-            # Reconstruct state AS OF sprint_end — not as of today's dump.
+            # The label is always the sprint's real outcome at its end.
             resolved_by_end = bool(row["resolution_date"]) and row["resolution_date"] <= sprint_end
             if not resolved_by_end:
                 n_unresolved_by_end += 1
+
+            # Reconstruct state AS OF the snapshot moment — not as of today's dump.
+            if checkpoint is not None and row["creation_date"] and row["creation_date"] > as_of:
+                continue  # not created yet, so not yet part of the sprint
+            resolved_by_as_of = bool(row["resolution_date"]) and row["resolution_date"] <= as_of
+            issue_ids.add(row["id"])
 
             assignee_id, reporter_id = row["assignee_id"], row["reporter_id"]
             for uid in (assignee_id, reporter_id):
@@ -154,14 +182,15 @@ def build_sprint_cases(conn: sqlite3.Connection, limit: Optional[int] = None) ->
             tasks.append(TaskSnapshot(
                 id=_uuid_for(f"issue:{row['id']}"),
                 title=row["issue_key"] or f"issue-{row['id']}",
-                status="done" if resolved_by_end else _map_status(row["status"]),
+                status="done" if resolved_by_as_of else _map_status(row["status"]),
                 priority=_map_priority(row["priority"]),
                 story_points=int(row["story_point"]) if row["story_point"] else None,
                 assignee_id=_uuid_for(f"user:{assignee_id}") if assignee_id else None,
                 reporter_id=_uuid_for(f"user:{reporter_id}") if reporter_id else None,
+                milestone_id=milestone_id,
                 due_date=sprint_end,  # the sprint's own boundary is the implicit deadline
                 created_at=row["creation_date"],
-                completed_at=row["resolution_date"] if resolved_by_end else None,
+                completed_at=row["resolution_date"] if resolved_by_as_of else None,
             ))
 
         deps = []
@@ -184,8 +213,8 @@ def build_sprint_cases(conn: sqlite3.Connection, limit: Optional[int] = None) ->
         if issue_ids:
             placeholders = ",".join("?" * len(issue_ids))
             for c in conn.execute(f"SELECT * FROM comment WHERE issue_id IN ({placeholders})", list(issue_ids)):
-                # Comments made after sprint_end didn't exist yet at that point.
-                if c["author_id"] is None or not c["creation_date"] or c["creation_date"] > sprint_end:
+                # Comments made after the snapshot moment didn't exist yet.
+                if c["author_id"] is None or not c["creation_date"] or c["creation_date"] > as_of:
                     continue
                 comments.append(CommentSnapshot(
                     task_id=_uuid_for(f"issue:{c['issue_id']}"),
@@ -202,11 +231,17 @@ def build_sprint_cases(conn: sqlite3.Connection, limit: Optional[int] = None) ->
             n_issues=len(issues),
             unresolved_fraction=round(unresolved_fraction, 4),
             label_delayed=unresolved_fraction >= SPRINT_DELAY_THRESHOLD,
+            as_of=as_of,
             snapshot=ProjectSnapshot(
                 project_id=_uuid_for(f"project:{sprint_row['project_id']}:sprint:{sprint_row['id']}"),
                 name=f"{sprint_row['project_key']} sprint {sprint_row['jira_id']}",
                 members=list(members_seen.values()),
-                milestones=[],
+                milestones=[MilestoneSnapshot(
+                    id=milestone_id,
+                    name=f"{sprint_row['project_key']} sprint {sprint_row['jira_id']}",
+                    start_date=sprint_row["start_date"],
+                    target_date=sprint_end,
+                )] if milestone_id else [],
                 tasks=tasks,
                 dependencies=deps,
                 comments=comments,

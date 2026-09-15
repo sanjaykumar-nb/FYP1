@@ -1,0 +1,402 @@
+{
+  "pre_registered": {
+    "checkpoints": [
+      0.5,
+      0.75
+    ],
+    "primary_prediction": "delay risk != low at the checkpoint",
+    "secondary_prediction": "delay risk high or critical at the checkpoint",
+    "auc_score": "projected unfinished share at the deadline",
+    "pace_min_elapsed": 0.25,
+    "severity_cutoffs": "OVERDUE_RATIO_* (0.10 / 0.25 / 0.40), reused unchanged"
+  },
+  "checkpoints": {
+    "50%": {
+      "all": {
+        "n_sprints": 987,
+        "n_projects": 31,
+        "positive_rate": 0.5876,
+        "sprints_with_nothing_in_scope_yet": 2,
+        "pace_rule": {
+          "n": 987,
+          "tp": 555,
+          "fp": 267,
+          "fn": 25,
+          "tn": 140,
+          "precision": 0.6752,
+          "recall": 0.9569,
+          "f1": 0.7917,
+          "accuracy": 0.7042,
+          "specificity": 0.344,
+          "flag_rate": 0.8328
+        },
+        "pace_rule_high_or_worse": {
+          "n": 987,
+          "tp": 526,
+          "fp": 214,
+          "fn": 54,
+          "tn": 193,
+          "precision": 0.7108,
+          "recall": 0.9069,
+          "f1": 0.797,
+          "accuracy": 0.7285,
+          "specificity": 0.4742,
+          "flag_rate": 0.7497
+        },
+        "flag_every_sprint": {
+          "n": 987,
+          "tp": 580,
+          "fp": 407,
+          "fn": 0,
+          "tn": 0,
+          "precision": 0.5876,
+          "recall": 1.0,
+          "f1": 0.7403,
+          "accuracy": 0.5876,
+          "specificity": 0.0,
+          "flag_rate": 1.0
+        },
+        "auc_projected_unfinished": 0.8144,
+        "auc_open_share_baseline": 0.8057
+      },
+      "tuning": {
+        "n_sprints": 717,
+        "n_projects": 9,
+        "positive_rate": 0.6248,
+        "sprints_with_nothing_in_scope_yet": 0,
+        "pace_rule": {
+          "n": 717,
+          "tp": 436,
+          "fp": 181,
+          "fn": 12,
+          "tn": 88,
+          "precision": 0.7066,
+          "recall": 0.9732,
+          "f1": 0.8188,
+          "accuracy": 0.7308,
+          "specificity": 0.3271,
+          "flag_rate": 0.8605
+        },
+        "pace_rule_high_or_worse": {
+          "n": 717,
+          "tp": 414,
+          "fp": 147,
+          "fn": 34,
+          "tn": 122,
+          "precision": 0.738,
+          "recall": 0.9241,
+          "f1": 0.8206,
+          "accuracy": 0.7476,
+          "specificity": 0.4535,
+          "flag_rate": 0.7824
+        },
+        "flag_every_sprint": {
+          "n": 717,
+          "tp": 448,
+          "fp": 269,
+          "fn": 0,
+          "tn": 0,
+          "precision": 0.6248,
+          "recall": 1.0,
+          "f1": 0.7691,
+          "accuracy": 0.6248,
+          "specificity": 0.0,
+          "flag_rate": 1.0
+        },
+        "auc_projected_unfinished": 0.8189,
+        "auc_open_share_baseline": 0.8095
+      },
+      "holdout": {
+        "n_sprints": 270,
+        "n_projects": 22,
+        "positive_rate": 0.4889,
+        "sprints_with_nothing_in_scope_yet": 2,
+        "pace_rule": {
+          "n": 270,
+          "tp": 119,
+          "fp": 86,
+          "fn": 13,
+          "tn": 52,
+          "precision": 0.5805,
+          "recall": 0.9015,
+          "f1": 0.7062,
+          "accuracy": 0.6333,
+          "specificity": 0.3768,
+          "flag_rate": 0.7593
+        },
+        "pace_rule_high_or_worse": {
+          "n": 270,
+          "tp": 112,
+          "fp": 67,
+          "fn": 20,
+          "tn": 71,
+          "precision": 0.6257,
+          "recall": 0.8485,
+          "f1": 0.7203,
+          "accuracy": 0.6778,
+          "specificity": 0.5145,
+          "flag_rate": 0.663
+        },
+        "flag_every_sprint": {
+          "n": 270,
+          "tp": 132,
+          "fp": 138,
+          "fn": 0,
+          "tn": 0,
+          "precision": 0.4889,
+          "recall": 1.0,
+          "f1": 0.6567,
+          "accuracy": 0.4889,
+          "specificity": 0.0,
+          "flag_rate": 1.0
+        },
+        "auc_projected_unfinished": 0.7916,
+        "auc_open_share_baseline": 0.8018
+      },
+      "holdout_paired_pace_rule_vs_flag_every_sprint": {
+        "mcnemar": {
+          "a_right_b_wrong": 52,
+          "b_right_a_wrong": 13,
+          "p_value": 1e-06
+        },
+        "bootstrap": {
+          "f1_difference": 0.0495,
+          "ci_95": [
+            0.0061,
+            0.094
+          ],
+          "share_of_resamples_a_better": 0.9875
+        }
+      }
+    },
+    "75%": {
+      "all": {
+        "n_sprints": 987,
+        "n_projects": 31,
+        "positive_rate": 0.5876,
+        "sprints_with_nothing_in_scope_yet": 2,
+        "pace_rule": {
+          "n": 987,
+          "tp": 572,
+          "fp": 269,
+          "fn": 8,
+          "tn": 138,
+          "precision": 0.6801,
+          "recall": 0.9862,
+          "f1": 0.8051,
+          "accuracy": 0.7194,
+          "specificity": 0.3391,
+          "flag_rate": 0.8521
+        },
+        "pace_rule_high_or_worse": {
+          "n": 987,
+          "tp": 555,
+          "fp": 190,
+          "fn": 25,
+          "tn": 217,
+          "precision": 0.745,
+          "recall": 0.9569,
+          "f1": 0.8377,
+          "accuracy": 0.7822,
+          "specificity": 0.5332,
+          "flag_rate": 0.7548
+        },
+        "flag_every_sprint": {
+          "n": 987,
+          "tp": 580,
+          "fp": 407,
+          "fn": 0,
+          "tn": 0,
+          "precision": 0.5876,
+          "recall": 1.0,
+          "f1": 0.7403,
+          "accuracy": 0.5876,
+          "specificity": 0.0,
+          "flag_rate": 1.0
+        },
+        "auc_projected_unfinished": 0.8747,
+        "auc_open_share_baseline": 0.8775
+      },
+      "tuning": {
+        "n_sprints": 717,
+        "n_projects": 9,
+        "positive_rate": 0.6248,
+        "sprints_with_nothing_in_scope_yet": 0,
+        "pace_rule": {
+          "n": 717,
+          "tp": 445,
+          "fp": 192,
+          "fn": 3,
+          "tn": 77,
+          "precision": 0.6986,
+          "recall": 0.9933,
+          "f1": 0.8203,
+          "accuracy": 0.728,
+          "specificity": 0.2862,
+          "flag_rate": 0.8884
+        },
+        "pace_rule_high_or_worse": {
+          "n": 717,
+          "tp": 435,
+          "fp": 143,
+          "fn": 13,
+          "tn": 126,
+          "precision": 0.7526,
+          "recall": 0.971,
+          "f1": 0.848,
+          "accuracy": 0.7824,
+          "specificity": 0.4684,
+          "flag_rate": 0.8061
+        },
+        "flag_every_sprint": {
+          "n": 717,
+          "tp": 448,
+          "fp": 269,
+          "fn": 0,
+          "tn": 0,
+          "precision": 0.6248,
+          "recall": 1.0,
+          "f1": 0.7691,
+          "accuracy": 0.6248,
+          "specificity": 0.0,
+          "flag_rate": 1.0
+        },
+        "auc_projected_unfinished": 0.8704,
+        "auc_open_share_baseline": 0.8726
+      },
+      "holdout": {
+        "n_sprints": 270,
+        "n_projects": 22,
+        "positive_rate": 0.4889,
+        "sprints_with_nothing_in_scope_yet": 2,
+        "pace_rule": {
+          "n": 270,
+          "tp": 127,
+          "fp": 77,
+          "fn": 5,
+          "tn": 61,
+          "precision": 0.6225,
+          "recall": 0.9621,
+          "f1": 0.756,
+          "accuracy": 0.6963,
+          "specificity": 0.442,
+          "flag_rate": 0.7556
+        },
+        "pace_rule_high_or_worse": {
+          "n": 270,
+          "tp": 120,
+          "fp": 47,
+          "fn": 12,
+          "tn": 91,
+          "precision": 0.7186,
+          "recall": 0.9091,
+          "f1": 0.8027,
+          "accuracy": 0.7815,
+          "specificity": 0.6594,
+          "flag_rate": 0.6185
+        },
+        "flag_every_sprint": {
+          "n": 270,
+          "tp": 132,
+          "fp": 138,
+          "fn": 0,
+          "tn": 0,
+          "precision": 0.4889,
+          "recall": 1.0,
+          "f1": 0.6567,
+          "accuracy": 0.4889,
+          "specificity": 0.0,
+          "flag_rate": 1.0
+        },
+        "auc_projected_unfinished": 0.8744,
+        "auc_open_share_baseline": 0.8814
+      },
+      "holdout_paired_pace_rule_vs_flag_every_sprint": {
+        "mcnemar": {
+          "a_right_b_wrong": 61,
+          "b_right_a_wrong": 5,
+          "p_value": 0.0
+        },
+        "bootstrap": {
+          "f1_difference": 0.0993,
+          "ci_95": [
+            0.0485,
+            0.148
+          ],
+          "share_of_resamples_a_better": 1.0
+        }
+      }
+    }
+  },
+  "end_of_sprint_holdout": {
+    "rule": {
+      "n": 270,
+      "tp": 132,
+      "fp": 107,
+      "fn": 0,
+      "tn": 31,
+      "precision": 0.5523,
+      "recall": 1.0,
+      "f1": 0.7116,
+      "accuracy": 0.6037,
+      "specificity": 0.2246,
+      "flag_rate": 0.8852
+    },
+    "composite": {
+      "n": 270,
+      "tp": 75,
+      "fp": 46,
+      "fn": 57,
+      "tn": 92,
+      "precision": 0.6198,
+      "recall": 0.5682,
+      "f1": 0.5929,
+      "accuracy": 0.6185,
+      "specificity": 0.6667,
+      "flag_rate": 0.4481
+    },
+    "flag_every_sprint": {
+      "n": 270,
+      "tp": 132,
+      "fp": 138,
+      "fn": 0,
+      "tn": 0,
+      "precision": 0.4889,
+      "recall": 1.0,
+      "f1": 0.6567,
+      "accuracy": 0.4889,
+      "specificity": 0.0,
+      "flag_rate": 1.0
+    },
+    "paired_rule_vs_composite": {
+      "mcnemar": {
+        "a_right_b_wrong": 57,
+        "b_right_a_wrong": 61,
+        "p_value": 0.782556
+      },
+      "bootstrap": {
+        "f1_difference": 0.1187,
+        "ci_95": [
+          -0.0247,
+          0.2914
+        ],
+        "share_of_resamples_a_better": 0.943
+      }
+    },
+    "paired_rule_vs_flag_every_sprint": {
+      "mcnemar": {
+        "a_right_b_wrong": 31,
+        "b_right_a_wrong": 0,
+        "p_value": 0.0
+      },
+      "bootstrap": {
+        "f1_difference": 0.0549,
+        "ci_95": [
+          0.0295,
+          0.0802
+        ],
+        "share_of_resamples_a_better": 1.0
+      }
+    }
+  }
+}

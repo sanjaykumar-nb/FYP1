@@ -181,6 +181,7 @@ class ProjectResponse(ProjectBase):
 class MilestoneBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
+    start_date: Optional[datetime] = None
     target_date: datetime
 
 
@@ -191,6 +192,7 @@ class MilestoneCreate(MilestoneBase):
 class MilestoneUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
+    start_date: Optional[datetime] = None
     target_date: Optional[datetime] = None
     status: Optional[str] = None
     progress: Optional[float] = None

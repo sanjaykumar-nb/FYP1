@@ -232,8 +232,9 @@ python -m app.scripts.import_real_sprint app/scripts/fixtures/mesos_sprint_74.js
 It prints a login for the imported project. On the board you can open the sprint's real blocking
 links and discussions, and **AI Insights** shows every finding with the exact issues and people it
 rests on. The workload recommendation comes with reassignments you can apply in one click; run the
-analysis again and the scores that changed are marked. The full walkthrough, including what is real
-and what the replay derives, is in [DEMO.md](DEMO.md).
+analysis again and the scores that changed are marked. Add `--at 0.5` to replay the sprint as it stood
+halfway through: nothing is overdue yet, and AI Insights already warns that it is behind pace. The
+full walkthrough, including what is real and what the replay derives, is in [DEMO.md](DEMO.md).
 
 ## Running Tests
 

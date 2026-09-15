@@ -22,6 +22,7 @@ class MemberSnapshot(BaseModel):
 class MilestoneSnapshot(BaseModel):
     id: UUID
     name: str
+    start_date: Optional[datetime] = None  # with target_date, the schedule window the pace signal uses
     target_date: Optional[datetime] = None
     status: str = "planned"
 

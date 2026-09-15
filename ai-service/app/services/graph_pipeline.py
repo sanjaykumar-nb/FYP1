@@ -57,6 +57,14 @@ _REC_TEMPLATES: dict[str, dict] = {
 }
 
 
+# A finding's own metric can call for a more specific action than its risk type.
+_METRIC_REC_TEMPLATES: dict[str, dict] = {
+    "projected_unfinished": dict(type="rescope", title="Re-plan before the deadline",
+                                 reasoning="On its current pace the work will not finish in time; moving or "
+                                           "cutting scope now is cheaper than slipping at the end"),
+}
+
+
 def build_graph(snapshot: ProjectSnapshot) -> tuple[ProjectGraph, GraphAnalysis]:
     graph = GraphBuilder().build(snapshot)
     analysis = GraphMetrics().compute(graph)
@@ -174,7 +182,7 @@ def recommendation_output_from_graph(
             continue
         if finding.risk_type in seen_types:
             continue
-        template = _REC_TEMPLATES.get(finding.risk_type)
+        template = _METRIC_REC_TEMPLATES.get(finding.metric) or _REC_TEMPLATES.get(finding.risk_type)
         if not template:
             continue
         seen_types.add(finding.risk_type)

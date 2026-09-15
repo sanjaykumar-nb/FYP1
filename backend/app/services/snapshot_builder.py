@@ -40,6 +40,7 @@ async def build_project_snapshot(db: AsyncSession, project: Project) -> dict:
         {
             "id": str(m.id),
             "name": m.name,
+            "start_date": m.start_date.isoformat() if m.start_date else None,
             "target_date": m.target_date.isoformat() if m.target_date else None,
             "status": m.status,
         }

@@ -107,6 +107,9 @@ def inline(t: str) -> str:
     return t
 
 
+_HEADING_STYLES = {"h1", "h2", "h3"}
+
+
 class MarkdownPDF:
     def __init__(self, figure_map: dict[str, str] | None = None,
                  figures_dir: Path | None = None):
@@ -119,12 +122,13 @@ class MarkdownPDF:
                                     textColor=BLUE, alignment=TA_CENTER, spaceAfter=6),
             "sub": ParagraphStyle("s", fontName=SANS, fontSize=11.5, leading=15,
                                   textColor=MUTED, alignment=TA_CENTER),
+            # keepWithNext: a heading never sits alone at the foot of a page.
             "h1": ParagraphStyle("h1", fontName=HEAD, fontSize=15, leading=19,
-                                 textColor=BLUE, spaceBefore=17, spaceAfter=7),
+                                 textColor=BLUE, spaceBefore=17, spaceAfter=7, keepWithNext=1),
             "h2": ParagraphStyle("h2", fontName=HEAD, fontSize=11.6, leading=15,
-                                 textColor=INK, spaceBefore=12, spaceAfter=5),
+                                 textColor=INK, spaceBefore=12, spaceAfter=5, keepWithNext=1),
             "h3": ParagraphStyle("h3", fontName=HEAD, fontSize=10, leading=13,
-                                 textColor=MUTED, spaceBefore=9, spaceAfter=4),
+                                 textColor=MUTED, spaceBefore=9, spaceAfter=4, keepWithNext=1),
             "body": ParagraphStyle("b", fontName=BODY, fontSize=9.7, leading=13.5,
                                    textColor=INK, alignment=TA_JUSTIFY, spaceAfter=6),
             "li": ParagraphStyle("li", fontName=BODY, fontSize=9.7, leading=13.2,
@@ -142,17 +146,40 @@ class MarkdownPDF:
         }
 
     # ---------------------------------------------------------------- blocks
+    def _column_widths(self, rows) -> list[float]:
+        """Give every column at least its longest word, so no word or number is
+        split mid-token (\"Precisio / n\"); share the remaining width by how much
+        longer each column's full text is. Only when even the longest words cannot
+        fit side by side is every column scaled down."""
+        pad = 13  # left + right cell padding, plus slack for bold text
+        size = self.S["cell"].fontSize
+        mins, prefs = [], []
+        for c in range(len(rows[0])):
+            word = line = 0.0
+            for i, row in enumerate(rows):
+                font = HEAD if i == 0 else SANS
+                text = _clean(re.sub(r"[*`\[\]]", "", row[c]))
+                for w in text.split():
+                    word = max(word, pdfmetrics.stringWidth(w, font, size))
+                line = max(line, pdfmetrics.stringWidth(text, font, size))
+            mins.append(word + pad)
+            # Cap prose so one long column cannot squeeze the rest.
+            prefs.append(max(word, min(line, CONTENT_W * 0.6)) + pad)
+
+        spare = CONTENT_W - sum(mins)
+        if spare <= 0:
+            return [m / sum(mins) * CONTENT_W for m in mins]
+        want = [p - m for p, m in zip(prefs, mins)]
+        if sum(want) <= spare:
+            # Every cell fits on one line; spread what is left in proportion to width.
+            left = spare - sum(want)
+            return [p + left * p / sum(prefs) for p in prefs]
+        return [m + spare * w / sum(want) for m, w in zip(mins, want)]
+
     def _table(self, rows):
         ncol = max(len(r) for r in rows)
         rows = [r + [""] * (ncol - len(r)) for r in rows]
-        # Width by longest cell per column, clamped so one prose column cannot
-        # squeeze the rest to nothing.
-        widths = []
-        for c in range(ncol):
-            longest = max(len(re.sub(r"[*`\[\]]", "", r[c])) for r in rows)
-            widths.append(max(6, min(longest, 78)))
-        total = sum(widths)
-        widths = [w / total * CONTENT_W for w in widths]
+        widths = self._column_widths(rows)
 
         data = [[Paragraph(inline(c), self.S["hdr" if i == 0 else "cell"])
                  for c in row] for i, row in enumerate(rows)]
@@ -168,7 +195,7 @@ class MarkdownPDF:
             style.append(("BACKGROUND", (0, i), (-1, i), ZEBRA))
         t = Table(data, colWidths=widths, repeatRows=1, hAlign="LEFT")
         t.setStyle(TableStyle(style))
-        return KeepTogether(t) if len(rows) <= 8 else t
+        return t
 
     def _code(self, lines, lang):
         # Mermaid is diagram source: swap in the pre-rendered vector figure.
@@ -269,7 +296,20 @@ class MarkdownPDF:
                     if r is not st:
                         i += 1
                 i += 2
-                story += [self._table(rows), Spacer(1, 8)]; continue
+                table = self._table(rows)
+                if len(rows) <= 8:
+                    # Small tables never split across pages. A heading directly before one
+                    # travels in the same KeepTogether: keepWithNext cannot merge a heading
+                    # into a KeepTogether, and nesting KeepTogethers forces a page break
+                    # before every one (its wrap reports an effectively infinite height).
+                    prev = story[-1] if story else None
+                    if isinstance(prev, Paragraph) and prev.style.name in _HEADING_STYLES:
+                        story[-1] = KeepTogether([prev, table])
+                    else:
+                        story.append(KeepTogether(table))
+                else:
+                    story.append(table)
+                story.append(Spacer(1, 8)); continue
 
             if st.startswith(">"):
                 flush()

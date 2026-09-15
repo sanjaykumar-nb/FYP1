@@ -12,7 +12,7 @@ place — they are part of the method, not hidden in the code.
 from __future__ import annotations
 
 import statistics
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Optional
 
 import networkx as nx
@@ -23,6 +23,8 @@ from app.graph.builder import (
     COMMENTED_ON,
     COMPONENT,
     KNOWS,
+    MILESTONE,
+    PART_OF,
     PERSON,
     TASK,
     ProjectGraph,
@@ -47,6 +49,12 @@ OVERDUE_RATIO_CRITICAL = 0.40
 
 BLOCKED_RATIO_MEDIUM = 0.10
 BLOCKED_RATIO_HIGH = 0.20
+
+# A milestone's pace is extrapolated only once this share of its schedule has
+# passed; earlier, one slow first day would read as a failing sprint. Projected
+# unfinished work is graded with the OVERDUE_RATIO_* cut-offs, so the pace signal
+# adds no thresholds of its own.
+PACE_MIN_ELAPSED = 0.25
 
 # Ratio of the busiest person's points to the team mean.
 WORKLOAD_SKEW_MEDIUM = 1.5
@@ -127,6 +135,62 @@ class GraphAnalysis(BaseModel):
         return [f for f in self.findings if f.risk_type in wanted]
 
 
+def _utc(value) -> Optional[datetime]:
+    if value is None:
+        return None
+    if isinstance(value, date) and not isinstance(value, datetime):
+        value = datetime(value.year, value.month, value.day)
+    return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value
+
+
+class PaceProjection(BaseModel):
+    """Where a milestone's work will stand at its deadline if the pace so far holds."""
+
+    milestone_id: str
+    name: str
+    elapsed: float                # share of the start -> deadline window that has passed
+    completed: float              # share of the work done (story points, at least 1 per task)
+    projected_unfinished: float   # share still open at the deadline on this pace
+    open_task_ids: list[str] = Field(default_factory=list)
+
+
+def pace_projections(graph: ProjectGraph, now: datetime) -> list[PaceProjection]:
+    """Linear burn-down extrapolation per milestone: projected completion at the
+    deadline = completed / elapsed. Only milestones with a start date and a deadline
+    still ahead are projected (PACE_MIN_ELAPSED <= elapsed < 1); once the deadline
+    has passed, the overdue signal speaks for their unfinished work."""
+    tasks = graph.task_attrs()
+    work: dict[str, list[str]] = {}
+    for u, v in graph.edges_of_kind(PART_OF):
+        task, milestone = (u, v) if graph.attrs(v).get("kind") == MILESTONE else (v, u)
+        if task in tasks:
+            work.setdefault(milestone, []).append(task)
+
+    now = _utc(now)
+    out: list[PaceProjection] = []
+    for milestone in graph.nodes_of(MILESTONE):
+        attrs = graph.attrs(milestone)
+        start, deadline = _utc(attrs.get("start_date")), _utc(attrs.get("target_date"))
+        members = sorted(work.get(milestone, []))
+        if start is None or deadline is None or deadline <= start or not members:
+            continue
+        elapsed = (now - start) / (deadline - start)
+        if not PACE_MIN_ELAPSED <= elapsed < 1:
+            continue
+        weight = {t: max(tasks[t].get("points") or 0, 1) for t in members}
+        done = sum(w for t, w in weight.items() if tasks[t].get("is_done"))
+        completed = done / sum(weight.values())
+        out.append(PaceProjection(
+            milestone_id=milestone,
+            name=attrs.get("name") or milestone,
+            elapsed=round(elapsed, 4),
+            completed=round(completed, 4),
+            projected_unfinished=round(max(0.0, 1 - completed / elapsed), 4),
+            open_task_ids=[t for t in members if not tasks[t].get("is_done")],
+        ))
+    return out
+
+
 class GraphMetrics:
     """Computes all six risk scores from a ProjectGraph."""
 
@@ -202,6 +266,22 @@ class GraphMetrics:
                 metric="blocked_ratio",
                 value=round(b_ratio, 3),
                 node_ids=blocked[:20],
+            ))
+
+        # Early warning: behind pace before the deadline, while there is still time to act.
+        for pace in pace_projections(graph, self.now):
+            if pace.projected_unfinished < OVERDUE_RATIO_MEDIUM:
+                continue
+            out.append(Finding(
+                risk_type="delay",
+                severity=_level_from(pace.projected_unfinished, OVERDUE_RATIO_MEDIUM,
+                                     OVERDUE_RATIO_HIGH, OVERDUE_RATIO_CRITICAL),
+                title=(f"'{pace.name}' is {pace.elapsed:.0%} through its schedule with "
+                       f"{pace.completed:.0%} of its work done; at this pace "
+                       f"{pace.projected_unfinished:.0%} will still be open at the deadline"),
+                metric="projected_unfinished",
+                value=pace.projected_unfinished,
+                node_ids=pace.open_task_ids[:20],
             ))
         return out
 

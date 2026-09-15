@@ -166,6 +166,7 @@ class GraphBuilder:
                 node_id(MILESTONE, ms.id),
                 kind=MILESTONE,
                 name=ms.name,
+                start_date=ms.start_date,
                 target_date=ms.target_date,
                 status=ms.status,
             )

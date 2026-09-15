@@ -88,6 +88,8 @@ class Milestone(BaseModel):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # With target_date, the schedule window the AI service's pace (burn-down) warning uses.
+    start_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     target_date: Mapped[date] = mapped_column(Date, nullable=False)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     status: Mapped[str] = mapped_column(String(50), default="upcoming", nullable=False)

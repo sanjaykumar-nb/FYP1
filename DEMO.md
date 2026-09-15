@@ -156,6 +156,22 @@ hands, its row reads *Applied* or *Changed since this analysis* instead of offer
 Also worth saying: **silent members — low.** On this real team, the people doing the work were
 also talking about it.
 
+**Early warning — the same sprint, halfway through.** Replay the sprint as it stood at its midpoint:
+
+```bash
+python -m app.scripts.import_real_sprint app/scripts/fixtures/mesos_sprint_74.json --at 0.5
+```
+
+Only what existed then is imported: 25 of the 30 issues (6 of them resolved) and 52 comments. The
+deadline is a week away, so nothing is overdue, yet AI Insights already reads **delay: critical**:
+
+> *"'Mesosphere Sprint 74' is 55% through its schedule with 18% of its work done; at this pace 67%
+> will still be open at the deadline"*, with the recommendation **Re-plan before the deadline**.
+
+The real sprint ended with 20 of its 30 issues unfinished (67%). One sprint proves little on its own:
+the evaluation across 270 held-out sprints is in `METRICS_INFERENCE.md` §16 (AUC 0.79 halfway
+through). The schedule reads 55% rather than 50% because milestone dates are stored as whole days.
+
 ## 4. What the prototype covers
 
 | Working now | Later |
@@ -167,6 +183,7 @@ also talking about it.
 | **Discussion** on every task, with real authors | LLM narration (works with a Groq key; not needed for the demo) |
 | Run analysis; results persisted; dashboard and workspace reflect them; **every finding shows the tasks and people it rests on** | |
 | **Recommendations you can apply**: suggested reassignments, one-click Apply, the change marked on the next run | Suggested actions for delay, dependency and knowledge risks |
+| **Early warning before the deadline**: a behind-pace delay warning with a re-plan recommendation | Setting milestone start dates in the UI (the importer sets them) |
 
 ## 5. Found and fixed by testing on real data
 

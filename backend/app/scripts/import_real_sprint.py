@@ -26,9 +26,15 @@ How the history is replayed faithfully:
   * Only "Blocker" links are imported as dependencies: Jira's outward "blocks"
     has an unambiguous direction; other link types do not mean "blocks".
 
+Mid-sprint replay (--at 0.5): the same reconstruction, but as the sprint stood
+that far through. Only issues created by then are imported, done means resolved
+by then, and the replayed moment is placed at *now*, so the deadline is still
+ahead and the pace warning, not the overdue signal, is what can fire.
+
 Run with the backend (and AI service) up:
     cd backend
     python -m app.scripts.import_real_sprint app/scripts/fixtures/mesos_sprint_74.json
+    python -m app.scripts.import_real_sprint app/scripts/fixtures/mesos_sprint_74.json --at 0.5
 """
 
 from __future__ import annotations
@@ -63,17 +69,30 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("fixture", type=Path)
     ap.add_argument("--api", default="http://localhost:8000")
+    ap.add_argument("--at", type=float, default=None, metavar="FRACTION",
+                    help="replay the sprint as it stood this far through (e.g. 0.5) instead of at its end")
     args = ap.parse_args()
+    if args.at is not None and not 0 < args.at < 1:
+        sys.exit("--at must be between 0 and 1")
 
     fx = json.loads(args.fixture.read_text(encoding="utf-8"))
     sprint_start, sprint_end = parse(fx["sprint"]["start"]), parse(fx["sprint"]["end"])
-    shift = (datetime.now(timezone.utc) - timedelta(days=1)) - sprint_end
+    now = datetime.now(timezone.utc)
+    if args.at is None:
+        # The replayed moment is sprint end, placed at yesterday.
+        cutoff, moment = sprint_end, "sprint end"
+        shift = (now - timedelta(days=1)) - sprint_end
+    else:
+        # The replayed moment is part-way through, placed at now: the deadline is still ahead.
+        cutoff, moment = sprint_start + (sprint_end - sprint_start) * args.at, f"{args.at:.0%} through the sprint"
+        shift = now - cutoff
 
     def replayed(ts: datetime) -> str:
         return (ts + shift).isoformat()
 
-    issues = fx["issues"]
-    comments = [c for c in fx["comments"] if c["created"] and parse(c["created"]) <= sprint_end]
+    # Only what existed by the replayed moment: issues created by then, comments written by then.
+    issues = [i for i in fx["issues"] if not i.get("created") or parse(i["created"]) <= cutoff]
+    comments = [c for c in fx["comments"] if c["created"] and parse(c["created"]) <= cutoff]
     people = sorted(
         {p for i in issues for p in (i["assignee"], i["reporter"]) if p}
         | {c["author"] for c in comments if c["author"]}
@@ -112,7 +131,7 @@ def main() -> None:
         # analysed as a teammate with no work.
         check(http.delete(f"/projects/{pid}/members/{me['id']}", headers=auth(pm_email)))
         milestone = check(http.post(f"/projects/{pid}/milestones", headers=auth(pm_email), json={
-            "name": fx["sprint"]["name"], "target_date": replayed(sprint_end),
+            "name": fx["sprint"]["name"], "start_date": replayed(sprint_start), "target_date": replayed(sprint_end),
         }))
 
         # Jira records no sprint team, so the delivery team is the people who
@@ -138,7 +157,7 @@ def main() -> None:
         done = 0
         for issue in issues:
             resolved = parse(issue["resolved"])
-            status = "done" if resolved and resolved <= sprint_end else OPEN_STATUS.get(issue["status"], "in_progress")
+            status = "done" if resolved and resolved <= cutoff else OPEN_STATUS.get(issue["status"], "in_progress")
             done += status == "done"
             reporter = emails.get(issue["reporter"], pm_email)
             description = (issue.get("description") or "").strip()
@@ -157,10 +176,12 @@ def main() -> None:
                 "milestone_id": milestone["id"],
             }))
             task_ids[issue["tawos_id"]] = task["id"]
-        print(f"tasks: {len(issues)} ({done} resolved by sprint end, {len(issues) - done} still open)")
+        print(f"tasks: {len(issues)} ({done} resolved by {moment}, {len(issues) - done} still open)")
 
         deps = 0
         for link in fx["links"]:
+            if link["from"] not in task_ids or link["to"] not in task_ids:
+                continue  # one end was not created yet at the replayed moment
             if link["type"] == "Blocker" and link["direction"] == "OUTBOUND":
                 blocker, blocked = task_ids[link["from"]], task_ids[link["to"]]
                 check(http.post(f"/projects/{pid}/tasks/{blocked}/dependencies", headers=auth(pm_email),
@@ -170,11 +191,11 @@ def main() -> None:
 
         for c in comments:
             author = emails.get(c["author"])
-            if not author:
+            if not author or c["issue"] not in task_ids:
                 continue
             check(http.post(f"/projects/{pid}/tasks/{task_ids[c['issue']]}/comments", headers=auth(author),
                             json={"content": (c["text"] or "").strip() or "(comment had no plain text)"}))
-        print(f"comments: {len(comments)} written by sprint end ({len(fx['comments']) - len(comments)} later ones excluded)")
+        print(f"comments: {len(comments)} written by {moment} ({len(fx['comments']) - len(comments)} later ones excluded)")
 
         run = check(http.post(f"/analytics/projects/{pid}/analyze", headers=auth(pm_email)))
         out = run.get("coordinator_output") or {}

@@ -453,6 +453,7 @@ async def create_milestone(
         project_id=project_id,
         name=milestone_data.name,
         description=milestone_data.description,
+        start_date=milestone_data.start_date,
         target_date=milestone_data.target_date,
     )
     db.add(milestone)
