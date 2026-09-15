@@ -21,7 +21,7 @@ import { TaskDependencies } from "@/components/tasks/task-dependencies"
 import { toast } from "@/hooks/use-toast"
 import { usePermissions } from "@/hooks/use-permissions"
 import { api } from "@/lib/api"
-import { TASK_STATUSES, type Member, type PaginatedResponse, type Task, type TaskStatus } from "@/types"
+import { TASK_STATUSES, type Member, type Milestone, type PaginatedResponse, type Task, type TaskStatus } from "@/types"
 
 const taskSchema = z.object({
   title: z.string().min(1, "Title is required").max(500),
@@ -31,6 +31,7 @@ const taskSchema = z.object({
   story_points: z.string().optional(),
   due_date: z.string().optional(),
   assignee_id: z.string().optional(),
+  milestone_id: z.string().optional(),
 })
 type TaskForm = z.infer<typeof taskSchema>
 
@@ -43,12 +44,15 @@ export function TaskDialog({
   open,
   onOpenChange,
   defaultStatus,
+  defaultMilestoneId,
 }: {
   projectId: string
   task?: Task
   open: boolean
   onOpenChange: (open: boolean) => void
   defaultStatus?: TaskStatus
+  /** New tasks start in this sprint (the board's current sprint filter). */
+  defaultMilestoneId?: string
 }) {
   const queryClient = useQueryClient()
   const isEdit = !!task
@@ -60,6 +64,15 @@ export function TaskDialog({
     queryFn: () =>
       api
         .get<PaginatedResponse<Member>>(`/projects/${projectId}/members`, { params: { page_size: 100 } })
+        .then((res) => res.data.items),
+    enabled: open,
+  })
+
+  const { data: milestones } = useQuery({
+    queryKey: ["milestones", projectId],
+    queryFn: () =>
+      api
+        .get<PaginatedResponse<Milestone>>(`/projects/${projectId}/milestones`, { params: { page_size: 100 } })
         .then((res) => res.data.items),
     enabled: open,
   })
@@ -89,6 +102,7 @@ export function TaskDialog({
               story_points: task.story_points != null ? String(task.story_points) : "",
               due_date: task.due_date ? task.due_date.slice(0, 10) : "",
               assignee_id: task.assignee_id ?? "",
+              milestone_id: task.milestone_id ?? "",
             }
           : {
               title: "",
@@ -98,10 +112,11 @@ export function TaskDialog({
               story_points: "",
               due_date: "",
               assignee_id: "",
+              milestone_id: defaultMilestoneId ?? "",
             }
       )
     }
-  }, [open, task, defaultStatus, reset])
+  }, [open, task, defaultStatus, defaultMilestoneId, reset])
 
   const save = useMutation({
     mutationFn: (data: TaskForm) => {
@@ -114,6 +129,7 @@ export function TaskDialog({
         due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
         // On edit, an empty choice must clear the assignee rather than leave it unchanged.
         assignee_id: data.assignee_id || (isEdit ? null : undefined),
+        milestone_id: data.milestone_id || (isEdit ? null : undefined),
       }
       return isEdit
         ? api.patch(`/projects/${projectId}/tasks/${task!.id}`, payload)
@@ -179,6 +195,17 @@ export function TaskDialog({
             {members && members.length === 0 && (
               <p className="text-xs text-muted-foreground">Add teammates from the project&apos;s Team tab to assign work.</p>
             )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="milestone_id">Sprint</Label>
+            <select id="milestone_id" className={selectClass} {...register("milestone_id")}>
+              <option value="">No sprint</option>
+              {(milestones ?? []).map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

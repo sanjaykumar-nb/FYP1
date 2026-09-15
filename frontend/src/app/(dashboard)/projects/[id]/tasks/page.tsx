@@ -10,7 +10,15 @@ import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
 import { usePermissions } from "@/hooks/use-permissions"
 import { api } from "@/lib/api"
-import { TASK_STATUSES, type Member, type PaginatedResponse, type Task, type TaskDependency, type TaskStatus } from "@/types"
+import {
+  TASK_STATUSES,
+  type Member,
+  type Milestone,
+  type PaginatedResponse,
+  type Task,
+  type TaskDependency,
+  type TaskStatus,
+} from "@/types"
 import { TaskCard } from "@/components/tasks/task-card"
 import { TaskDialog } from "@/components/tasks/task-dialog"
 
@@ -44,6 +52,23 @@ export default function TaskBoardPage() {
 
   const tasks = data?.items ?? []
 
+  const { data: milestones } = useQuery({
+    queryKey: ["milestones", projectId],
+    queryFn: () =>
+      api
+        .get<PaginatedResponse<Milestone>>(`/projects/${projectId}/milestones`, { params: { page_size: 100 } })
+        .then((res) => res.data.items),
+  })
+  // "all", "none" (tasks in no sprint), or a milestone id.
+  const [sprintFilter, setSprintFilter] = useState("all")
+  const visibleTasks = useMemo(
+    () =>
+      sprintFilter === "all"
+        ? tasks
+        : tasks.filter((t) => (sprintFilter === "none" ? !t.milestone_id : t.milestone_id === sprintFilter)),
+    [tasks, sprintFilter]
+  )
+
   const { data: dependencies } = useQuery({
     queryKey: ["dependencies", projectId],
     queryFn: () => api.get<TaskDependency[]>(`/projects/${projectId}/dependencies`).then((res) => res.data),
@@ -69,14 +94,14 @@ export default function TaskBoardPage() {
       review: [],
       done: [],
     }
-    for (const task of tasks) {
+    for (const task of visibleTasks) {
       ;(byStatus[task.status] ?? byStatus.backlog).push(task)
     }
     for (const status of Object.keys(byStatus) as TaskStatus[]) {
       byStatus[status].sort((a, b) => a.position - b.position)
     }
     return byStatus
-  }, [tasks])
+  }, [visibleTasks])
 
   const moveTask = useMutation({
     mutationFn: ({ taskId, status, position }: { taskId: string; status: TaskStatus; position: number }) =>
@@ -125,12 +150,28 @@ export default function TaskBoardPage() {
           </Link>
           <h1 className="text-3xl font-bold tracking-tight">Task Board</h1>
         </div>
-        {can("task:create") && (
-          <Button onClick={() => openNewTask("backlog")}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Task
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <select
+            aria-label="Filter by sprint"
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+            value={sprintFilter}
+            onChange={(e) => setSprintFilter(e.target.value)}
+          >
+            <option value="all">All sprints</option>
+            {(milestones ?? []).map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+            <option value="none">No sprint</option>
+          </select>
+          {can("task:create") && (
+            <Button onClick={() => openNewTask("backlog")}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Task
+            </Button>
+          )}
+        </div>
       </div>
 
       {isLoading ? (
@@ -187,6 +228,7 @@ export default function TaskBoardPage() {
         projectId={projectId}
         task={editingTask}
         defaultStatus={newTaskStatus}
+        defaultMilestoneId={sprintFilter !== "all" && sprintFilter !== "none" ? sprintFilter : undefined}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
       />

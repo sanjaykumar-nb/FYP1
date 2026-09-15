@@ -34,6 +34,20 @@ export interface Member {
   permissions?: string[]
 }
 
+// A sprint or milestone. With a start date, the analysis can tell whether its work is on pace.
+export interface Milestone {
+  id: string
+  project_id: string
+  name: string
+  description: string | null
+  start_date: string | null
+  target_date: string
+  status: string
+  progress: number
+  completed_at: string | null
+  created_at: string
+}
+
 export type TaskStatus = "backlog" | "planned" | "in_progress" | "blocked" | "review" | "done"
 export type TaskPriority = "low" | "medium" | "high" | "critical"
 

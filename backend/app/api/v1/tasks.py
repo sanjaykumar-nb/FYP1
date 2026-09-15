@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, or_
 from sqlalchemy.orm import selectinload
 from app.api.deps import get_db, get_current_user_id, get_current_org_id, get_pagination_params, require_permission
-from app.models.project import Project
+from app.models.project import Milestone, Project
 from app.models.task import Task, TaskDependency, TaskComment
 from app.models.user import User
 from app.schemas.task import (
@@ -101,6 +101,8 @@ async def create_task(
             detail="Project not found",
         )
     
+    await _check_milestone(db, project_id, task_data.milestone_id)
+
     # Get max position for the status
     max_pos_result = await db.execute(
         select(func.max(Task.position)).where(
@@ -208,6 +210,8 @@ async def update_task(
             detail="Task not found",
         )
     
+    if "milestone_id" in task_data.model_fields_set:
+        await _check_milestone(db, task.project_id, task_data.milestone_id)
     for field, value in task_data.model_dump(exclude_unset=True).items():
         setattr(task, field, value)
     
@@ -282,6 +286,7 @@ async def move_task(
     
     # Update milestone if provided
     if move_data.milestone_id is not None:
+        await _check_milestone(db, task.project_id, move_data.milestone_id)
         task.milestone_id = move_data.milestone_id
     
     await db.commit()
@@ -464,6 +469,20 @@ async def remove_dependency(
 
     await db.delete(dep)
     await db.commit()
+
+
+async def _check_milestone(db: AsyncSession, project_id: UUID, milestone_id: Optional[UUID]) -> None:
+    """A task can only join a sprint of its own project."""
+    if milestone_id is None:
+        return
+    found = await db.execute(
+        select(Milestone.id).where(Milestone.id == milestone_id, Milestone.project_id == project_id)
+    )
+    if found.scalar_one_or_none() is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="That sprint is not part of this project",
+        )
 
 
 def _reaches(blocks: dict[UUID, set[UUID]], start: UUID, target: UUID) -> bool:

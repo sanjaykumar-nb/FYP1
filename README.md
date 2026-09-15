@@ -127,13 +127,16 @@ every number: [IEEE_PAPER_REPORT.md](IEEE_PAPER_REPORT.md).
 - Organization-based multi-tenancy with JWT auth and refresh rotation
 - Role-based permissions (owner, admin, project manager, developer, viewer) checked on every
   change; nobody can grant a role above their own
-- Projects with milestones, health/risk scores, and a drag-and-drop Kanban board
+- Projects with sprints (start and end dates, work done against time elapsed), health/risk scores,
+  and a drag-and-drop Kanban board that filters by sprint
 - Task dependencies (with real multi-hop cycle detection), subtasks, comments
 - Real-time updates via WebSocket
 
 **AI intelligence layer**
 - Five active specialist agents (Planning, Progress, Workload, Risk, Recommendation)
 - Deterministic, zero-token risk scoring with optional LLM narration on top
+- Early warning: a burn-down projection flags sprints falling behind pace before their deadline
+  (AUC 0.79 halfway through a sprint on 22 held-out real projects)
 - Rule-based fallback for every agent — fully functional with no API key configured
 - Mechanically enforced evidence grounding on every recommendation
 - Full audit trail: every analysis run persists its specialist outputs, risk scores, and the

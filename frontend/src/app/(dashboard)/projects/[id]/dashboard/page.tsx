@@ -16,6 +16,7 @@ import { api } from "@/lib/api"
 import type { AgentRun, Member, PaginatedResponse, Project, RecommendedAction, Task } from "@/types"
 import { AgentRunPanel, nodeRawId } from "@/components/analytics/agent-run-panel"
 import { TeamPanel } from "@/components/team/team-panel"
+import { SprintsPanel } from "@/components/sprints/sprints-panel"
 
 interface ProjectHealth {
   health_score: number
@@ -180,12 +181,17 @@ export default function ProjectDashboardPage() {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="sprints">Sprints</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
           <TabsTrigger value="team">Team</TabsTrigger>
           <TabsTrigger value="ai">AI Insights</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="sprints" className="space-y-6">
+          <SprintsPanel projectId={projectId} />
+        </TabsContent>
 
         <TabsContent value="team" className="space-y-6">
           <TeamPanel projectId={projectId} />

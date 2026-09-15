@@ -172,6 +172,15 @@ The real sprint ended with 20 of its 30 issues unfinished (67%). One sprint prov
 the evaluation across 270 held-out sprints is in `METRICS_INFERENCE.md` §16 (AUC 0.79 halfway
 through). The schedule reads 55% rather than 50% because milestone dates are stored as whole days.
 
+**Sprints — the warning on a sprint you create yourself.** In the **Sprints** tab, create a sprint that
+started a week ago and ends a week from now. Each sprint shows its dates, its task count, and two bars:
+*work done* and *time elapsed*. Open a few unfinished tasks on the board, pick the new sprint in the
+task dialog's **Sprint** field, and filter the board by that sprint to see just those cards. Run the
+analysis: AI Insights reads *"'Sprint 75' is 56% through its schedule with 0% of its work done; at this
+pace 100% will still be open at the deadline"*, cites exactly the tasks you moved, and recommends
+**Re-plan before the deadline**. A sprint without a start date says so, since the analysis needs one
+to judge pace. Only roles that can update the project see the create and edit forms.
+
 ## 4. What the prototype covers
 
 | Working now | Later |
@@ -183,7 +192,8 @@ through). The schedule reads 55% rather than 50% because milestone dates are sto
 | **Discussion** on every task, with real authors | LLM narration (works with a Groq key; not needed for the demo) |
 | Run analysis; results persisted; dashboard and workspace reflect them; **every finding shows the tasks and people it rests on** | |
 | **Recommendations you can apply**: suggested reassignments, one-click Apply, the change marked on the next run | Suggested actions for delay, dependency and knowledge risks |
-| **Early warning before the deadline**: a behind-pace delay warning with a re-plan recommendation | Setting milestone start dates in the UI (the importer sets them) |
+| **Early warning before the deadline**: a behind-pace delay warning with a re-plan recommendation | Burn-down history over time |
+| **Sprints**: create sprints with start and end dates, put tasks in them, filter the board by sprint, see work done against time elapsed | |
 
 ## 5. Found and fixed by testing on real data
 
@@ -214,6 +224,9 @@ None of these showed up with the invented seed data:
 
 - The **coordination** measure only links people through assigned work; someone who only reviews
   and comments looks unconnected. This is why reporters/commenters are not project members here.
+- **A sprint doubles as the "component"** the knowledge and coordination measures group work by. Splitting
+  work across sprints therefore changes those scores: moving three tasks into a new sprint raised both
+  from low to medium. Real component data (labels, code areas) would remove this coupling.
 - Recall-first: the delay signal flags every unfinished sprint and some finished ones.
 - Only the deterministic path is demonstrated; the language-model narration is optional.
 

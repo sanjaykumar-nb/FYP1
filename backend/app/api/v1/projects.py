@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -393,6 +394,15 @@ async def remove_project_member(
 
 
 # Milestones
+def _check_schedule(start, target) -> None:
+    """A milestone needs an end date, and a start date (optional) must come before it."""
+    if target is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A sprint needs an end date")
+    as_day = lambda v: v.date() if isinstance(v, datetime) else v
+    if start is not None and as_day(start) >= as_day(target):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A sprint must end after it starts")
+
+
 @router.get("/{project_id}/milestones", response_model=PaginatedResponse)
 async def list_milestones(
     project_id: UUID,
@@ -449,6 +459,7 @@ async def create_milestone(
             detail="Project not found",
         )
     
+    _check_schedule(milestone_data.start_date, milestone_data.target_date)
     milestone = Milestone(
         project_id=project_id,
         name=milestone_data.name,
@@ -473,9 +484,12 @@ async def update_milestone(
     org_id: UUID = Depends(get_current_org_id),
 ):
     result = await db.execute(
-        select(Milestone).where(
+        select(Milestone)
+        .join(Project, Project.id == Milestone.project_id)
+        .where(
             Milestone.id == milestone_id,
             Milestone.project_id == project_id,
+            Project.organization_id == org_id,
         )
     )
     milestone = result.scalar_one_or_none()
@@ -488,6 +502,7 @@ async def update_milestone(
     
     for field, value in milestone_data.model_dump(exclude_unset=True).items():
         setattr(milestone, field, value)
+    _check_schedule(milestone.start_date, milestone.target_date)
     
     await db.commit()
     await db.refresh(milestone)
