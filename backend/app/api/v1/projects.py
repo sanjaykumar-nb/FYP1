@@ -171,6 +171,7 @@ async def update_project(
     
     for field, value in project_data.model_dump(exclude_unset=True).items():
         setattr(project, field, value)
+    _check_project_dates(project.start_date, project.target_end_date)
     
     await db.commit()
     await db.refresh(project)
@@ -391,6 +392,12 @@ async def remove_project_member(
     await db.commit()
     
     return {"message": "Member removed"}
+
+
+def _check_project_dates(start, end) -> None:
+    as_day = lambda v: v.date() if isinstance(v, datetime) else v
+    if start is not None and end is not None and as_day(start) >= as_day(end):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A project must end after it starts")
 
 
 # Milestones

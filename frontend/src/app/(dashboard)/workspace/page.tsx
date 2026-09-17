@@ -22,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { toast } from "@/hooks/use-toast"
+import { usePermissions } from "@/hooks/use-permissions"
 import { api } from "@/lib/api"
 import type { PaginatedResponse, Project } from "@/types"
 
@@ -45,12 +46,13 @@ export default function WorkspacePage() {
       api.get<PaginatedResponse<Project>>("/projects").then((res) => res.data),
   })
 
-  const projects = data?.items ?? []
+  // Archived projects keep their data but leave the workspace (see project Settings).
+  const projects = (data?.items ?? []).filter((p) => p.status !== "archived")
   const activeCount = projects.filter((p) => p.status === "active").length
   const atRiskCount = projects.filter((p) => (p.risk_score ?? 0) >= 0.4).length
 
   const stats = [
-    { label: "Total Projects", value: String(data?.total ?? 0), icon: FolderKanban, color: "bg-blue-500" },
+    { label: "Total Projects", value: String(projects.length), icon: FolderKanban, color: "bg-blue-500" },
     { label: "Active", value: String(activeCount), icon: LayoutDashboard, color: "bg-green-500" },
     { label: "At Risk", value: String(atRiskCount), icon: AlertTriangle, color: "bg-yellow-500" },
   ]
@@ -208,6 +210,7 @@ function ProjectListItem({ project }: { project: Project }) {
 function NewProjectDialog() {
   const [open, setOpen] = useState(false)
   const router = useRouter()
+  const { can } = usePermissions()
   const queryClient = useQueryClient()
 
   const {
@@ -234,6 +237,9 @@ function NewProjectDialog() {
       })
     },
   })
+
+  // Only roles that can create projects see the button (owners and admins).
+  if (!can("project:create")) return null
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

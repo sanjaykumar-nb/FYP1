@@ -3,47 +3,32 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import {
-  LayoutDashboard,
-  FolderKanban,
-  Users,
-  Calendar,
-  MessageSquare,
-  BarChart3,
-  Lightbulb,
-  Database,
-  Settings,
-  Brain,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react"
+import { ArrowLeft, Brain, ChevronLeft, FolderKanban, LayoutDashboard, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 
 interface SidebarProps {
   isOpen: boolean
   onClose: () => void
 }
 
-const navigation = [
-  { name: "Dashboard", href: "/workspace", icon: LayoutDashboard },
-  { name: "Projects", href: "/projects", icon: FolderKanban },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
-  { name: "Admin", href: "/admin", icon: Settings, adminOnly: true },
+export interface NavItem {
+  name: string
+  href: string
+  icon: typeof LayoutDashboard
+  /** Project items are relative to /projects/{id} unless marked absolute. */
+  absolute?: boolean
+}
+
+// Only destinations that exist: src/tests/navigation.test.ts fails if an item has no page.
+// Sprints, Team and AI Insights are tabs on a project's Overview.
+export const workspaceNavigation: NavItem[] = [
+  { name: "Workspace", href: "/workspace", icon: LayoutDashboard },
 ]
 
-// Relative to a project's root — resolved against /projects/{id} below.
-// Pages not yet built in the MVP (meetings, recommendations, memory, review,
-// settings) still route correctly; they 404 until their phase lands rather
-// than silently going to the workspace root.
-const projectNavigation = [
+export const projectNavigation: NavItem[] = [
+  { name: "All projects", href: "/workspace", icon: ArrowLeft, absolute: true },
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Tasks", href: "/tasks", icon: FolderKanban },
-  { name: "Meetings", href: "/meetings", icon: MessageSquare },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
-  { name: "Recommendations", href: "/recommendations", icon: Lightbulb },
-  { name: "Memory", href: "/memory", icon: Database },
-  { name: "Review", href: "/review", icon: Brain },
+  { name: "Task board", href: "/tasks", icon: FolderKanban },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 
@@ -53,10 +38,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const isProjectPage = !!projectMatch && projectMatch[1] !== "new"
   const projectRoot = projectMatch ? `/projects/${projectMatch[1]}` : ""
 
-  const resolvedProjectNavigation = projectNavigation.map((item) => ({
-    ...item,
-    href: `${projectRoot}${item.href}`,
-  }))
+  const items = isProjectPage
+    ? projectNavigation.map((item) => ({ ...item, href: item.absolute ? item.href : `${projectRoot}${item.href}` }))
+    : workspaceNavigation
 
   return (
     <>
@@ -84,30 +68,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               <ChevronLeft className="h-4 w-4" />
             </Button>
           </div>
-          
+
           {/* Navigation */}
           <nav className="flex-1 space-y-1 p-4" aria-label="Main navigation">
-            {isProjectPage ? (
-              <>
-                <div className="flex items-center gap-2 px-2 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Project
-                </div>
-                {resolvedProjectNavigation.map((item) => (
-                  <NavLink key={item.name} item={item} pathname={pathname} onClose={onClose} />
-                ))}
-              </>
-            ) : (
-              <>
-                <div className="flex items-center gap-2 px-2 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Workspace
-                </div>
-                {navigation.map((item) => (
-                  <NavLink key={item.name} item={item} pathname={pathname} onClose={onClose} />
-                ))}
-              </>
-            )}
+            <div className="flex items-center gap-2 px-2 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {isProjectPage ? "Project" : "Workspace"}
+            </div>
+            {items.map((item) => (
+              <NavLink key={item.name} item={item} pathname={pathname} onClose={onClose} />
+            ))}
           </nav>
-          
+
           {/* Footer */}
           <div className="p-4 border-t border-border">
             <div className="text-xs text-muted-foreground text-center">
@@ -116,7 +87,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
         </div>
       </aside>
-      
+
       {/* Overlay */}
       {isOpen && (
         <div
@@ -129,9 +100,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   )
 }
 
-function NavLink({ item, pathname, onClose }: { item: typeof navigation[0]; pathname: string; onClose: () => void }) {
+function NavLink({ item, pathname, onClose }: { item: NavItem; pathname: string; onClose: () => void }) {
   const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
-  
+
   return (
     <Link
       href={item.href}

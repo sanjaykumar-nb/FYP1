@@ -201,6 +201,7 @@ and people whose work names no component are not reported as isolated.
 | **Recommendations you can apply**: suggested reassignments, one-click Apply, the change marked on the next run | Suggested actions for delay, dependency and knowledge risks |
 | **Early warning before the deadline**: a behind-pace delay warning with a re-plan recommendation | Burn-down history over time |
 | **Sprints**: create sprints with start and end dates, put tasks in them, filter the board by sprint, see work done against time elapsed | |
+| **Project settings** (edit details, archive) and a **profile** showing what your role allows; every navigation link leads to a real page | Notifications (the placeholder bell was removed until they exist) |
 
 ## 5. Found and fixed by testing on real data
 
