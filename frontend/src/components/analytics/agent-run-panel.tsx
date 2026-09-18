@@ -43,7 +43,8 @@ type Finding = Partial<GraphFinding> & { title: string; node_ids: string[] }
 export function citationLabel(
   nodeId: string,
   taskTitles: Map<string, string>,
-  memberNames: Map<string, string>
+  memberNames: Map<string, string>,
+  componentNames: Map<string, string> = new Map()
 ): { label: string; title?: string } {
   const sep = nodeId.indexOf(":")
   const kind = sep === -1 ? "" : nodeId.slice(0, sep)
@@ -59,9 +60,10 @@ export function citationLabel(
     const name = memberNames.get(id)
     return name ? { label: name, title: name } : { label: "former member" }
   }
-  // Named components are "area:<name>"; a milestone standing in for one only has an id.
+  // Named components are "area:<name>", lowercased for matching; show the board's spelling.
   if (kind === "component" && id.startsWith("area:")) {
-    const name = id.slice("area:".length)
+    const key = id.slice("area:".length)
+    const name = componentNames.get(key) ?? key
     return { label: name, title: `Component: ${name}` }
   }
   return { label: kind || nodeId, title: nodeId }
@@ -159,6 +161,7 @@ export function AgentRunPanel({
   run,
   taskTitles = new Map(),
   memberNames = new Map(),
+  componentNames = new Map(),
   taskAssignees = new Map(),
   onApplyAction,
   applyingTaskId,
@@ -167,6 +170,8 @@ export function AgentRunPanel({
   run: AgentRun
   taskTitles?: Map<string, string>
   memberNames?: Map<string, string>
+  /** lowercased component name → the spelling used on the board */
+  componentNames?: Map<string, string>
   /** task id → current assignee id, to tell which suggested moves still apply */
   taskAssignees?: Map<string, string | null>
   onApplyAction?: (action: RecommendedAction) => void
@@ -296,7 +301,7 @@ export function AgentRunPanel({
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="text-xs text-muted-foreground">Based on:</span>
                         {finding.node_ids.slice(0, MAX_CITED).map((nodeId) => {
-                          const cited = citationLabel(nodeId, taskTitles, memberNames)
+                          const cited = citationLabel(nodeId, taskTitles, memberNames, componentNames)
                           return (
                             <Badge key={nodeId} variant="outline" title={cited.title} className="font-normal max-w-[16rem] truncate">
                               {cited.label}

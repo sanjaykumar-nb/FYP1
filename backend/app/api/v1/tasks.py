@@ -120,7 +120,7 @@ async def create_task(
         reporter_id=user_id,
         title=task_data.title,
         description=task_data.description,
-        component=task_data.component,
+        component=await _canonical_component(db, project_id, task_data.component),
         status=task_data.status,
         priority=task_data.priority,
         story_points=task_data.story_points,
@@ -213,7 +213,10 @@ async def update_task(
     
     if "milestone_id" in task_data.model_fields_set:
         await _check_milestone(db, task.project_id, task_data.milestone_id)
-    for field, value in task_data.model_dump(exclude_unset=True).items():
+    changes = task_data.model_dump(exclude_unset=True)
+    if "component" in changes:
+        changes["component"] = await _canonical_component(db, task.project_id, changes["component"])
+    for field, value in changes.items():
         setattr(task, field, value)
     
     await db.commit()
@@ -326,7 +329,7 @@ async def create_subtask(
         reporter_id=user_id,
         title=task_data.title,
         description=task_data.description,
-        component=task_data.component,
+        component=await _canonical_component(db, parent_task.project_id, task_data.component),
         status=task_data.status,
         priority=task_data.priority,
         story_points=task_data.story_points,
@@ -471,6 +474,27 @@ async def remove_dependency(
 
     await db.delete(dep)
     await db.commit()
+
+
+async def _canonical_component(db: AsyncSession, project_id: UUID, component: Optional[str]) -> Optional[str]:
+    """Reuse the spelling the project already uses.
+
+    The analysis treats "Windows port" and "windows Port" as one component, so the
+    board should show them as one too — whoever types it next inherits the first
+    spelling instead of splitting the component in two on screen.
+    """
+    if not component:
+        return component
+    key = " ".join(component.split()).lower()
+    spellings = await db.execute(
+        select(Task.component)
+        .where(Task.project_id == project_id, Task.component.is_not(None))
+        .distinct()
+    )
+    for (spelling,) in spellings.all():
+        if " ".join(spelling.split()).lower() == key:
+            return spelling
+    return component
 
 
 async def _check_milestone(db: AsyncSession, project_id: UUID, milestone_id: Optional[UUID]) -> None:

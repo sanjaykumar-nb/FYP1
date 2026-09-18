@@ -74,7 +74,10 @@ services:
       - ./ai-service:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 
+  # Background schedules are not part of the demo path; start them with
+  #   docker compose --profile scheduled up
   celery-worker:
+    profiles: ["scheduled"]
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -89,6 +92,7 @@ services:
     command: celery -A app.core.celery_app worker --loglevel=info --concurrency=4
 
   celery-beat:
+    profiles: ["scheduled"]
     build:
       context: ./backend
       dockerfile: Dockerfile

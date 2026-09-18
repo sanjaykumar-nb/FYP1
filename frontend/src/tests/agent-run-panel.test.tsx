@@ -103,6 +103,14 @@ describe('citationLabel', () => {
       title: 'Component: windows port',
     })
   })
+
+  it('spells a component the way the board does', () => {
+    const components = new Map([['windows port', 'Windows Port']])
+    expect(citationLabel('component:area:windows port', new Map(), new Map(), components)).toEqual({
+      label: 'Windows Port',
+      title: 'Component: Windows Port',
+    })
+  })
 })
 
 const OTHER = '33333333-3333-3333-3333-333333333333'

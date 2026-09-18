@@ -11,7 +11,7 @@ help:
 	@echo "make test         - Run tests for all services"
 	@echo "make lint         - Run linting for all services"
 	@echo "make format       - Format code for all services"
-	@echo "make db-migrate   - Run database migrations"
+	@echo "make db-import    - Import a real sprint from the TAWOS dataset"
 	@echo "make db-seed      - Seed database with demo data"
 	@echo "make clean        - Clean up Docker volumes and images"
 
@@ -38,28 +38,23 @@ logs-frontend:
 	docker-compose logs -f frontend
 
 # Database
-db-migrate:
-	docker-compose exec backend alembic upgrade head
-
-db-migrate-create:
-	@read -p "Migration message: " msg; \
-	docker-compose exec backend alembic revision --autogenerate -m "$$msg"
-
+# Tables are created by the backend on startup, so there is no migration step to run.
 db-seed:
 	docker-compose exec backend python -m app.scripts.seed
 
+db-import:
+	docker-compose exec backend python -m app.scripts.import_real_sprint
+
 db-reset:
 	docker-compose down -v
-	docker-compose up -d postgres
-	sleep 5
-	docker-compose exec backend alembic upgrade head
+	docker-compose up -d
 	docker-compose exec backend python -m app.scripts.seed
 
 # Testing
 test:
 	docker-compose exec backend pytest
 	docker-compose exec ai-service pytest
-	docker-compose exec frontend npm test
+	docker-compose exec frontend npm run test:ci
 
 test-backend:
 	docker-compose exec backend pytest -v
@@ -68,7 +63,7 @@ test-ai:
 	docker-compose exec ai-service pytest -v
 
 test-frontend:
-	docker-compose exec frontend npm test
+	docker-compose exec frontend npm run test:ci
 
 # Linting
 lint:

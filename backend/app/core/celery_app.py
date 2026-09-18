@@ -27,7 +27,7 @@ celery_app.conf.update(
     worker_max_tasks_per_child=100,
     beat_schedule={
         "daily-workload-snapshot": {
-            "task": "app.tasks.analytics_tasks.create_daily_workload_snapshots",
+            "task": "app.tasks.ai_tasks.create_daily_workload_snapshots",
             "schedule": 86400.0,  # 24 hours
         },
         "scheduled-analysis": {

@@ -186,10 +186,14 @@ MULTI-AGENT/
 git clone https://github.com/sanjaykumar-nb/FYP1.git
 cd FYP1
 cp .env.example .env          # GROQ_API_KEY is optional — the app is fully functional without one
-make up
-make db-migrate
+make up                       # Postgres, Redis, the backend, the AI service and the frontend
 make db-seed                  # 1 org, 6 demo users, 3 projects, 45 tasks with real dependency/workload risk
 ```
+
+The backend creates its tables on startup, so there is no migration step. Scheduled background
+jobs are not part of the demo and stay off unless you ask for them:
+`docker compose --profile scheduled up -d`.
+
 
 - Frontend: http://localhost:3000 — log in as `pm@demo.com` / `password123`
 - Core API docs: http://localhost:8000/docs
@@ -245,18 +249,25 @@ full walkthrough, including what is real and what the replay derives, is in [DEM
 
 ```bash
 make test               # everything
-make test-backend       # backend: 29/29
-make test-ai            # AI service: 43/43 (pytest -m mvp)
-make test-frontend      # frontend: 27/27 (vitest)
+make test-backend       # backend: 63 tests
+make test-ai            # AI service: 70 tests
+make test-frontend      # frontend: 50 tests (vitest)
 ```
 
 Or per-service, without Docker:
 
 ```bash
 cd backend && python -m pytest -q
-cd ai-service && python -m pytest -q -m mvp
-cd frontend && npx vitest run
+cd ai-service && python -m pytest -q -m "not deferred"
+cd frontend && npm run type-check && npm run test:ci
 ```
+
+`deferred` marks the tests for meeting and communication intelligence. Those features have no data
+source in the product yet, so their tests stay in the tree and stay red — see
+[Known Limitations](#known-limitations).
+
+All three suites and the frontend type check run on every push and pull request
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ## Datasets & Reproducing the Evaluation
 

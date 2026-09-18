@@ -87,6 +87,17 @@ export default function ProjectDashboardPage() {
     () => new Map((tasks?.items ?? []).map((t) => [t.id, t.assignee_id])),
     [tasks]
   )
+  // Findings cite a component by its lowercased name; show it as the board spells it.
+  const componentNames = useMemo(
+    () =>
+      new Map(
+        (tasks?.items ?? [])
+          .map((t) => t.component)
+          .filter((c): c is string => !!c)
+          .map((c) => [c.toLowerCase(), c] as const)
+      ),
+    [tasks]
+  )
 
   const applyAction = useMutation({
     mutationFn: (action: RecommendedAction) =>
@@ -342,6 +353,7 @@ export default function ProjectDashboardPage() {
               run={latestRun}
               taskTitles={taskTitles}
               memberNames={memberNames}
+              componentNames={componentNames}
               taskAssignees={taskAssignees}
               onApplyAction={can("task:update") ? (action) => applyAction.mutate(action) : undefined}
               applyingTaskId={applyAction.isPending && applyAction.variables ? nodeRawId(applyAction.variables.task_id) : null}

@@ -33,3 +33,28 @@ class TestTaskComponent:
         snapshot = await build_project_snapshot(db_session, test_project)
         (task,) = snapshot["tasks"]
         assert task["component"] == "Scheduler"
+
+    async def test_a_component_keeps_one_spelling_per_project(
+        self, client: AsyncClient, auth_headers, test_project
+    ):
+        tasks = f"/api/v1/projects/{test_project.id}/tasks"
+        first = await client.post(
+            tasks, json={"title": "Port the installer", "component": "Windows Port"}, headers=auth_headers
+        )
+        assert first.json()["component"] == "Windows Port"
+
+        # Typed differently, but it is the same component as far as the analysis is concerned.
+        second = await client.post(
+            tasks, json={"title": "Port the tray icon", "component": "windows   port"}, headers=auth_headers
+        )
+        assert second.json()["component"] == "Windows Port"
+
+        edited = await client.patch(
+            f"{tasks}/{second.json()['id']}", json={"component": "WINDOWS PORT"}, headers=auth_headers
+        )
+        assert edited.json()["component"] == "Windows Port"
+
+        other = await client.post(
+            tasks, json={"title": "Linux packaging", "component": "Linux port"}, headers=auth_headers
+        )
+        assert other.json()["component"] == "Linux port"
