@@ -1,5 +1,7 @@
 # TeamSync AI
 
+[![CI](https://github.com/sanjaykumar-nb/FYP1/actions/workflows/ci.yml/badge.svg)](https://github.com/sanjaykumar-nb/FYP1/actions/workflows/ci.yml)
+
 **Explainable, Graph-Grounded Multi-Agent Project Intelligence**
 
 TeamSync AI is a Kanban project-management platform with an AI layer that detects six kinds of
