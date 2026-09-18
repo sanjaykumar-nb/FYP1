@@ -18,6 +18,12 @@ def build_story():
     det, lat, gr = run["detection"]["overall"], run["latency"], run["grounding"]
     gm, base = a9["graph_metrics"], a9["baseline_story_points_median"]
     rule, comp = hold["original_single_signal"], hold["composite_model"]
+    mid = D["mid"]
+    mid50, mid75 = mid["checkpoints"]["50%"]["holdout"], mid["checkpoints"]["75%"]["holdout"]
+    mid50p = mid["checkpoints"]["50%"]["holdout_paired_pace_rule_vs_flag_every_sprint"]["bootstrap"]
+    mid75p = mid["checkpoints"]["75%"]["holdout_paired_pace_rule_vs_flag_every_sprint"]["bootstrap"]
+    end_vs_comp = mid["end_of_sprint_holdout"]["paired_rule_vs_composite"]
+    end_vs_all = mid["end_of_sprint_holdout"]["paired_rule_vs_flag_every_sprint"]
     ag, an = abl["graph_architecture"], abl["naive_architecture"]
     last, first = tok[-1], tok[0]
     ratio = last["naive"] / last["graph"]
@@ -37,13 +43,18 @@ def build_story():
          "Compute coordination risk deterministically from a knowledge graph; let the LLM only "
          "<i>narrate</i> one finding from a bounded slice of that graph."],
         ["**Main claim**",
-         "Risk detection can be made both cheap and trustworthy <b>without losing accuracy</b>."],
+         "Risk detection can be made both cheap and trustworthy <b>without losing accuracy</b>, "
+         "and it can warn while the sprint can still be changed."],
         ["**Token reduction**",
          f"<b>{ratio:.0f}x</b> vs naive prompting ({last['naive']:,} to {last['graph']} tokens "
          f"at {last['tasks']:,} tasks)"],
+        ["**Mid-sprint warning**",
+         f"<b>AUC {mid50['auc_projected_unfinished']:.3f}</b> halfway through a sprint, "
+         f"<b>{mid75['auc_projected_unfinished']:.3f}</b> at three-quarters, on "
+         f"{mid50['n_projects']} unseen projects"],
         ["**Held-out F1**",
-         f"<b>{rule['f1']:.3f}</b> (zero-parameter graph rule) vs {comp['f1']:.3f} (tuned ML model), "
-         f"on {hold['n_projects']} unseen projects"],
+         f"<b>{rule['f1']:.3f}</b> (zero-parameter graph rule) at sprint end, where a tuned model's "
+         f"cross-validated 0.816 fell to {comp['f1']:.3f}, on {hold['n_projects']} unseen projects"],
         ["**Accuracy ablation**",
          f"<b>{ag['f1']:.3f}</b> graph vs {an['f1']:.3f} naive full-dataset prompting, "
          f"identical scenarios"],
@@ -138,12 +149,34 @@ def build_story():
          f"fabricated references removed ({gr['enforcement_rate']*100:.0f}%).</b> This converts "
          f"<i>the model was told to cite evidence</i> into <i>every surviving citation is "
          f"verifiably real</i>."),
-        ("3.4 A zero-parameter graph rule beats a tuned model on unseen data",
+        ("3.4 Added model complexity did not survive unseen projects",
          f"Three attempts to improve accuracy with more sophisticated methods <b>all failed or "
-         f"backfired</b> on held-out projects (Section 8.5). The untuned deterministic rule scored "
-         f"<b>F1 {rule['f1']:.3f}</b> against the tuned logistic model's <b>{comp['f1']:.3f}</b> on "
-         f"{hold['n_projects']} projects neither had seen. Reported as a finding in its own right: "
-         f"added model complexity was not merely unhelpful here, it was actively harmful."),
+         f"backfired</b> on held-out projects (Section 7.5). A tuned logistic model that reached "
+         f"cross-validated F1 0.816 fell to <b>{comp['f1']:.3f}</b> on {hold['n_projects']} projects "
+         f"it had not seen, where the untuned deterministic rule scored <b>{rule['f1']:.3f}</b>. A "
+         f"paired test cannot separate them (exact McNemar p = {end_vs_comp['mcnemar']['p_value']:.2f}; "
+         f"bootstrap F1 difference {end_vs_comp['bootstrap']['f1_difference']:+.3f}, 95% CI "
+         f"[{end_vs_comp['bootstrap']['ci_95'][0]:+.3f}, {end_vs_comp['bootstrap']['ci_95'][1]:+.3f}]), "
+         f"so the claim is <b>not</b> that the rule predicts better. What is significant: the rule "
+         f"beats flagging every sprint by {end_vs_all['bootstrap']['f1_difference']:+.3f} F1 "
+         f"(95% CI [{end_vs_all['bootstrap']['ci_95'][0]:+.3f}, "
+         f"{end_vs_all['bootstrap']['ci_95'][1]:+.3f}], p &lt; 0.001), and the learned model's tuned "
+         f"advantage vanished across project boundaries. Complexity bought no measurable accuracy "
+         f"here, and it cost the explanation."),
+        ("3.5 The warning arrives while the sprint can still be changed",
+         f"Projected forward from the work completed so far, the same graph flags sprints that will "
+         f"finish late <b>halfway through</b> rather than after the deadline. On "
+         f"{mid50['n_sprints']} held-out sprints from {mid50['n_projects']} unseen projects: "
+         f"<b>AUC {mid50['auc_projected_unfinished']:.3f}</b> at the 50% checkpoint and "
+         f"<b>{mid75['auc_projected_unfinished']:.3f}</b> at 75%, with F1 {mid50['pace_rule']['f1']:.3f} "
+         f"and {mid75['pace_rule']['f1']:.3f} against {mid50['flag_every_sprint']['f1']:.3f} for "
+         f"flagging every sprint ({mid50p['f1_difference']:+.3f}, 95% CI "
+         f"[{mid50p['ci_95'][0]:+.3f}, {mid50p['ci_95'][1]:+.3f}]; {mid75p['f1_difference']:+.3f}, "
+         f"[{mid75p['ci_95'][0]:+.3f}, {mid75p['ci_95'][1]:+.3f}]; both p &lt; 0.001). Stated "
+         f"honestly, the projection ranks <i>no better</i> than the share of work still open "
+         f"({mid50['auc_open_share_baseline']:.3f} and {mid75['auc_open_share_baseline']:.3f}) - its "
+         f"contribution is that the graph explaining a risk also carries it forward in time, with "
+         f"the evidence attached."),
     ]:
         s += [P(head, "h2"), P(body)]
     s.append(callout("<b>Novelty statement for the abstract.</b> Risk detection can be made both "
@@ -268,7 +301,7 @@ def build_story():
          "risk scores and the witness subgraph used; real multi-hop cycle detection"],
         ["**Deferred**",
          "Meeting Intelligence; Communication Intelligence; Review Trio; Organizational Memory and "
-         "RAG; Team Intelligence Index; fine-grained RBAC; persistent graph storage (Neo4j)"],
+         "RAG; Team Intelligence Index; per-project roles; persistent graph storage (Neo4j)"],
     ], [0.16, 0.84]))
 
     # ============================================================ 6. datasets
@@ -325,4 +358,5 @@ def build_story():
 
     return s, dict(det=det, lat=lat, gr=gr, gm=gm, base=base, rule=rule, comp=comp,
                    ag=ag, an=an, tok=tok, last=last, ratio=ratio, a9=a9, hold=hold,
-                   abl=abl, live=live, run=run)
+                   abl=abl, live=live, run=run, mid50=mid50, mid75=mid75, mid50p=mid50p,
+                   mid75p=mid75p, end_vs_comp=end_vs_comp, end_vs_all=end_vs_all)

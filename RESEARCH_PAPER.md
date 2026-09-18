@@ -209,19 +209,33 @@ anything that doesn't resolve is discarded. **Measured:** 200/200 fabricated ref
 stripped. This converts "the model was told to cite evidence" into "every surviving citation is
 verifiably real."
 
-### Novelty 4 — A simple, zero-parameter graph rule beats a tuned learned model on unseen data
+### Novelty 4 — A tuned learned model's advantage did not survive unseen projects
 
 Rather than reporting only favorable numbers, three separate attempts to improve accuracy with
 more sophisticated methods (threshold tuning, individualized due-date estimation, a trained
 logistic-regression composite score) were tried against a real-world dataset — and **all three
-failed or backfired** on held-out projects (§6.7). The deterministic, untuned graph rule
-outperformed the tuned learned model on data neither had seen (F1 0.712 vs 0.593). This is
-reported as a finding in its own right: added model complexity was actively harmful here, not
-merely unhelpful, and reporting that honestly is what makes the headline claim credible.
+failed or backfired** on held-out projects (§6.7). The logistic composite reached cross-validated
+F1 0.816 on the tuning projects and fell to **0.593** on 22 projects it had not seen, where the
+untuned graph rule scored **0.712**. A paired test on those same sprints cannot separate the two
+(exact McNemar *p* = 0.78; bootstrap F1 difference +0.119, 95% CI [−0.025, +0.291]), so the claim
+is not that the rule predicts better. It is that the complexity bought no measurable accuracy
+across project boundaries and cost the explanation — and that both approaches beat flagging every
+sprint, the rule by F1 +0.055, 95% CI [+0.030, +0.080], *p* < 0.001.
+
+### Novelty 5 — The same graph warns mid-sprint, while the plan can still change
+
+Projecting the graph forward from the work completed so far flags sprints that will finish late
+**halfway through**, rather than reporting them afterwards: **AUC 0.792 at the 50% checkpoint and
+0.874 at 75%** on the 270 held-out sprints, with F1 0.706 and 0.756 against 0.657 for flagging
+every sprint (+0.050, 95% CI [+0.006, +0.094]; +0.099, [+0.049, +0.148]; both *p* < 0.001). Stated
+plainly, the projection does not *rank* better than counting the share of work still open (AUC
+0.802 and 0.881); what it adds is that the warning arrives early and carries the same verifiable
+evidence as every other finding (§6.3).
 
 **One-sentence summary of the novelty, for an abstract:** *risk detection can be made both cheap
 (graph-computed, O(anomalies) prompt cost) and trustworthy (mechanically grounded evidence)
-without sacrificing accuracy to a more complex learned model.*
+without losing accuracy to a more complex learned model that did not generalise — and the same
+graph warns mid-sprint, while the plan can still change.*
 
 ---
 
@@ -314,7 +328,27 @@ sprints held out**, zero overlap, evaluated once.
 | Accuracy | 0.655 | 0.450 |
 | AUC-ROC | 0.581 | — |
 
-#### Held-out result (270 sprints, 22 unseen projects) — the headline number
+#### Mid-sprint result (270 held-out sprints) — the headline number
+
+Each sprint is rebuilt as it stood at a checkpoint — only issues created by then exist, only those
+resolved by then are done — and the system projects the share of scope still unfinished at the
+deadline, raising a delay risk from the severity cut-offs already used elsewhere. Checkpoints,
+prediction and cut-offs were fixed before the held-out projects were touched; nothing was tuned.
+
+| Checkpoint | Predictor | Precision | Recall | F1 | AUC |
+|---|---|---|---|---|---|
+| **50%** | Delay risk ≠ low | 0.581 | 0.902 | **0.706** | **0.792** |
+| 50% | Flag every sprint | 0.489 | 1.000 | 0.657 | — |
+| **75%** | Delay risk ≠ low | 0.623 | 0.962 | **0.756** | **0.874** |
+| 75% | Delay risk high or worse | 0.719 | 0.909 | **0.803** | — |
+| 75% | Flag every sprint | 0.489 | 1.000 | 0.657 | — |
+
+Paired against flagging every sprint (cluster bootstrap by project, exact McNemar): **+0.050 F1**,
+95% CI [+0.006, +0.094] at 50%, and **+0.099**, [+0.049, +0.148] at 75%; both *p* < 0.001. A
+simple open-work-share baseline ranks the same sprints as well (AUC 0.802 and 0.881), so the
+contribution is the early, explained warning rather than superior ranking.
+
+#### Sprint-end result (270 sprints, 22 unseen projects) — sanity check
 
 > **Figure 3** (`fig3_holdout_tawos.svg`) charts precision/recall/F1 for all three approaches.
 
@@ -324,9 +358,11 @@ sprints held out**, zero overlap, evaluated once.
 | **Deterministic single-signal rule (untuned)** | **0.712** | 0.552 | **1.000** |
 | Tuned composite logistic regression | 0.593 | 0.620 | 0.568 |
 
-**Interpretation:** the system catches every delayed sprint (recall 1.00) at the cost of
-over-flagging roughly half the on-time ones — a high-sensitivity early warning, appropriate when
-a false alarm is cheap to dismiss but a missed one is not.
+**Interpretation:** the system flags every delayed sprint (recall 1.00) at the cost of
+over-flagging roughly half the on-time ones. At sprint end that recall is guaranteed by the label
+definition — a delayed sprint is one with work unfinished past the due date, which is the condition
+the rule tests — so it demonstrates the operating point, not predictive skill. The mid-sprint
+result above is where recall (0.90 halfway through) carries information.
 
 ### 6.4 Live-LLM narration layer — schema validity & LLM-vs-fallback agreement
 
@@ -394,8 +430,13 @@ honestly distinct numbers, as in v2:
 
 | Definition | Value |
 |---|---|
-| Validity rate over **all** attempted calls (including rate-limit blocks) | 41.1% (37/90) |
-| Validity rate over calls that **actually reached the model with a genuine response** | ~92% (37/40, from the diagnosed subset) |
+| Validity rate over **all** attempted calls (including rate-limit blocks) | **41.1%** (37/90) — measured |
+| Validity rate over calls that **actually reached the model** | **54–95%** — bounded, not measured |
+
+The second row is a range because only 24 of the 50 failures were diagnosed individually. If every
+undiagnosed failure reached the model, validity is 37/68 = 54%; if none did, 37/39 = 95%. Quoting
+"~92%" silently assumes the optimistic extreme. The range closes to a single number with one
+re-run that logs every call's error — about an hour on a paid key.
 
 The first is the fair number to quote for "how often does an analysis complete via the LLM path
 end-to-end on this account's infrastructure." The second is the fair number for "how often does
@@ -529,6 +570,13 @@ they are what makes Novelty 4 credible rather than cherry-picked.
 - `blocked_ratio` never fires — TAWOS's status vocabulary has no blocked state.
 - AUC is weak by construction at the sprint level, since all tasks in a reconstructed sprint share
   one deadline.
+- The mid-sprint projection ranks no better than counting the share of work still open (AUC 0.792
+  vs 0.802 at the halfway checkpoint; 0.874 vs 0.881 at three-quarters). Its contribution is the
+  explained, integrated early warning, not rank quality.
+- Sprint-end recall of 1.00 is structural: the label and the rule test the same condition once the
+  deadline has passed. Only the mid-sprint recall is predictive.
+- Live-LLM schema validity over calls that reached the model is a 54–95% range, not a number; only
+  the end-to-end 41.1% is measured.
 - Live-LLM metrics (§6.4) are now measured, but from a single small run on a single rate-limited
   API key against a single model — not a stable, repeated-trial estimate. Treat κ=0.95 (n=37, all
   6 risk types) as a strengthened but still first-pass signal, not a settled number — most of the

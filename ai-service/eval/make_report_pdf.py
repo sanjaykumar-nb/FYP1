@@ -44,6 +44,7 @@ D = {
     "tok": json.loads((EVAL / "figure_token_sweep.json").read_text()),
     "all987": json.loads((EVAL / "datasets" / "tawos_score_result.json").read_text()),
     "hold": json.loads((EVAL / "datasets" / "tawos_holdout_result.json").read_text()),
+    "mid": json.loads((EVAL / "datasets" / "tawos_midsprint_result.json").read_text()),
     "abl": json.loads((EVAL / "ablation_result.json").read_text()),
     "live": json.loads((EVAL / "live_llm_result_v3.json").read_text()),
 }

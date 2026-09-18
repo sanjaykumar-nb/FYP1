@@ -14,6 +14,8 @@ def build_story2(d):
     ag, an, tok, last = d["ag"], d["an"], d["tok"], d["last"]
     a9, hold, abl, live, run = d["a9"], d["hold"], d["abl"], d["live"], d["run"]
     ratio = d["ratio"]
+    mid50, mid75, mid50p, mid75p = d["mid50"], d["mid75"], d["mid50p"], d["mid75p"]
+    end_vs_comp, end_vs_all = d["end_vs_comp"], d["end_vs_all"]
     per = abl["per_risk_type"]
 
     s = [P("7. Evaluation - All Measured Values", "h1")]
@@ -22,9 +24,10 @@ def build_story2(d):
     s += [P("7.1 Engineering baseline", "h2")]
     s.append(tbl([
         ["Item", "Value"],
-        ["Backend tests", "29 / 29 pass"],
-        ["AI service tests", "43 / 43 pass (pytest -m mvp)"],
-        ["Frontend tests", "27 / 27 pass (vitest)"],
+        ["Backend tests", "63 / 63 pass"],
+        ["AI service tests", "67 / 67 pass (pytest -m \"not deferred\")"],
+        ["Frontend tests", "50 / 50 pass (vitest), tsc clean"],
+        ["Continuous integration", "all three suites and the type check run on every push"],
         ["Code size", "approx. 21,000 lines"],
         ["Quality gates", "ruff, mypy, eslint, prettier, tsc"],
     ], [0.3, 0.7]))
@@ -108,8 +111,41 @@ def build_story2(d):
     ], [0.34, 0.33, 0.33], align_right=[1, 2]))
 
     s.append(Spacer(1, 8))
-    s.append(P(f"<b>Held-out result - {hold['n_sprints']} sprints, {hold['n_projects']} unseen "
-               f"projects. This is the headline number.</b>"))
+    s.append(P(f"<b>Mid-sprint result - {mid50['n_sprints']} held-out sprints, "
+               f"{mid50['n_projects']} unseen projects. This is the headline number.</b>"))
+    s.append(P("Each sprint is rebuilt as it stood at a checkpoint - only issues created by then "
+               "exist, only those resolved by then are done - and the system projects the share of "
+               "scope still unfinished at the deadline. Checkpoints, prediction and severity "
+               "cut-offs were fixed before the held-out projects were touched; nothing was tuned."))
+    s.append(tbl([
+        ["Checkpoint", "Predictor", "Precision", "Recall", "F1", "AUC"],
+        ["**50%**", "Delay risk not low", f"{mid50['pace_rule']['precision']:.3f}",
+         f"{mid50['pace_rule']['recall']:.3f}", f"**{mid50['pace_rule']['f1']:.3f}**",
+         f"**{mid50['auc_projected_unfinished']:.3f}**"],
+        ["50%", "Flag every sprint", f"{mid50['flag_every_sprint']['precision']:.3f}",
+         f"{mid50['flag_every_sprint']['recall']:.3f}", f"{mid50['flag_every_sprint']['f1']:.3f}", "-"],
+        ["**75%**", "Delay risk not low", f"{mid75['pace_rule']['precision']:.3f}",
+         f"{mid75['pace_rule']['recall']:.3f}", f"**{mid75['pace_rule']['f1']:.3f}**",
+         f"**{mid75['auc_projected_unfinished']:.3f}**"],
+        ["75%", "Delay risk high or worse", f"{mid75['pace_rule_high_or_worse']['precision']:.3f}",
+         f"{mid75['pace_rule_high_or_worse']['recall']:.3f}",
+         f"**{mid75['pace_rule_high_or_worse']['f1']:.3f}**", "-"],
+        ["75%", "Flag every sprint", f"{mid75['flag_every_sprint']['precision']:.3f}",
+         f"{mid75['flag_every_sprint']['recall']:.3f}", f"{mid75['flag_every_sprint']['f1']:.3f}", "-"],
+    ], [0.15, 0.31, 0.14, 0.13, 0.13, 0.14], align_right=[2, 3, 4, 5]))
+    s.append(Spacer(1, 5))
+    s.append(callout(
+        f"<b>Interpretation.</b> Halfway through a sprint the warning is real: it drops a quarter of "
+        f"what flagging everything would flag and still catches {mid50['pace_rule']['recall']*100:.0f}% "
+        f"of the sprints that finish late ({mid50p['f1_difference']:+.3f} F1, 95% CI "
+        f"[{mid50p['ci_95'][0]:+.3f}, {mid50p['ci_95'][1]:+.3f}]; at 75%, {mid75p['f1_difference']:+.3f}, "
+        f"[{mid75p['ci_95'][0]:+.3f}, {mid75p['ci_95'][1]:+.3f}]; both p &lt; 0.001). <b>What it does "
+        f"not show:</b> better ranking than a trivial baseline - the share of work still open ranks "
+        f"these sprints just as well (AUC {mid50['auc_open_share_baseline']:.3f} and "
+        f"{mid75['auc_open_share_baseline']:.3f})."))
+    s.append(Spacer(1, 8))
+    s.append(P(f"<b>Sprint-end result - {hold['n_sprints']} sprints, {hold['n_projects']} unseen "
+               f"projects. Sanity check on the same rule after the deadline.</b>"))
     s.append(tbl([
         ["Model", "Precision", "Recall", "F1", "Accuracy", "AUC"],
         ["**Graph rule (untuned, 0 parameters)**", f"{rule['precision']:.3f}",
@@ -123,13 +159,19 @@ def build_story2(d):
                f"FP {comp['fp']}, FN {comp['fn']}, TN {comp['tn']}.", "note"))
     s.append(figure("fig3_holdout_tawos.svg",
                     "Fig. 4. Sprint-delay prediction on the held-out TAWOS split. The zero-parameter "
-                    "graph rule outperforms a composite logistic model tuned on the other nine "
-                    "projects. The story-point baseline is measured on all 987 sprints."))
-    s.append(callout(f"<b>Interpretation.</b> The system catches <b>every</b> delayed sprint "
+                    "graph rule scores alongside a composite logistic model tuned on the other "
+                    "nine projects; a paired test cannot separate them. The story-point baseline is "
+                    "measured on all 987 sprints."))
+    s.append(callout(f"<b>Interpretation.</b> The system flags <b>every</b> delayed sprint "
                      f"(recall {rule['recall']:.2f}, FN = {rule['fn']}) while over-flagging roughly "
-                     f"half the on-time ones (precision {rule['precision']:.3f}). It is a "
-                     f"<b>high-sensitivity early warning</b>, not a precise classifier - the right "
-                     f"operating point when a false alarm is cheap to dismiss but a missed one is not."))
+                     f"half the on-time ones (precision {rule['precision']:.3f}). Read that recall "
+                     f"carefully: after the deadline, a delayed sprint is one with work unfinished "
+                     f"past the due date, which is exactly the condition the rule tests, so recall "
+                     f"1.00 is <b>guaranteed by the label definition here</b> rather than earned. "
+                     f"The mid-sprint numbers above are the predictive ones. What this does show is "
+                     f"the operating point: a <b>high-sensitivity early warning</b>, not a precise "
+                     f"classifier - the right trade when a false alarm is cheap to dismiss but a "
+                     f"missed one is not."))
 
     # ---------------- 7.5 negative results
     s += [P("7.5 Negative results - three failed improvement attempts", "h2"),
@@ -153,9 +195,12 @@ def build_story2(d):
          "to project-specific structure."],
     ], [0.04, 0.30, 0.66]))
     s.append(Spacer(1, 5))
-    s.append(callout("<b>Conclusion.</b> The zero-parameter, fully explainable graph rule outperforms "
-                     "the tuned learned model on unseen projects. Added model complexity was not "
-                     "merely unhelpful here - it was actively harmful."))
+    s.append(callout(f"<b>Conclusion.</b> The tuned model's advantage did not cross the project "
+                     f"boundary: CV F1 0.816 fell to {comp['f1']:.3f}, and a paired test cannot "
+                     f"separate it from the zero-parameter rule (exact McNemar p = "
+                     f"{end_vs_comp['mcnemar']['p_value']:.2f}). Added complexity bought no "
+                     f"measurable accuracy here, and it cost the explanation: the rule's verdict "
+                     f"arrives with the graph nodes behind it, the logistic model's does not."))
 
     # ---------------- 7.6 ablation
     s += [PageBreak(), P("7.6 Ablation - does graph-grounding cost accuracy?", "h2"),
@@ -240,12 +285,15 @@ def build_story2(d):
         ["Over <b>all</b> attempted calls (including rate-limit blocks)",
          f"{live['schema_validity_rate']*100:.1f}% "
          f"({live['schema_valid_calls']}/{live['n_agent_calls']})"],
-        ["Over calls that <b>actually reached the model</b>", "**approx. 92% (37/40)**"],
+        ["Over calls that <b>actually reached the model</b>", "**54 to 95% (bounded)**"],
     ], [0.6, 0.4], align_right=[1]))
     s.append(Spacer(1, 5))
-    s.append(P("Quote the first for how often an analysis completes end-to-end on this "
-               "infrastructure; quote the second for how often the model produces a valid response. "
-               "Conflating them misleads in either direction.", "note"))
+    s.append(P("Only the first number is measured. The second cannot be: the run diagnosed 24 of the "
+               "50 failures individually and not the rest, so validity over calls that reached the "
+               "model is 37/68 = 54% if every undiagnosed failure reached it and 37/39 = 95% if none "
+               "did. The often-quoted 92% assumes the optimistic extreme. Quote the first as the "
+               "end-to-end rate on free-tier infrastructure and the range for the model itself, "
+               "until the run is repeated with per-call error logging.", "note"))
 
     # ---------------- 7.8 glossary
     s += [P("7.8 Metric glossary", "h2")]
@@ -325,12 +373,18 @@ def build_story2(d):
               "six risk types at n=1. Single provider, single model, one rate-limited key."],
         ["6", "<b>No human evaluation of explanation quality.</b> Grounding proves citations are "
               "real, not that the explanations are <i>useful</i>."],
-        ["7", "<b>No confidence intervals.</b> The held-out F1 is a single point estimate from one split."],
-        ["8", "<b>RBAC is not enforced</b> at fine granularity; the guarantee is authenticated and "
-              "organization-scoped only."],
-        ["9", "<b>Two designed agents are unimplemented</b> (Meeting, Communication Intelligence) "
-              "because no data source exists yet."],
-        ["10", "<b>No longitudinal study.</b> There is no evidence yet that a flagged risk predicts a "
+        ["7", "<b>The mid-sprint projection ranks no better than counting open work</b> "
+              "(AUC 0.792 vs 0.802 at the halfway checkpoint, 0.874 vs 0.881 at three-quarters). Its "
+              "contribution is the early, evidence-carrying warning, not rank quality."],
+        ["8", "<b>Sprint-end recall of 1.00 is structural</b>, guaranteed by the label definition at "
+              "that evaluation point; only the mid-sprint recall is predictive."],
+        ["9", "<b>Nothing is claimed about the first quarter of a sprint.</b> The pace signal is "
+              "deliberately inactive until a quarter of the sprint has elapsed."],
+        ["10", "<b>Live-LLM schema validity is a range</b> (54 to 95%), not a number; only the "
+               "end-to-end 41.1% is measured."],
+        ["11", "<b>Two designed agents are unimplemented</b> (Meeting, Communication Intelligence) "
+               "because no data source exists yet."],
+        ["12", "<b>No longitudinal study.</b> There is no evidence yet that a flagged risk predicts a "
                "real-world outcome over weeks."],
     ], [0.05, 0.95]))
 
@@ -374,15 +428,18 @@ def build_story2(d):
         ["VII", "**Results**", "Sections 7.2 to 7.7, with Figs. 3, 4 and 5", "2 - 3"],
         ["VIII", "**Discussion**",
          "Section 7.5 negative results, Section 3.4, plus an ethics paragraph", "1"],
-        ["IX", "**Threats to Validity**", "Section 8 - reproduce all ten honestly", "0.5"],
+        ["IX", "**Threats to Validity**", "Section 8 - reproduce all twelve honestly", "0.5"],
         ["X", "**Conclusion and Future Work**", "Section 1 plus Section 12", "0.5"],
     ], [0.07, 0.26, 0.51, 0.16]))
     s.append(Spacer(1, 6))
     s.append(callout("<b>Tone guidance.</b> The strongest defensible claim is: <i>a simple, "
-                     "explainable, zero-parameter graph rule matches or beats a tuned learned model "
-                     "on unseen projects, at 487x lower prompt cost.</i> Do not overclaim beyond "
-                     "that. Report the negative results prominently rather than burying them - they "
-                     "are what make the headline credible."))
+                     "explainable, zero-parameter graph rule matches a tuned learned model on unseen "
+                     "projects at 487x lower prompt cost, and warns halfway through a sprint rather "
+                     "than after it.</i> Do not overclaim beyond that. Avoid <i>beats</i> for the "
+                     "model comparison (the paired test cannot separate them) and <i>more accurate</i> "
+                     "for the mid-sprint ranking (a trivial open-work baseline ranks as well). Report "
+                     "the negative results prominently rather than burying them - they are what make "
+                     "the headline credible."))
     s.append(P("<b>An ethics paragraph is worth writing.</b> Risk-scoring <i>people</i> - workload "
                "pressure, silent-member detection - carries surveillance and fairness concerns. "
                "Acknowledging this directly strengthens the paper rather than weakening it."))
@@ -393,8 +450,8 @@ def build_story2(d):
     s.append(tbl([
         ["Command", "Effect"],
         ["cp .env.example .env", "GROQ_API_KEY optional - full fallback mode works without it"],
-        ["make up && make db-migrate && make db-seed", "Start the full stack and seed demo data"],
-        ["make test", "backend 29/29, ai-service 43/43, frontend 27/27"],
+        ["make up && make db-seed", "Start the full stack and seed demo data (tables are created on startup)"],
+        ["make test", "backend 63, ai-service 67, frontend 50 - also run in CI on every push"],
     ], [0.44, 0.56]))
     s.append(Spacer(1, 8))
     s.append(P("Reproducing every number in this report (run from <font face='Courier'>ai-service/</font>):"))

@@ -109,8 +109,10 @@ Every number below is measured and reproducible — see [Reproducing the Evaluat
 |---|---|
 | Prompt-token growth vs. project-size growth | **1.47× tokens for a 154× larger project** |
 | Prompt-token reduction vs. naive full-dataset prompting | **99.8% (487×)** at 2,003 tasks |
-| Held-out real-world F1 (TAWOS, 22 unseen projects) | **0.712** — beats a tuned ML model's 0.593 |
-| Detection accuracy: graph vs. naive prompting (controlled ablation) | **1.000 vs 0.947** |
+| Mid-sprint warning, held-out (22 unseen projects) | **AUC 0.792 halfway through a sprint, 0.874 at three-quarters** |
+| Mid-sprint F1 vs. flagging every sprint | **+0.050** halfway, **+0.099** at three-quarters (both *p* < 0.001) |
+| Held-out sprint-end F1 (TAWOS, 22 unseen projects) | **0.712** recall-first, where a tuned model's cross-validated 0.816 fell to 0.593 |
+| Detection accuracy: graph vs. naive prompting (controlled ablation) | **1.000 vs 0.947** — no accuracy lost (n = 36, not significant) |
 | Evidence-grounding enforcement | **200/200** fabricated citations stripped |
 | LLM-narration vs. deterministic-verdict agreement (Cohen's κ) | **0.95** |
 | Deterministic pipeline latency (p50, 203 tasks) | **~11 ms** |
@@ -120,7 +122,9 @@ Every number below is measured and reproducible — see [Reproducing the Evaluat
 Three separate attempts to improve accuracy with more sophisticated methods (threshold tuning,
 individualized due-date estimation, a trained logistic-regression composite score) **all failed
 or backfired** on held-out data — reported prominently because it's what makes the headline claim
-credible rather than cherry-picked. Full details, all metrics, and the independent re-audit of
+credible rather than cherry-picked. The honest reading of the sprint-end comparison is that the
+tuned model's advantage did not survive unseen projects, not that the simple rule is more accurate:
+a paired test cannot separate the two (*p* = 0.78). Both beat flagging every sprint. Full details, all metrics, and the independent re-audit of
 every number: [IEEE_PAPER_REPORT.md](IEEE_PAPER_REPORT.md).
 
 ## Features
@@ -252,7 +256,7 @@ full walkthrough, including what is real and what the replay derives, is in [DEM
 ```bash
 make test               # everything
 make test-backend       # backend: 63 tests
-make test-ai            # AI service: 70 tests
+make test-ai            # AI service: 67 tests
 make test-frontend      # frontend: 50 tests (vitest)
 ```
 
@@ -264,9 +268,9 @@ cd ai-service && python -m pytest -q -m "not deferred"
 cd frontend && npm run type-check && npm run test:ci
 ```
 
-`deferred` marks the tests for meeting and communication intelligence. Those features have no data
-source in the product yet, so their tests stay in the tree and stay red — see
-[Known Limitations](#known-limitations).
+`deferred` marks the five tests for meeting and communication intelligence. Those features have no
+data source in the product yet, so their tests stay in the tree rather than being deleted, and two
+of them currently fail — see [Known Limitations](#known-limitations).
 
 All three suites and the frontend type check run on every push and pull request
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).

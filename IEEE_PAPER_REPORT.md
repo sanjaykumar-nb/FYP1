@@ -3,10 +3,11 @@
 **Explainable, Graph-Grounded Multi-Agent Project Intelligence**
 
 This is the single consolidated reference for writing the paper. Every number is measured,
-reproducible, and independently re-audited. Nothing is estimated.
+reproducible, and independently re-audited. Where a quantity could not be measured, it is given as
+a bounded range and labelled as one — see §8.7.
 
 **Contents:** [1. Summary](#1-one-page-summary) · [2. Problem](#2-problem-statement) ·
-[3. Solution](#3-proposed-solution) · [4. Novelty](#4-novelty--the-four-claims) ·
+[3. Solution](#3-proposed-solution) · [4. Novelty](#4-novelty--the-five-claims) ·
 [5. Architecture](#5-architecture) · [6. Features](#6-features) ·
 [7. Datasets](#7-datasets) · [8. Evaluation](#8-evaluation--all-metrics) ·
 [9. Limitations](#9-limitations--threats-to-validity) · [10. Figures](#10-figures) ·
@@ -22,8 +23,8 @@ reproducible, and independently re-audited. Nothing is estimated.
 |---|---|
 | **What it is** | A Kanban project-management platform with an AI layer that detects six kinds of team coordination risk, explains each with verifiable evidence, and recommends actions. |
 | **Core idea** | Don't ask an LLM to *find* risk. Compute risk deterministically from a knowledge graph, then let the LLM only *narrate* one finding from a bounded slice of that graph. |
-| **Main claim** | Risk detection can be made both **cheap** (487× fewer tokens) and **trustworthy** (mechanically verified citations) **without losing accuracy**. |
-| **Headline numbers** | 487× token reduction · held-out F1 **0.712** beats a tuned ML model's 0.593 · ablation F1 **1.000 vs 0.947** vs naive prompting · κ **0.95** LLM-vs-deterministic agreement · 200/200 fabricated citations stripped |
+| **Main claim** | Risk detection can be made both **cheap** (487× fewer tokens) and **trustworthy** (mechanically verified citations) **without losing accuracy** — and it warns while the sprint can still be changed. |
+| **Headline numbers** | 487× token reduction · mid-sprint warning **AUC 0.792 at the halfway point, 0.874 at three-quarters** on 22 unseen projects · held-out end-of-sprint F1 **0.712** recall-first, where a tuned model's cross-validated 0.816 fell to 0.593 · ablation F1 **1.000 vs 0.947** vs naive prompting · κ **0.95** LLM-vs-deterministic agreement · 200/200 fabricated citations stripped |
 | **Real dataset** | TAWOS — 458,232 real Jira issues, 39 open-source projects (MSR 2022, Apache 2.0) |
 | **Stack** | Next.js + FastAPI ×2 + PostgreSQL + NetworkX + Groq/LLM |
 | **Suggested venue** | IEEE Access (good fit now) · regional IEEE conferences (comfortably above bar) |
@@ -75,7 +76,7 @@ Six steps. The inversion in steps 2–4 is the whole idea.
 
 ---
 
-## 4. Novelty — the four claims
+## 4. Novelty — the five claims
 
 Each is independently testable, and each was tested.
 
@@ -95,16 +96,31 @@ Most XAI systems ask an LLM to cite sources and hope. Here every citation is che
 bounded set of real node ids; anything unresolvable is stripped. **Measured: 200/200 fabricated
 references removed.** "Told to cite evidence" becomes "every surviving citation is verifiably real."
 
-### Novelty 4 — A zero-parameter graph rule beats a tuned ML model on unseen data
+### Novelty 4 — Added model complexity did not survive unseen projects
 Three attempts to improve accuracy with more sophisticated methods **all failed or backfired**
-on held-out projects. The untuned deterministic rule scored **F1 0.712** against the tuned
-logistic model's **0.593** on 22 projects neither had seen. Reported as a finding in its own
-right: added model complexity was actively harmful here.
+on held-out projects. A tuned logistic model that reached **cross-validated F1 0.816** fell to
+**0.593** on 22 projects it had not seen, while the zero-parameter deterministic rule scored
+**0.712** on the same sprints. A paired test cannot separate the two (exact McNemar *p* = 0.78;
+bootstrap F1 difference +0.119, 95% CI [−0.025, +0.291]), so the claim is **not** that the rule is
+the more accurate predictor. What is significant is that the rule beats flagging every sprint
+(F1 +0.055, 95% CI [+0.030, +0.080], *p* < 0.001) and that the learned model's tuned advantage
+disappeared across project boundaries. Reported as a finding in its own right: added complexity
+bought nothing here, and cost the explanation.
+
+### Novelty 5 — The warning arrives while the sprint can still be changed
+The same graph, projected forward from the work completed so far, flags sprints that will finish late
+**halfway through**, not after the deadline has passed. On 270 held-out sprints from 22 unseen
+projects: **AUC 0.792 at the 50% checkpoint and 0.874 at 75%**, with F1 0.706 and 0.756 against
+0.657 for flagging every sprint (differences +0.050, 95% CI [+0.006, +0.094] and +0.099,
+[+0.049, +0.148]; both *p* < 0.001). Stated honestly, the projection **ranks no better than a
+simple open-work-share baseline** (0.792 vs 0.802; 0.874 vs 0.881) — its contribution is that the
+same graph that explains a risk also carries it forward in time, with the evidence attached.
 
 **One-sentence novelty statement (for the abstract):**
 > *Risk detection can be made both cheap (graph-computed, O(anomalies) prompt cost) and
-> trustworthy (mechanically grounded evidence) without sacrificing accuracy to a more complex
-> learned model.*
+> trustworthy (mechanically grounded evidence) without losing accuracy to a more complex learned
+> model that did not generalise — and the same graph warns mid-sprint, while the plan can still
+> change.*
 
 ---
 
@@ -302,9 +318,10 @@ checks, boundary sweeps, and the ablation.
 
 | Item | Value |
 |---|---|
-| Backend tests | 29/29 pass |
-| AI service tests | 43/43 pass (`pytest -m mvp`) |
-| Frontend tests | 27/27 pass (`vitest`) |
+| Backend tests | 63/63 pass |
+| AI service tests | 67/67 pass (`pytest -m "not deferred"`; 5 deferred tests for un-built agents are excluded, 2 of them currently red) |
+| Frontend tests | 50/50 pass (`vitest`), `tsc --noEmit` clean |
+| Continuous integration | All three suites and the type check run on every push (GitHub Actions) |
 | Code size | ~21K LOC |
 | Quality gates | ruff, mypy, eslint, prettier, tsc |
 
@@ -362,6 +379,50 @@ Varies with machine load between runs (p50 observed 4.8–11.0 ms across runs). 
 
 ### 8.4 Real-world results — TAWOS
 
+Two evaluations run on the same data. The **mid-sprint** one is the result to lead with: it asks
+the question a project manager actually has ("is this sprint going to finish?") at a moment when
+the answer still changes what they do. The **sprint-end** one is a sanity check on the same rule
+once the deadline has passed.
+
+#### Mid-sprint early warning — lead with this
+
+Each sprint is rebuilt as it stood at a checkpoint: only issues created by then exist, only issues
+resolved by then are done, and the clock is set to that moment. The system projects the share of
+scope that will still be unfinished at the deadline
+(`1 − completed/elapsed`, story points, minimum 1 point per issue) and raises a delay risk from the
+same severity cut-offs used everywhere else — nothing was tuned for this experiment. The
+checkpoints (50%, 75%), the prediction, and the cut-offs were fixed **before** the held-out
+projects were touched.
+
+**270 held-out sprints, 22 unseen projects** (48.9% of them finished late):
+
+| Checkpoint | Predictor | Precision | Recall | F1 | Flag rate | AUC |
+|---|---|---|---|---|---|---|
+| **50%** | Delay risk ≠ low | 0.581 | 0.902 | **0.706** | 0.759 | **0.792** |
+| 50% | Flag every sprint | 0.489 | 1.000 | 0.657 | 1.000 | — |
+| 50% | Open-work-share baseline | — | — | — | — | 0.802 |
+| **75%** | Delay risk ≠ low | 0.623 | 0.962 | **0.756** | 0.756 | **0.874** |
+| 75% | Delay risk high or worse | 0.719 | 0.909 | **0.803** | 0.619 | — |
+| 75% | Flag every sprint | 0.489 | 1.000 | 0.657 | 1.000 | — |
+| 75% | Open-work-share baseline | — | — | — | — | 0.881 |
+
+**Paired tests against flagging every sprint** (cluster bootstrap by project, 2,000 resamples;
+exact McNemar on the same sprints):
+
+| Checkpoint | F1 difference | 95% CI | McNemar |
+|---|---|---|---|
+| 50% | **+0.050** | [+0.006, +0.094] | 52 vs 13 discordant, *p* < 0.001 |
+| 75% | **+0.099** | [+0.049, +0.148] | 61 vs 5 discordant, *p* < 0.001 |
+
+> **Interpretation.** Halfway through a sprint the warning is real: it drops a quarter of the
+> sprints that flagging everything would flag, and still catches 90% of the ones that finish late.
+> By three-quarters the separation is clear (AUC 0.874). **What it does not show:** better ranking
+> than a trivial baseline. The share of work still open ranks sprints just as well (0.802 and
+> 0.881). The graph projection earns its place by being explainable and by carrying the same
+> evidence the rest of the system uses — not by ranking better than counting open issues.
+
+#### Sprint-end evaluation — sanity check
+
 **All 987 sprints (default, untuned):**
 
 | Metric | GraphMetrics | Story-point baseline |
@@ -382,10 +443,14 @@ Varies with machine load between runs (p50 observed 4.8–11.0 ms across runs). 
 
 Confusion matrices — rule: TP 132, FP 107, FN **0**, TN 31 · composite: TP 75, FP 46, FN 57, TN 92.
 
-> **Interpretation:** the system catches **every** delayed sprint (recall 1.00) while
-> over-flagging roughly half the on-time ones. It is a **high-sensitivity early warning**, not a
-> precise classifier — the right operating point when a false alarm is cheap to dismiss but a
-> missed one is not.
+> **Interpretation:** the system flags **every** delayed sprint (recall 1.00) while over-flagging
+> roughly half the on-time ones. Read that recall carefully: at sprint end a delayed sprint is one
+> with unfinished work past the due date, which is exactly the condition the rule tests, so recall
+> 1.00 is **guaranteed by the label definition here** — it is a property of evaluating after the
+> deadline, not a skill. The mid-sprint evaluation above, where the answer is not yet determined,
+> is where recall (0.90 at the halfway point) means something. What the sprint-end numbers do show
+> is the operating point: a high-sensitivity early warning rather than a precise classifier — the
+> right trade when a false alarm is cheap to dismiss and a miss is not.
 
 **Bootstrap confidence interval on the held-out F1.** A single point estimate from one split
 invites a fair question: how stable is 0.712? Answered with a **cluster bootstrap by project**
@@ -409,10 +474,14 @@ deterministically 1.0 in every replicate. This is worth stating plainly rather t
 smoothing over: the confidence interval correctly reports zero uncertainty in a quantity that has
 zero variance in the underlying data.
 
-**The interval strengthens, not just qualifies, the headline claim.** Even the *pessimistic* end
-of the graph rule's F1 interval (0.610) exceeds the tuned composite model's single point estimate
-(0.593) — the "beats a tuned model" claim holds under resampling uncertainty, not only at the
-original point estimate.
+**What the interval does and does not settle.** The pessimistic end of the rule's F1 interval
+(0.610) sits above the composite model's point estimate (0.593), but that comparison is between an
+interval and a point, on two predictors scored over the same sprints — it is not a test. The paired
+tests are: against the composite model, exact McNemar *p* = 0.78 with a bootstrap F1 difference of
++0.119, 95% CI [−0.025, +0.291] — **the two cannot be separated**. Against flagging every sprint,
++0.055, 95% CI [+0.030, +0.080], McNemar *p* < 0.001 — **a real difference**. The defensible claim
+is that the tuned model's advantage did not survive unseen projects, not that the rule is more
+accurate than it.
 
 ### 8.5 Negative results — three failed improvement attempts
 
@@ -424,8 +493,10 @@ Reported prominently. They establish the simple rule isn't leaving accuracy on t
 | 2 | **Individualized due dates** from cycle time (2.96 days/story-point) | Un-collapsed the signal (median ratio 0.76) but **lowered AUC 0.581 → 0.531**. Story points are too noisy a duration proxy. |
 | 3 | **Composite logistic regression**, 4 features, 3-fold group CV by project | Won on tuning (CV F1 **0.816**, AUC **0.887**), **lost on held-out (F1 0.593)**. Dominant weight fell on `idle_member_ratio`, which is *mechanically* coupled to the label rather than independently predictive; calibration didn't transfer. AUC collapse 0.887→0.658 is the signature of overfitting to project-specific structure. |
 
-**Conclusion:** the zero-parameter, fully explainable rule outperforms the tuned learned model on
-unseen projects. Added complexity was not merely unhelpful — it was **actively harmful**.
+**Conclusion:** the tuned learned model's advantage did not cross project boundaries — CV F1 0.816
+collapsed to 0.593, and a paired test cannot separate it from the zero-parameter rule (*p* = 0.78).
+Added complexity bought no measurable accuracy here, and it cost the explanation: the rule's verdict
+comes with the graph nodes behind it, the logistic model's does not.
 
 ### 8.6 Ablation — does graph-grounding cost accuracy?
 
@@ -492,11 +563,15 @@ rate-limits from the free-tier API key — an infrastructure constraint, not a m
 
 | Definition | Value |
 |---|---|
-| Over **all** attempted calls (incl. rate-limit blocks) | 41.1% (37/90) |
-| Over calls that **actually reached the model** | **~92%** (37/40) |
+| Over **all** attempted calls (incl. rate-limit blocks) | **41.1%** (37/90) — measured |
+| Over calls that **actually reached the model** | **54–95%** — bounded, not measured |
 
-Quote the first for "how often does an analysis complete end-to-end on this infrastructure";
-the second for "how often does the model produce a valid response." Conflating them misleads.
+Only the first number is measured. The second cannot be, because the run logged 24 of the 50
+failures individually and not the rest: if every undiagnosed failure reached the model, validity is
+37/68 = 54%; if none did, 37/39 = 95%. The often-quoted "~92%" assumes the second extreme, and the
+run has no per-call record to support it. **Quote 41.1% as the end-to-end rate on free-tier
+infrastructure, and report the model's own validity as a 54–95% range** until the run is repeated
+with per-call error logging (one hour on a paid key — see §14).
 
 ### 8.8 Metric glossary
 
@@ -556,10 +631,12 @@ Useful for a "lessons learned" or methodology-credibility paragraph.
 | 4 | **AUC is weak by construction** at sprint level, since all tasks in a reconstructed sprint share one deadline. |
 | 5 | **Live-LLM sample is thin and imbalanced** — κ=0.95 rests on n=37, with 3 of 6 risk types at n=1. Single provider, single model, one rate-limited key. |
 | 6 | **No human evaluation** of explanation quality. Grounding proves citations are real, not that explanations are *useful*. |
-| 7 | **No confidence intervals** — held-out F1 0.712 is a single point estimate from one split. |
-| 8 | **RBAC not enforced** at fine granularity; the guarantee is *authenticated + org-scoped*. |
+| 7 | **The mid-sprint projection ranks no better than counting open work** (AUC 0.792 vs 0.802 at 50%; 0.874 vs 0.881 at 75%). Its advantage is explanation and integration, not rank quality. |
+| 8 | **Mid-sprint recall depends on the projection horizon.** At the 25% checkpoint the elapsed fraction is below the rule's minimum and the signal is switched off deliberately; nothing is claimed about the first quarter of a sprint. |
 | 9 | **Two designed agents unimplemented** (Meeting, Comm Intel) — no data source exists yet. |
 | 10 | **No longitudinal study** — no evidence a flagged risk predicts a real-world outcome over weeks. |
+| 11 | **Live-LLM schema validity is a range, not a number** (54–95%); only the end-to-end 41.1% is measured. |
+| 12 | **The sprint-end recall of 1.00 is structural**, guaranteed by the label definition at that evaluation point. |
 
 ---
 
@@ -617,14 +694,18 @@ Suggested 8–12 pages for IEEE Access; 6–8 for a conference.
 | IV | **Graph-Grounded Prompting** ← *core* | §4 Novelty 1–3, §5.3–5.5, §8.10 bugs as rigor | 2–3 |
 | V | **Multi-Agent Design** | §5.6 + `AgentOutput` schema | 1–1.5 |
 | VI | **Experimental Setup** | §7 datasets, split discipline, point-in-time reconstruction | 1 |
-| VII | **Results** | §8.2–8.7 + **Figs. 2, 3, 4** | 2–3 |
-| VIII | **Discussion** | §8.5 negative results, §4 Novelty 4, ethics of risk-scoring people | 1 |
-| IX | **Threats to Validity** | §9 — reproduce honestly, all ten | 0.5 |
+| VII | **Results** | §8.2–8.7, leading with the mid-sprint evaluation in §8.4 + **Figs. 2, 3, 4** | 2–3 |
+| VIII | **Discussion** | §8.5 negative results, §4 Novelty 4–5, ethics of risk-scoring people | 1 |
+| IX | **Threats to Validity** | §9 — reproduce honestly, all twelve | 0.5 |
 | X | **Conclusion & Future Work** | §1 + §14 | 0.5 |
 
 **Tone guidance.** The strongest defensible claim is:
-> *"A simple, explainable, zero-parameter graph rule matches or beats a tuned learned model on
-> unseen projects, at 487× lower prompt cost."*
+> *"A simple, explainable, zero-parameter graph rule matches a tuned learned model on unseen
+> projects at 487× lower prompt cost, and warns halfway through a sprint rather than after it."*
+
+Two words to avoid: **"beats"** for the composite model comparison (the paired test says the two
+cannot be separated, §8.4) and **"accurate"** for the mid-sprint projection's ranking (a trivial
+open-work baseline ranks as well, §9 threat 7).
 
 Do not overclaim beyond that. Report the negative results (§8.5) **prominently** rather than
 burying them — they are what makes the headline credible.
@@ -639,8 +720,8 @@ carries surveillance and fairness concerns. A paragraph acknowledging this stren
 ```bash
 # Run the system
 cp .env.example .env          # GROQ_API_KEY optional — full fallback mode works without it
-make up && make db-migrate && make db-seed
-make test                     # backend 29/29, ai 43/43, frontend 27/27
+make up && make db-seed       # tables are created on startup; there is no migration step
+make test                     # backend 63, ai 67, frontend 50 (also run in CI on every push)
 ```
 
 ```bash
@@ -651,6 +732,7 @@ python -m eval.datasets.tawos_load           # TAWOS .sql -> SQLite (~4.3GB, one
 python -m eval.datasets.tawos_split          # fixed project-level split
 python -m eval.datasets.tawos_score          # all-987-sprint result
 python -m eval.datasets.tawos_holdout_eval   # the one-shot held-out number
+python -m eval.datasets.tawos_midsprint_eval # mid-sprint checkpoints + paired tests (§8.4)
 python -m eval.ablation_naive_vs_graph       # naive-vs-graph ablation   [needs API key, billed]
 python -m eval.live_llm_eval                 # schema validity + Cohen's κ [needs API key, billed]
 python -m eval.make_figures                  # regenerate all 4 figures (offline)
@@ -669,19 +751,22 @@ Honest gap list, in priority order.
 |---|---|---|---|
 | ~~1~~ | ~~Bootstrap confidence intervals on held-out F1~~ | done | §8.4 — 95% CI [0.610, 0.814] on F1, cluster bootstrap by project |
 | ~~2~~ | ~~Bibliography (~15–20 refs)~~ | done | §15 — 16 real, verifiable references, cited inline |
-| **3** | **IEEEtran conversion** | 1 day | `paper.tex` provided (§16); this environment has no LaTeX installed to compile it — compile via Overleaf or a local TeX Live install |
-| 4 | Human evaluation of explanation quality | 1–2 weeks | The biggest unmeasured claim for an *explainability* paper |
-| 5 | Grounding ablation (run with the check disabled) | ~1 day | Proves the safety net catches something real, not just synthetic fabrications |
-| 6 | Balanced live-LLM sample (paid tier) | days | Fixes n=1 categories in the κ breakdown |
-| 7 | Validate remaining 5 risk types on real data (AMI/Enron) | months | Removes the largest scope limitation |
+| ~~3~~ | ~~Prediction before the sprint ends~~ | done | §8.4 — pre-registered 50% and 75% checkpoints on the held-out projects |
+| ~~4~~ | ~~Paired significance tests~~ | done | §8.4 — exact McNemar + cluster bootstrap for every headline comparison |
+| **5** | **IEEEtran conversion** | 1 day | `paper.tex` provided (§16); this environment has no LaTeX installed to compile it — compile via Overleaf or a local TeX Live install |
+| 6 | Human evaluation of explanation quality | 1–2 weeks | The biggest unmeasured claim for an *explainability* paper |
+| 7 | Live-LLM re-run with per-call error logging | ~1 hour on a paid key | Replaces the 54–95% schema-validity range with one measured number (§8.7) |
+| 8 | Grounding ablation (run with the check disabled) | ~1 day | Proves the safety net catches something real, not just synthetic fabrications |
+| 9 | Balanced live-LLM sample (paid tier) | days | Fixes n=1 categories in the κ breakdown |
+| 10 | Validate remaining 5 risk types on real data (AMI/Enron) | months | Removes the largest scope limitation |
 
 **Verdict on readiness:**
 
 | Venue | Ready? |
 |---|---|
 | Regional IEEE conferences (ICCCNT, ICACCS, etc.) | **Yes, comfortably above bar** |
-| **IEEE Access** | **Yes** — items 1–2 done; only LaTeX compilation (item 3, mechanical) remains |
-| IEEE ICSME / SANER | Borderline — add items 4–5 |
+| **IEEE Access** | **Yes** — items 1–4 done; only LaTeX compilation (item 5, mechanical) remains |
+| IEEE ICSME / SANER | Borderline — add items 6–8 |
 | IEEE TSE / ICSE / ASE | No — needs items 4–7 |
 
 ---

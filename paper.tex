@@ -56,13 +56,18 @@ anomalies rather than project size (measured 1.47$\times$ token growth for a
 prompting at 2{,}003 tasks), and evidence grounding that is enforced rather than
 requested (200/200 fabricated citations correctly stripped in trial). On a held-out,
 project-level split of a real 458{,}232-issue Jira dataset (TAWOS, 22 unseen
-projects), the untuned, zero-parameter graph rule reaches F1 = 0.712 (95\% bootstrap
-CI [0.610, 0.814]), exceeding a logistic-regression model tuned on the training
-split (F1 = 0.593) -- a result that holds even at the pessimistic end of the
-confidence interval. Three independent attempts to improve on this simple rule with
-more sophisticated methods all failed or backfired on held-out data, a set of
-negative results we report in full because they are what make the headline claim
-credible. A controlled ablation further shows the token-efficient graph architecture
+projects), the same graph, projected forward from work completed so far, warns of
+sprints that will finish late while they are still running: AUC 0.792 at the halfway
+point and 0.874 at three-quarters, improving on flagging every sprint by F1 +0.050
+(95\% CI [+0.006, +0.094]) and +0.099 ([+0.049, +0.148]), both $p < 0.001$. Evaluated
+after the deadline instead, the untuned, zero-parameter rule reaches F1 = 0.712 (95\%
+bootstrap CI [0.610, 0.814]) where a logistic-regression model that reached
+cross-validated F1 = 0.816 on the tuning split falls to 0.593; a paired test cannot
+separate the two ($p = 0.78$), so we claim not that the simple rule predicts better,
+but that the tuned model's advantage did not cross project boundaries. Three
+independent attempts to improve on the simple rule with more sophisticated methods all
+failed or backfired on held-out data, a set of negative results we report in full
+because they are what make the headline claim credible. A controlled ablation further shows the token-efficient graph architecture
 matches or exceeds naive full-dataset LLM prompting on detection accuracy (F1 1.000
 vs.\ 0.947), so the efficiency gain does not trade away correctness.
 \end{abstract}
@@ -111,9 +116,14 @@ a 487$\times$ reduction against naive prompting at scale. (iii) A mechanical
 evidence-grounding check that converts ``the model was asked to cite sources'' into
 ``every surviving citation is verifiably real,'' rather than relying on prompt
 compliance. (iv) A held-out, real-world evaluation, including three reported negative
-results, showing that a zero-parameter deterministic rule matches or exceeds a tuned
-learned model on unseen data -- and a controlled ablation showing this efficiency does
-not cost detection accuracy.
+results, showing that a zero-parameter deterministic rule matches a tuned learned
+model on unseen data -- the two cannot be separated by a paired test, while the
+learned model's cross-validated advantage does not survive the project boundary -- and
+a controlled ablation showing this efficiency does not cost detection accuracy.
+(v) A pre-registered mid-sprint evaluation on the same held-out projects, in which the
+graph projected forward from completed work identifies sprints that will finish late at
+their halfway point (AUC 0.792, and 0.874 at three-quarters), moving the warning to a
+point where it can still change the outcome.
 
 The remainder of this paper is organized as follows. Section~II positions this work
 against related tooling and techniques. Section~III describes the system
@@ -427,14 +437,33 @@ achieves precision 0.630, recall 1.000, F1 0.773, and accuracy 0.655, against a
 story-point-median baseline's precision 0.545, recall 0.386, F1 0.452, and accuracy
 0.450.
 
-On the 270-sprint, 22-project held-out set -- the headline result -- the untuned,
-zero-parameter graph rule achieves precision 0.552, recall 1.000, F1 0.712, against a
-composite logistic-regression model (tuned via three-fold group cross-validation on
-the training split) achieving precision 0.620, recall 0.568, F1 0.593, AUC 0.658
-(Fig.~\ref{fig:holdout}). The system recalls every delayed sprint at the cost of
-over-flagging roughly half the on-time ones: a high-sensitivity early-warning
-operating point, appropriate when a missed risk is costlier than a dismissible false
-alarm.
+\textbf{Mid-sprint prediction.} The evaluation that matters to a practitioner asks
+whether a sprint is in trouble while it is still running. We rebuild each held-out
+sprint as it stood at a checkpoint -- only issues created by then exist, only issues
+resolved by then are done, and the clock is set to that moment -- and project the share
+of scope that will remain unfinished at the deadline, raising a delay risk from the
+severity cutoffs already used elsewhere in the system. The checkpoints (50\%, 75\%), the
+prediction, and the cutoffs were fixed before the held-out projects were touched, and
+nothing was tuned for this experiment. On the 270 held-out sprints (48.9\% of which
+finished late), the rule achieves F1 0.706 (precision 0.581, recall 0.902) at the
+halfway point and F1 0.756 (precision 0.623, recall 0.962) at three-quarters, against
+0.657 for flagging every sprint; paired by sprint, the differences are +0.050 (95\% CI
+[+0.006, +0.094]) and +0.099 ([+0.049, +0.148]), exact McNemar $p < 0.001$ in both
+cases. Ranked by the projected unfinished share, AUC is 0.792 and 0.874. We note
+explicitly that a simple open-work-share baseline ranks the same sprints as well (AUC
+0.802 and 0.881): the projection's contribution is an early warning carrying the same
+verifiable evidence as every other finding, not superior ranking.
+
+\textbf{Sprint-end evaluation.} Evaluated after the deadline instead, on the same
+270-sprint held-out set, the untuned zero-parameter rule achieves precision 0.552,
+recall 1.000, F1 0.712, against a composite logistic-regression model (tuned via
+three-fold group cross-validation on the training split) achieving precision 0.620,
+recall 0.568, F1 0.593, AUC 0.658 (Fig.~\ref{fig:holdout}). The perfect recall here is
+structural rather than skillful: at sprint end, a delayed sprint is by definition one
+with work unfinished past the due date, which is precisely the condition the rule
+tests. What the comparison does show is the operating point -- over-flagging roughly
+half the on-time sprints in exchange for missing none -- appropriate when a missed risk
+is costlier than a dismissible false alarm.
 
 \begin{figure}[t]
 \centering
@@ -454,9 +483,13 @@ resulting 95\% confidence interval is F1 $\in [0.610, 0.814]$, precision $\in [0
 $[1.000, 1.000]$: every held-out project has zero false negatives under the untuned
 rule, so no resample can introduce one either; this is a genuine property of the
 data, not a bootstrap artifact, and we report it as such rather than obscuring it.
-Notably, even the pessimistic end of the F1 interval (0.610) exceeds the tuned
-composite model's point estimate (0.593), so the headline claim holds under
-resampling uncertainty, not only at the original point estimate.
+Comparing that interval to the composite model's point estimate would not be a test,
+so we ran paired ones on the same sprints: against the composite model, exact McNemar
+gives $p = 0.78$ and the bootstrap difference in F1 is +0.119 (95\% CI [-0.025,
++0.291]) -- the two predictors cannot be separated; against flagging every sprint, the
+rule gains +0.055 (95\% CI [+0.030, +0.080], $p < 0.001$). We therefore claim that the
+tuned model's cross-validated advantage did not survive unseen projects, not that the
+zero-parameter rule is the more accurate predictor.
 
 \subsection{Negative Results}
 
@@ -529,19 +562,28 @@ risk types (dependency, $n=14$; knowledge, $n=12$) carry most of the statistical
 weight; the remainder have thin samples (as low as $n=1$) due to rate-limiting on the
 evaluation account, a limitation we discuss in Section~IX. Separately, of 24
 diagnosed call failures, 22 were HTTP rate-limit responses rather than genuine model
-failures; among calls that reached the model, the observed schema-validity rate was
-approximately 92\%.
+failures. Because only 24 of the 50 failures were diagnosed individually, the validity
+rate over calls that actually reached the model is bounded rather than measured: 54\%
+if every undiagnosed failure reached the model, 95\% if none did. We therefore report
+41.1\% (37/90) as the measured end-to-end rate on this infrastructure and 54--95\% as
+the range for the model's own schema validity, pending a re-run with per-call error
+logging.
 
 \section{Discussion}
 
 The results support a precise claim, and we are careful not to extend it further: a
-simple, explainable, zero-parameter graph rule matches or exceeds a tuned learned
-model on unseen projects, at a fraction of the token cost of naive LLM prompting, and
-without loss of detection accuracy in a controlled ablation. This is a narrower claim
-than ``deterministic graph rules are always superior to learned models'' -- the
-result reflects this specific problem's structure (a low-parameter, sprint-level
-delay signal, evaluated with strict project-level held-out discipline), not a general
-argument against learning.
+simple, explainable, zero-parameter graph rule matches a tuned learned model on unseen
+projects, at a fraction of the token cost of naive LLM prompting, without loss of
+detection accuracy in a controlled ablation, and it delivers its warning while the
+sprint can still be changed. Each half of that sentence is bounded. ``Matches'' is
+literal: a paired test on the held-out sprints cannot separate the two predictors
+($p = 0.78$), and we do not claim the rule is more accurate -- only that the learned
+model's cross-validated advantage did not cross project boundaries. The mid-sprint
+result is an improvement over flagging every sprint, not over ranking by open work,
+which performs comparably. This is a narrower claim than ``deterministic graph rules
+are always superior to learned models'' -- the result reflects this specific problem's
+structure (a low-parameter, sprint-level delay signal, evaluated with strict
+project-level held-out discipline), not a general argument against learning.
 
 \textbf{Why simplicity won here.} The negative results in Section~VII-C converge on
 one explanation: with limited real-world training data (717 tuning sprints across
@@ -568,7 +610,7 @@ only as a plausible direction, not a validated one.
 
 \section{Threats to Validity}
 
-We list ten threats explicitly rather than allowing them to remain implicit.
+We list twelve threats explicitly rather than allowing them to remain implicit.
 (1)~The TAWOS delay label is a proxy, since the dataset lacks a due-date field; the
 30\%-unresolved-at-sprint-end definition is defensible but not canonical.
 (2)~Only one of six risk types (delay) has real-world, non-synthetic validation;
@@ -585,12 +627,18 @@ single model, and one rate-limited API key. (6)~We have not conducted a human
 evaluation of explanation quality; grounding demonstrates that citations are real,
 not that the resulting explanations are useful to a practitioner. (7)~The bootstrap
 interval quantifies sampling uncertainty from one fixed split; it does not
-substitute for evaluation on an independent dataset. (8)~Fine-grained
-role-based access control is designed but not enforced; the present guarantee is
-authentication plus organization-scoping only. (9)~Two designed agents (Meeting
+substitute for evaluation on an independent dataset. (8)~The mid-sprint projection
+does not rank sprints better than the share of work still open (AUC 0.792 versus
+0.802 at the halfway checkpoint, 0.874 versus 0.881 at three-quarters); its
+contribution is an early, evidence-carrying warning rather than superior
+discrimination. (9)~Perfect recall in the sprint-end evaluation is structural,
+guaranteed by the label definition at that evaluation point, and should not be read
+as predictive skill; only the mid-sprint recall is informative. (10)~The mid-sprint
+signal is deliberately inactive before a quarter of the sprint has elapsed, so no
+claim is made about the earliest phase of a sprint. (11)~Two designed agents (Meeting
 Intelligence, Communication Intelligence) are unimplemented because no transcript or
 chat/email data source yet exists in the product -- an explicit scoping decision.
-(10)~We have not conducted a longitudinal study showing that a flagged risk predicts
+(12)~We have not conducted a longitudinal study showing that a flagged risk predicts
 a real downstream outcome over subsequent weeks.
 
 \section{Conclusion and Future Work}
@@ -601,9 +649,11 @@ mechanically enforces that separation through evidence grounding. The design yie
 measured, not merely claimed, efficiency (487$\times$ lower prompt cost than naive
 prompting at scale) and trustworthiness (200/200 fabricated citations caught), and a
 held-out real-world evaluation shows this efficiency does not cost accuracy: a
-zero-parameter graph rule matches or exceeds a tuned learned model on unseen
-projects, a claim that holds under bootstrap resampling and that a controlled
-ablation shows is not an artifact of an easy comparison. We reported three negative
+zero-parameter graph rule matches a tuned learned model on unseen projects -- a paired
+test cannot separate them -- and a controlled ablation shows this is not an artifact of
+an easy comparison. Projected forward from work completed so far, the same graph warns
+of late sprints at their halfway point (AUC 0.792, rising to 0.874 at three-quarters),
+which is where such a warning has to arrive to be worth acting on. We reported three negative
 results from attempts to improve on the simple rule specifically because they
 substantiate rather than undermine this claim.
 

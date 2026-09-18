@@ -110,7 +110,7 @@ All numbers below are reproducible from `ai-service/eval/`. Nothing here is
 estimated or illustrative.
 
 ### 10.1 Engineering baseline
-- **Tests**: backend 29/29, ai-service 43/43 (`pytest -m mvp`), frontend 27/27 (`vitest run`)
+- **Tests**: backend 63, ai-service 67 (`pytest -m "not deferred"`), frontend 50 (`vitest run`), all run in CI on every push
 - **Quality**: ruff/mypy (Py), eslint/prettier/tsc (TS)
 - **Demo seed**: `make db-seed` → 1 org, 5 users, 3 projects, 50+ tasks
 
@@ -190,10 +190,19 @@ across the boundary. The held-out set was evaluated **once**.
 | **Deterministic single-signal rule (untuned)** | **0.712** | 0.552 | **1.000** |
 | Tuned composite logistic model | 0.593 | 0.620 | 0.568 |
 
-**The system catches every delayed sprint (recall 1.00) at the cost of
-over-flagging roughly half the on-time ones.** It is a high-sensitivity early
-warning, not a precise classifier — which is the appropriate operating point
-for surfacing risk to a project manager who can dismiss a false alarm cheaply.
+**The system flags every delayed sprint (recall 1.00) at the cost of
+over-flagging roughly half the on-time ones.** After the deadline that recall is
+structural — the label and the rule test the same condition — so read it as the
+operating point rather than as skill; the mid-sprint numbers below are the
+predictive ones. It is a high-sensitivity early warning, not a precise classifier,
+which suits a project manager who can dismiss a false alarm cheaply.
+
+**Mid-sprint, on the same 270 held-out sprints:** F1 0.706 (precision 0.581,
+recall 0.902) at the halfway point and 0.756 at three-quarters, against 0.657
+for flagging every sprint — differences of +0.050, 95% CI [+0.006, +0.094] and
++0.099, [+0.049, +0.148], both *p* < 0.001. AUC 0.792 and 0.874; a simple
+open-work-share baseline ranks as well (0.802, 0.881), so the contribution is the
+early, evidence-carrying warning rather than better ranking.
 
 ### 10.5 Three attempts to improve it — all negative results
 
@@ -217,9 +226,10 @@ that the simple rule is not leaving accuracy on the table.
    team-specific and did not transfer. The AUC collapse 0.887 → 0.658 is the
    signature of fitting project-specific structure.
 
-**Conclusion:** the zero-parameter, fully explainable graph rule outperforms
-the tuned learned model on unseen projects. Added model complexity was not
-merely unhelpful here — it was actively harmful.
+**Conclusion:** the tuned model's advantage did not cross the project
+boundary — CV F1 0.816 fell to 0.593, and a paired test cannot separate it from
+the zero-parameter rule (exact McNemar *p* = 0.78). Added complexity bought no
+measurable accuracy here, and it cost the explanation.
 
 ### 10.6 Threats to validity
 - **Label is a proxy.** TAWOS lacks due dates; "≥30% unresolved at sprint end"
@@ -260,7 +270,7 @@ doi:10.1145/3524842.3528029.
 ```bash
 git clone <url> && cd teamsync-ai
 cp .env.example .env  # add GROQ_API_KEY
-make up && make db-migrate && make db-seed
+make up && make db-seed
 # Frontend: localhost:3000 | Core API: localhost:8000/docs | AI: localhost:8001/docs
 ```
 
@@ -303,7 +313,7 @@ Use this to prompt the AI for each paper section. Replace `[...]` with your actu
 > (d) **Negative results** — Section 10.5's three failed improvement attempts; emphasize that the zero-parameter explainable rule *beat* the learned composite on held-out data (0.712 vs 0.593), and why (idle_member_ratio is mechanically coupled to the label, doesn't transfer across teams).
 > (e) **Threats to validity** — reproduce Section 10.6 honestly: proxy label, five of six risk types validated only synthetically, no live-LLM metrics.
 >
-> Tone: report the negative results prominently rather than burying them. The strongest claim available is *'a simple, explainable, zero-parameter graph rule matches or beats a tuned learned model on unseen projects'* — do not overclaim beyond that."
+> Tone: report the negative results prominently rather than burying them. The strongest claim available is *'a simple, explainable, zero-parameter graph rule matches a tuned learned model on unseen projects, and warns halfway through a sprint rather than after it'* — do not overclaim beyond that, and avoid the word 'beats': the paired test cannot separate the two."
 
 ### 8. Discussion (1 page)
 > "Cover: (a) Limitations - LLM cost/latency, fallback quality ceiling, 6 risk types may not generalize, no code analysis agent yet; (b) Threats to validity - synthetic data, single LLM provider, no longitudinal study; (c) Generalizability - other domains (sales, support, research); (d) Ethics - surveillance concerns, bias in risk scores, data privacy."

@@ -134,8 +134,9 @@ Rather than reporting only favorable synthetic numbers, the evaluation includes 
 held-out test against a public 458K-issue Jira dataset (§12.4) and three documented attempts to
 improve accuracy that **failed or backfired** (§12.5) — reported because a negative result that
 rules out added complexity is itself a finding, and because it is what makes the "simple,
-zero-parameter graph rule matches or beats a tuned learned model on unseen data" claim credible
-rather than cherry-picked.
+zero-parameter graph rule matches a tuned learned model on unseen data" claim credible rather than
+cherry-picked. The evaluation also runs at pre-registered mid-sprint checkpoints (§12.4), which is
+where a delay warning has to arrive to be worth anything.
 
 ---
 
@@ -558,7 +559,8 @@ labels bypassing the ORM layer entirely.
 
 ### 12.1 Engineering baseline
 
-- **Tests:** backend 29/29, ai-service 43/43 (`pytest -m mvp`), frontend 27/27 (`vitest run`).
+- **Tests:** backend 63, ai-service 67 (`pytest -m "not deferred"`), frontend 50 (`vitest run`),
+  all run in CI on every push.
 - **Quality gates:** ruff/mypy (Python), eslint/prettier/tsc (TypeScript).
 - **Demo seed:** `make db-seed` → 1 org, 5 users, 3 projects, 50+ tasks.
 
@@ -628,17 +630,42 @@ once.
 | Accuracy | 0.655 | 0.450 |
 | AUC-ROC | 0.581 | — |
 
-#### Held-out result (270 sprints, 22 unseen projects) — the headline number
+#### Mid-sprint result (270 held-out sprints) — the headline number
+
+Each sprint is rebuilt as it stood at a checkpoint — only issues created by then exist, only those
+resolved by then are done — and the system projects the share of scope still unfinished at the
+deadline. Checkpoints, prediction and severity cut-offs were fixed before the held-out projects
+were touched.
+
+| Checkpoint | Predictor | Precision | Recall | F1 | AUC |
+|---|---|---|---|---|---|
+| **50%** | Delay risk ≠ low | 0.581 | 0.902 | **0.706** | **0.792** |
+| 50% | Flag every sprint | 0.489 | 1.000 | 0.657 | — |
+| **75%** | Delay risk ≠ low | 0.623 | 0.962 | **0.756** | **0.874** |
+| 75% | Delay risk high or worse | 0.719 | 0.909 | **0.803** | — |
+| 75% | Flag every sprint | 0.489 | 1.000 | 0.657 | — |
+
+Paired against flagging every sprint: **+0.050 F1**, 95% CI [+0.006, +0.094] at the halfway point;
+**+0.099**, [+0.049, +0.148] at three-quarters; exact McNemar *p* < 0.001 for both. An
+open-work-share baseline ranks the same sprints as well (AUC 0.802 and 0.881), so the claim is the
+early, explained warning — not better ranking.
+
+#### Sprint-end result (270 sprints, 22 unseen projects) — sanity check
 
 | | F1 | Precision | Recall |
 |---|---|---|---|
 | **Deterministic single-signal rule (untuned)** | **0.712** | 0.552 | **1.000** |
 | Tuned composite logistic model | 0.593 | 0.620 | 0.568 |
 
-**Reading this result:** the system catches every delayed sprint (recall 1.00) at the cost of
-over-flagging roughly half the on-time ones. It is a high-sensitivity early-warning signal, not a
-precise classifier — which is the appropriate operating point for surfacing risk to a project
-manager who can dismiss a false alarm cheaply but cannot recover from a missed one.
+**Reading this result:** the system flags every delayed sprint (recall 1.00) at the cost of
+over-flagging roughly half the on-time ones. That recall is structural: after the deadline, a
+delayed sprint is one with unfinished work past the due date, which is the condition the rule
+tests — so read it as the operating point, not as predictive skill. It is a high-sensitivity
+early-warning signal, not a precise classifier, which is the appropriate trade for a project
+manager who can dismiss a false alarm cheaply but cannot recover from a missed one. Against the
+tuned composite model, a paired test cannot separate the two (exact McNemar *p* = 0.78; bootstrap
+F1 difference +0.119, 95% CI [−0.025, +0.291]); against flagging every sprint the rule gains
++0.055, 95% CI [+0.030, +0.080], *p* < 0.001.
 
 ### 12.5 Three attempts to improve accuracy — all negative results
 
@@ -661,9 +688,10 @@ and it is what makes the headline claim credible rather than cherry-picked.
    and did not transfer. The AUC collapse from 0.887 to 0.658 is the textbook signature of
    overfitting to project-specific structure rather than a general delay signal.
 
-**Conclusion:** the zero-parameter, fully explainable graph rule outperforms the tuned learned
-model on unseen projects. Added model complexity was not merely unhelpful here — it was actively
-harmful.
+**Conclusion:** the tuned model's advantage did not cross the project boundary — CV F1 0.816 fell
+to 0.593, and a paired test cannot separate it from the zero-parameter rule (*p* = 0.78). Added
+complexity bought no measurable accuracy here, and it cost the explanation: the rule's verdict
+arrives with the graph nodes behind it.
 
 ### 12.6 Threats to validity
 
@@ -820,7 +848,7 @@ results.** No single comparator combines all five.
 ```bash
 git clone <repo-url> && cd teamsync-ai
 cp .env.example .env          # add GROQ_API_KEY (optional — full fallback mode works without it)
-make up && make db-migrate && make db-seed
+make up && make db-seed
 # Frontend:  http://localhost:3000
 # Core API:  http://localhost:8000/docs
 # AI:        http://localhost:8001/docs
@@ -828,9 +856,9 @@ make up && make db-migrate && make db-seed
 
 ```bash
 make test            # all services
-make test-backend    # backend 29/29
-make test-ai         # ai-service 43/43 (pytest -m mvp)
-make test-frontend   # frontend 27/27 (vitest)
+make test-backend    # backend 63
+make test-ai         # ai-service 67
+make test-frontend   # frontend 50 (vitest)
 ```
 
 Evaluation reproduction commands are in §12.8.
@@ -850,7 +878,8 @@ risk types computed as deterministic graph invariants) plus specialist LLM agent
 findings under a mechanically enforced evidence-grounding constraint. State the two central
 measured results: 99.8% prompt-token reduction vs. a naive baseline while project size grows
 154×, and a held-out real-world evaluation (TAWOS, 458K Jira issues) where the zero-parameter
-graph rule beats a tuned learned model (F1 0.712 vs 0.593) on unseen projects."
+graph rule warns of late sprints at their halfway point (AUC 0.792, rising to 0.874 at
+three-quarters) and matches a tuned learned model at sprint end on unseen projects."
 
 **Introduction:** problem (§1) → gap vs. existing tools (§15) → approach (§3, §5) →
 contributions (§3.1–3.5) → paper structure.
@@ -867,7 +896,8 @@ and fixed (unbounded witness growth, empty-findings grounding bug) as evidence o
 
 **Evaluation:** §12 in full — do not omit §12.5 (negative results) or §12.6 (threats to
 validity); the paper's strongest defensible claim is *"a simple, explainable, zero-parameter graph
-rule matches or beats a tuned learned model on unseen projects"* — state exactly that, no more.
+rule matches a tuned learned model on unseen projects, and warns halfway through a sprint rather
+than after it"* — state exactly that, no more, and avoid "beats": the paired test returns *p* = 0.78.
 
 **Discussion:** §14 limitations, ethical considerations (risk-scoring people carries surveillance
 and fairness concerns — an explicit paragraph is warranted), generalizability to non-software

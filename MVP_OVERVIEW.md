@@ -145,7 +145,7 @@ No exotic infrastructure — everything runs in a handful of containers on a lap
 ```bash
 git clone <repo-url> && cd teamsync-ai
 cp .env.example .env        # AI key is optional — the app works fully without one
-make up && make db-migrate && make db-seed
+make up && make db-seed
 ```
 
 Then open:
