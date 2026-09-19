@@ -124,7 +124,7 @@ Recommendations, each checked against the raw sprint:
 
 **Why: evidence from the project graph** — the panel that lets anyone check the verdict instead of
 trusting it. It lists the six risk scores (delay critical, workload high, the rest low), computed from
-a graph of 46 nodes and 160 links, then every finding with the issues and people it rests on:
+a graph of 45 nodes and 117 links, then every finding with the issues and people it rests on:
 
 | Finding | Measure | Based on |
 |---|---|---|
@@ -140,15 +140,15 @@ No language model produces any of these numbers, which is why each one can be tr
 computed on the same graph as the finding. Each move takes one open task from whoever carries the most
 at that point and hands it to the teammate that leaves the pair most even:
 
-1. MESOS-8567 (3 pts) — contributor #3409 → #3415 (who had no open work)
-2. MESOS-8524 (2 pts) — contributor #3391 → #3361
-3. MESOS-8383 (3 pts) — contributor #3409 → #3569
+1. MESOS-8492 (3 pts) — contributor #3409 → #3415 (who had no open work)
+2. MESOS-8524 (2 pts) — contributor #3391 → #3569
+3. MESOS-8383 (3 pts) — contributor #3409 → #3361
 
 *Expected: heaviest open load falls from 9 to 6 points against a team mean of 3.8 — load skew high →
 medium.* Click **Apply** on each: the task's assignee changes on the board and the row reads
 *Applied*. Then **Run Analysis** again. Live result: **Workload — was high, now medium**, as
-predicted. The heaviest load is now contributor #3481's 6 points, and the new run suggests one more
-move (MESOS-5882 to #3389), expected to take load skew from medium to low.
+predicted. The heaviest load is now contributor #3481's 6 points, and the new run suggests further
+moves, expected to take load skew from medium to low.
 
 A suggestion can't be applied twice or against a board that has moved on: once the task changes
 hands, its row reads *Applied* or *Changed since this analysis* instead of offering the button.
@@ -165,7 +165,7 @@ python -m app.scripts.import_real_sprint app/scripts/fixtures/mesos_sprint_74.js
 Only what existed then is imported: 25 of the 30 issues (6 of them resolved) and 52 comments. The
 deadline is a week away, so nothing is overdue, yet AI Insights already reads **delay: critical**:
 
-> *"'Mesosphere Sprint 74' is 55% through its schedule with 18% of its work done; at this pace 67%
+> *"'Mesosphere Sprint 74' is 55% through its schedule with 18% of its work done; at this pace 66%
 > will still be open at the deadline"*, with the recommendation **Re-plan before the deadline**.
 
 The real sprint ended with 20 of its 30 issues unfinished (67%). One sprint proves little on its own:

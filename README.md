@@ -304,6 +304,8 @@ python -m eval.make_figures                  # regenerate every figure in docs/i
 | [PROJECT_RESEARCH_DOSSIER.md](PROJECT_RESEARCH_DOSSIER.md) ([PDF](PROJECT_RESEARCH_DOSSIER.pdf)) | Fuller dossier — concrete use cases, full data model, security posture, glossary |
 | [PROJECT_REPORT.pdf](PROJECT_REPORT.pdf) | Standalone illustrated report with all figures |
 | [MVP_OVERVIEW.md](MVP_OVERVIEW.md) | Plain-language walkthrough of the MVP for a non-technical reader |
+| [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | Six-minute demo recording script — setup, shot list, expected numbers |
+| [docs/SLIDES.md](docs/SLIDES.md) | Presentation outline — 14 slides with the numbers to quote and the claims to avoid |
 | `ai-service/eval/figures/README.md` | Figure sourcing, palette/accessibility rationale, LaTeX captions |
 
 ## Known Limitations
