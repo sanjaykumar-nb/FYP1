@@ -9,6 +9,8 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Pinned rather than ubuntu-latest, which moves to Ubuntu 26 on 2026-10-19: the build
+# should not change underneath the project in its final weeks.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -16,7 +18,7 @@ concurrency:
 jobs:
   backend:
     name: Backend tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -31,7 +33,7 @@ jobs:
 
   ai-service:
     name: AI service tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -49,7 +51,7 @@ jobs:
 
   frontend:
     name: Frontend type check and tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -66,7 +68,7 @@ jobs:
 
   demo:
     name: Demo still shows what the script says
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
