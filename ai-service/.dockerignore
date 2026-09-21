@@ -1,0 +1,13 @@
+# Keep secrets, the multi-GB evaluation dataset and local caches out of the image.
+.env
+.env.*
+!.env.example
+eval/datasets/raw/
+eval/datasets/*.db
+*.db
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/

@@ -6,6 +6,16 @@ from app.llm.structured import validate_against_schema
 
 settings = get_settings()
 
+# The value .env.example ships with. Copying the template must mean "no LLM", not
+# "an LLM that rejects every request".
+PLACEHOLDER_KEYS = frozenset({"your-groq-api-key-here"})
+
+
+class LLMUnavailable(RuntimeError):
+    """No usable API key. Every caller already falls back to its deterministic
+    output on any exception; raising this makes that happen without a network
+    round-trip (which, offline or on a bad network, can take the full timeout)."""
+
 # JSON Schema "type" keywords Groq's json_object mode does not enforce, so we
 # have to state them — but only tersely. A field:type hint costs a fraction of
 # what a fully expanded (and often $ref-nested) Pydantic schema costs, and
@@ -28,13 +38,18 @@ def _compact_schema_hint(schema: dict) -> str:
 
 class GroqClient:
     def __init__(self):
-        self.api_key = settings.GROQ_API_KEY
+        key = (settings.GROQ_API_KEY or "").strip()
+        self.api_key = key if key and key not in PLACEHOLDER_KEYS else None
         self.model = settings.AI_MODEL
         self.temperature = settings.AI_TEMPERATURE
         self.max_tokens = settings.AI_MAX_TOKENS
         self.timeout = settings.AI_TIMEOUT_SECONDS
         self.base_url = "https://api.groq.com/openai/v1"
     
+    @property
+    def configured(self) -> bool:
+        return self.api_key is not None
+
     async def generate_structured(
         self,
         system_prompt: str,
@@ -49,6 +64,8 @@ class GroqClient:
         knowledge-graph token budget: ~940 tokens of indented schema per
         agent call collapses to a single short line.
         """
+        if not self.configured:
+            raise LLMUnavailable("no GROQ_API_KEY configured; using the deterministic output")
 
         schema_instruction = (
             f"\n\nRespond with a single JSON object with exactly these fields "

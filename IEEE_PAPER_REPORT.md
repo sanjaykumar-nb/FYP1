@@ -318,9 +318,9 @@ checks, boundary sweeps, and the ablation.
 
 | Item | Value |
 |---|---|
-| Backend tests | 63/63 pass |
-| AI service tests | 68/68 pass (`pytest -m "not deferred"`; 5 deferred tests for un-built agents are excluded, 2 of them currently red) |
-| Frontend tests | 50/50 pass (`vitest`), `tsc --noEmit` clean |
+| Backend tests | 65/65 pass, on both SQLite and PostgreSQL 16 |
+| AI service tests | 73/73 pass (`pytest -m "not deferred"`; 5 deferred tests for un-built agents are excluded, 2 of them currently red) |
+| Frontend tests | 53/53 pass (`vitest`), `tsc --noEmit` clean |
 | Continuous integration | All three suites, the type check, and a replay of the demo that checks every number the demo script quotes, on every push (GitHub Actions) |
 | Code size | ~21K LOC |
 | Quality gates | ruff, mypy, eslint, prettier, tsc |
@@ -721,7 +721,7 @@ carries surveillance and fairness concerns. A paragraph acknowledging this stren
 # Run the system
 cp .env.example .env          # GROQ_API_KEY optional — full fallback mode works without it
 make up && make db-seed       # tables are created on startup; there is no migration step
-make test                     # backend 63, ai 68, frontend 50 (also run in CI on every push)
+make test                     # backend 65, ai 73, frontend 53 (also run in CI on every push)
 ```
 
 ```bash

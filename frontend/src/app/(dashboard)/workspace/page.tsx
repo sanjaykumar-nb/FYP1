@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Plus, FolderKanban, AlertTriangle, LayoutDashboard, List } from "lucide-react"
+import { Plus, FolderKanban, AlertTriangle, LayoutDashboard, List, ArchiveRestore, ChevronDown, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -121,6 +121,8 @@ export default function WorkspacePage() {
           ))}
         </div>
       )}
+
+      <ArchivedProjects />
     </div>
   )
 }
@@ -204,6 +206,70 @@ function ProjectListItem({ project }: { project: Project }) {
         </CardContent>
       </Card>
     </Link>
+  )
+}
+
+/** Archived projects keep their data; this is the way back for them. */
+function ArchivedProjects() {
+  const [open, setOpen] = useState(false)
+  const { can } = usePermissions()
+  const queryClient = useQueryClient()
+
+  const { data } = useQuery({
+    queryKey: ["projects", "archived"],
+    queryFn: () =>
+      api
+        .get<PaginatedResponse<Project>>("/projects", { params: { status: "archived", page_size: 100 } })
+        .then((res) => res.data),
+  })
+
+  const restore = useMutation({
+    mutationFn: (project: Project) =>
+      api.patch<Project>(`/projects/${project.id}`, { status: "active" }).then((res) => res.data),
+    onSuccess: (project) => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
+      toast({ title: "Project restored", description: `${project.name} is back in the workspace.`, variant: "success" })
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Could not restore project",
+        description: error.response?.data?.detail || "Please try again",
+        variant: "destructive",
+      })
+    },
+  })
+
+  const archived = data?.items ?? []
+  if (archived.length === 0) return null
+
+  return (
+    <div className="space-y-3">
+      <Button variant="ghost" size="sm" onClick={() => setOpen(!open)} aria-expanded={open}>
+        {open ? <ChevronDown className="mr-1 h-4 w-4" /> : <ChevronRight className="mr-1 h-4 w-4" />}
+        Archived ({archived.length})
+      </Button>
+      {open && (
+        <div className="space-y-2">
+          {archived.map((project) => (
+            <Card key={project.id}>
+              <CardContent className="p-4 flex items-center gap-4">
+                <Badge variant="secondary" className="w-16 text-center">{project.key}</Badge>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{project.name}</p>
+                  <p className="text-sm text-muted-foreground">Hidden from the workspace; its tasks and analyses are kept.</p>
+                </div>
+                {can("project:update") && (
+                  <Button size="sm" variant="outline" onClick={() => restore.mutate(project)} disabled={restore.isPending}>
+                    <ArchiveRestore className="mr-2 h-4 w-4" />
+                    Restore
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 

@@ -77,7 +77,7 @@ export default function SignupPage() {
           </div>
           <h1 className="text-2xl font-bold text-center mb-2">Create your account</h1>
           <p className="text-muted-foreground text-center mb-6">
-            Start your free trial - no credit card required
+            Your account comes with its own workspace; you are its owner.
           </p>
           
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

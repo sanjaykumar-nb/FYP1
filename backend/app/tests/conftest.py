@@ -1,8 +1,11 @@
+import asyncio
+import os
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.pool import NullPool, StaticPool
 
 from app.main import app
 from app.database import get_db, Base
@@ -20,17 +23,32 @@ from datetime import datetime
 
 settings = get_settings()
 
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+# SQLite in memory by default. CI also runs the suite against PostgreSQL, the
+# database the Docker setup uses, by pointing TEST_DATABASE_URL at one.
+TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL") or "sqlite+aiosqlite:///:memory:"
 
-engine = create_async_engine(
-    TEST_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+if TEST_DATABASE_URL.startswith("sqlite"):
+    engine = create_async_engine(
+        TEST_DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+else:
+    # Each test runs in its own event loop; a pooled asyncpg connection would
+    # outlive the loop it was opened on.
+    engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool)
 
 TestingSessionLocal = async_sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False
 )
+
+
+def pytest_sessionfinish(session, exitstatus):
+    # The in-memory database keeps one connection open for the whole run, and
+    # aiosqlite serves each connection from a non-daemon thread. Left open, it
+    # holds the process after the last test: the run prints "passed" and never
+    # exits.
+    asyncio.run(engine.dispose())
 
 
 @pytest_asyncio.fixture

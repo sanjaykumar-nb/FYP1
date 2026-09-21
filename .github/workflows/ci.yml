@@ -1,10 +1,13 @@
 name: CI
 
 # Every push and pull request runs the three test suites and the frontend type check,
-# so a change that breaks one of them is visible before it reaches the demo.
+# on both databases the product supports, then brings the whole stack up with Docker
+# Compose and replays the demo against it — so a change that breaks any of it is
+# visible before it reaches the demo.
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -15,10 +18,28 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  PG_URL: postgresql+asyncpg://teamsync:teamsync@localhost:5432/teamsync
+
 jobs:
   backend:
-    name: Backend tests
+    name: Backend tests (${{ matrix.database }})
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgres]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: teamsync
+          POSTGRES_PASSWORD: teamsync
+          POSTGRES_DB: teamsync
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U teamsync"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -30,6 +51,9 @@ jobs:
         working-directory: backend
       - run: python -m pytest -q
         working-directory: backend
+        env:
+          # Unset means SQLite in memory (see app/tests/conftest.py).
+          TEST_DATABASE_URL: ${{ matrix.database == 'postgres' && env.PG_URL || '' }}
 
   ai-service:
     name: AI service tests
@@ -67,8 +91,23 @@ jobs:
         working-directory: frontend
 
   demo:
-    name: Demo still shows what the script says
+    name: Demo still shows what the script says (${{ matrix.database }})
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgres]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: teamsync
+          POSTGRES_PASSWORD: teamsync
+          POSTGRES_DB: teamsync
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U teamsync"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -79,14 +118,14 @@ jobs:
             backend/requirements.txt
             ai-service/requirements.txt
       - run: pip install -r backend/requirements.txt -r ai-service/requirements.txt
-      # Both services exactly as the demo runs them: SQLite, and no GROQ_API_KEY.
+      # Both services exactly as the demo runs them, with no GROQ_API_KEY.
       - name: Start the AI service
         working-directory: ai-service
         run: nohup python -m uvicorn app.main:app --port 8001 > ai.log 2>&1 &
       - name: Start the backend
         working-directory: backend
         env:
-          DATABASE_URL: sqlite+aiosqlite:///./demo.db
+          DATABASE_URL: ${{ matrix.database == 'postgres' && env.PG_URL || 'sqlite+aiosqlite:///./demo.db' }}
           JWT_SECRET: ci-only-secret-key-at-least-32-characters-long
         run: nohup python -m uvicorn app.main:app --port 8000 > backend.log 2>&1 &
       - name: Wait for both services
@@ -103,3 +142,47 @@ jobs:
       - name: Service logs
         if: failure()
         run: tail -n 60 ai-service/ai.log backend/backend.log
+
+  docker:
+    name: Docker Compose stack runs the demo
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build and start the stack
+        run: |
+          cp .env.example .env
+          docker compose up -d --build
+      - name: Wait for backend, AI service and frontend
+        run: |
+          for attempt in $(seq 90); do
+            curl -sf http://localhost:8000/health \
+              && curl -sf http://localhost:8001/health \
+              && curl -sf -o /dev/null http://localhost:3000/login \
+              && exit 0
+            sleep 4
+          done
+          exit 1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      # The check only talks HTTP to the stack, so it needs nothing but httpx on the host.
+      - name: Check the demo's claims against the Compose stack
+        working-directory: backend
+        run: |
+          pip install -q httpx==0.28.0
+          set -o pipefail
+          python -m app.scripts.check_demo | tee /tmp/check.log
+      # Logs of a failed run need a GitHub sign-in to read; annotations do not.
+      - name: Surface failures as annotations
+        if: failure()
+        run: |
+          grep -h "FAIL" /tmp/check.log 2>/dev/null | head -10 | while read -r line; do echo "::error title=demo claim::$line"; done
+          for service in backend ai-service frontend postgres; do
+            log=$(docker compose logs --no-color --tail 30 "$service" 2>&1 | tail -c 3500 \
+                  | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')
+            echo "::error title=$service log::$log"
+          done
+          docker compose ps
+      - name: Stop the stack
+        if: always()
+        run: docker compose down -v

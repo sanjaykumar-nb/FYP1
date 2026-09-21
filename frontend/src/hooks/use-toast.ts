@@ -4,7 +4,10 @@ import * as React from "react"
 import type { ToastActionElement, ToastProps } from "@/components/ui/toaster"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+// How long a dismissed toast stays mounted: just long enough for its exit animation.
+// The template's default (1,000,000 ms) left an invisible toast over the bottom of the
+// page for ~17 minutes, swallowing clicks on whatever was underneath it.
+export const TOAST_REMOVE_DELAY = 1000
 
 type ToasterToast = ToastProps & {
   id: string

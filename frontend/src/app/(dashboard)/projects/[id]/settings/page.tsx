@@ -86,7 +86,7 @@ export default function ProjectSettingsPage() {
     mutationFn: () => api.delete(`/projects/${projectId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] })
-      toast({ title: "Project archived", description: `${project?.name} no longer appears in the workspace.`, variant: "success" })
+      toast({ title: "Project archived", description: `${project?.name} moved to the workspace's Archived list.`, variant: "success" })
       router.push("/workspace")
     },
     onError: (error: any) =>
@@ -166,7 +166,8 @@ export default function ProjectSettingsPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Archiving hides the project from the workspace. Its tasks, discussions and analysis history are kept.
+              Archiving hides the project from the workspace. Its tasks, discussions and analysis history are kept,
+              and it can be restored from the workspace's Archived list.
             </p>
             <Button variant="destructive" onClick={() => setConfirmArchive(true)}>
               <Archive className="mr-2 h-4 w-4" />
@@ -181,7 +182,7 @@ export default function ProjectSettingsPage() {
           <DialogHeader>
             <DialogTitle>Archive {project.name}?</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">It disappears from the workspace. Nothing is deleted.</p>
+          <p className="text-sm text-muted-foreground">It disappears from the workspace. Nothing is deleted, and you can restore it from the workspace's Archived list.</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmArchive(false)}>
               Cancel

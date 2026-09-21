@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { existsSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 import { projectNavigation, workspaceNavigation } from '@/components/layout/sidebar'
 
@@ -23,5 +23,26 @@ describe('navigation', () => {
 
   it('the account menu links to a page', () => {
     expect(pageExists('/profile')).toBe(true)
+  })
+})
+
+describe('landing page links', () => {
+  const APP = path.join(process.cwd(), 'src', 'app')
+  const source = readFileSync(path.join(APP, 'page.tsx'), 'utf-8')
+  const hrefs = Array.from(source.matchAll(/href="([^"]*)"/g), (m) => m[1])
+  const routeExists = (route: string) =>
+    existsSync(path.join(APP, route, 'page.tsx')) || existsSync(path.join(APP, '(auth)', route, 'page.tsx'))
+
+  it('has links, and none of them go nowhere', () => {
+    expect(hrefs.length).toBeGreaterThan(0)
+    expect(hrefs).not.toContain('#')
+  })
+
+  it('every page link has a page and every anchor has its section', () => {
+    for (const href of hrefs) {
+      if (href === '/') continue
+      if (href.startsWith('#')) expect(source.includes(`id="${href.slice(1)}"`), href).toBe(true)
+      else expect(routeExists(href), href).toBe(true)
+    }
   })
 })

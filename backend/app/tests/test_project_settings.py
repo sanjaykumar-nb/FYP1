@@ -29,3 +29,25 @@ class TestProjectSettings:
         url = f"/api/v1/projects/{test_project.id}"
         assert (await client.patch(url, json={"name": "Renamed"}, headers=headers)).status_code == 403
         assert (await client.delete(url, headers=headers)).status_code == 403
+
+    async def test_an_archived_project_can_be_found_and_restored(
+        self, client: AsyncClient, auth_headers, test_project
+    ):
+        url = f"/api/v1/projects/{test_project.id}"
+        assert (await client.delete(url, headers=auth_headers)).status_code == 204
+
+        listed = await client.get("/api/v1/projects", headers=auth_headers)
+        assert test_project.name not in [p["name"] for p in listed.json()["items"]]
+        archived = await client.get("/api/v1/projects", params={"status": "archived"}, headers=auth_headers)
+        assert [p["name"] for p in archived.json()["items"]] == [test_project.name]
+
+        restored = await client.patch(url, json={"status": "active"}, headers=auth_headers)
+        assert restored.status_code == 200
+        assert (await client.get(url, headers=auth_headers)).json()["status"] == "active"
+
+    async def test_a_project_status_must_be_one_the_product_knows(
+        self, client: AsyncClient, auth_headers, test_project
+    ):
+        url = f"/api/v1/projects/{test_project.id}"
+        assert (await client.patch(url, json={"status": "banana"}, headers=auth_headers)).status_code == 422
+        assert (await client.patch(url, json={"status": "on_hold"}, headers=auth_headers)).status_code == 200

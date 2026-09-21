@@ -1,0 +1,527 @@
+{
+  "components": {
+    "schemas": {
+      "AgentRecommendation": {
+        "properties": {
+          "actions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RecommendedAction"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "expected_effect": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Effect"
+          },
+          "priority": {
+            "title": "Priority",
+            "type": "string"
+          },
+          "reasoning": {
+            "title": "Reasoning",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "description",
+          "reasoning",
+          "priority",
+          "confidence"
+        ],
+        "title": "AgentRecommendation",
+        "type": "object"
+      },
+      "AnalyzeRequest": {
+        "properties": {
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "scope": {
+            "default": [
+              "planning",
+              "progress",
+              "meetings",
+              "communication",
+              "workload"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Scope",
+            "type": "array"
+          },
+          "snapshot": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot"
+          },
+          "trigger_type": {
+            "default": "manual",
+            "title": "Trigger Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id"
+        ],
+        "title": "AnalyzeRequest",
+        "type": "object"
+      },
+      "AnalyzeResponse": {
+        "properties": {
+          "agent_run_id": {
+            "format": "uuid",
+            "title": "Agent Run Id",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CoordinatorOutput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_run_id",
+          "status",
+          "message"
+        ],
+        "title": "AnalyzeResponse",
+        "type": "object"
+      },
+      "CoordinatorOutput": {
+        "properties": {
+          "merged_recommendations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AgentRecommendation"
+            },
+            "title": "Merged Recommendations",
+            "type": "array"
+          },
+          "next_actions": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Next Actions",
+            "type": "array"
+          },
+          "overall_confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Overall Confidence",
+            "type": "number"
+          },
+          "overall_risk_level": {
+            "pattern": "^(low|medium|high|critical)$",
+            "title": "Overall Risk Level",
+            "type": "string"
+          },
+          "overall_summary": {
+            "title": "Overall Summary",
+            "type": "string"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "specialist_outputs": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "default": {},
+            "title": "Specialist Outputs",
+            "type": "object"
+          }
+        },
+        "required": [
+          "project_id",
+          "overall_summary",
+          "overall_risk_level",
+          "overall_confidence"
+        ],
+        "title": "CoordinatorOutput",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "RecommendedAction": {
+        "description": "One concrete change that carries out a recommendation. Ids are graph node\nids (\"task:<uuid>\", \"person:<uuid>\"), so a client can apply it directly.",
+        "properties": {
+          "from_person": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Person"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "points": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Points"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "to_person": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Person"
+          }
+        },
+        "required": [
+          "kind",
+          "task_id",
+          "summary"
+        ],
+        "title": "RecommendedAction",
+        "type": "object"
+      },
+      "ReviewTrioInput": {
+        "properties": {
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "proposal": {
+            "title": "Proposal",
+            "type": "object"
+          },
+          "requested_by": {
+            "format": "uuid",
+            "title": "Requested By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "proposal",
+          "project_id",
+          "requested_by"
+        ],
+        "title": "ReviewTrioInput",
+        "type": "object"
+      },
+      "RunAgentRequest": {
+        "properties": {
+          "input": {
+            "default": {},
+            "title": "Input",
+            "type": "object"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id"
+        ],
+        "title": "RunAgentRequest",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "TeamSync AI Service - Multi-Agent Project Intelligence",
+    "title": "TeamSync AI Service",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Root"
+      }
+    },
+    "/api/v1/agents/{agent_name}": {
+      "post": {
+        "description": "Run a single specialist agent",
+        "operationId": "run_agent_api_v1_agents__agent_name__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "agent_name",
+            "required": true,
+            "schema": {
+              "title": "Agent Name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunAgentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Agent"
+      }
+    },
+    "/api/v1/analyze": {
+      "post": {
+        "description": "Run full multi-agent analysis for a project and return the result.\n\nRuns synchronously \u2014 the MVP has no Celery/queue (see plan Part B3), and\nthe graph-grounded pipeline is fast enough (deterministic risk scoring,\nsmall witness-subgraph prompts) that there is no need for one. The AI\nservice is stateless: this id identifies the run for the caller's own\ncorrelation, but persisting an AgentRun row is the backend's job \u2014 it\nowns that table (see app.services.ai_client / snapshot_builder there).",
+        "operationId": "analyze_project_api_v1_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyzeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Analyze Project"
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "description": "Health check endpoint",
+        "operationId": "health_check_api_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health Check"
+      }
+    },
+    "/api/v1/review": {
+      "post": {
+        "description": "Run the professional review trio (Frontend, Backend, AI/ML)",
+        "operationId": "run_review_api_v1_review_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewTrioInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Review"
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health Check"
+      }
+    }
+  }
+}

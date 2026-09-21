@@ -1,0 +1,8 @@
+# The image installs its own dependencies (npm ci); keep local builds and secrets out.
+node_modules/
+.next/
+.env
+.env.*
+!.env.example
+coverage/
+*.tsbuildinfo

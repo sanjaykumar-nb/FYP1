@@ -1,6 +1,8 @@
 import Link from "next/link"
-import { ArrowRight, Brain, Shield, Users, Zap, BarChart3 } from "lucide-react"
+import { ArrowRight, Brain, FileSearch, FolderKanban, KeyRound, Network, ShieldCheck, Timer, Wrench } from "lucide-react"
 
+// Everything on this page describes what the product does today. Deferred work
+// (meeting and communication intelligence, organizational memory) is not advertised.
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
@@ -33,45 +35,46 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <Zap className="h-4 w-4" />
-              <span>Explainable Multi-Agent Project Intelligence</span>
+              <Network className="h-4 w-4" />
+              <span>Explainable, graph-grounded project intelligence</span>
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-              Predict Coordination Failures{" "}
-              <span className="text-primary">Before They Happen</span>
+              See a sprint going wrong{" "}
+              <span className="text-primary">while you can still fix it</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              TeamSync AI analyzes team collaboration, project execution, communication patterns,
-              workload, and meeting outcomes to predict risks early and recommend corrective actions.
-              Not just a task tracker—real project intelligence.
+              TeamSync AI turns your board — tasks, assignees, dependencies and discussion — into a
+              knowledge graph, computes six kinds of coordination risk from it, and shows the tasks
+              and people behind every warning. It suggests the fix, and tells you mid-sprint when the
+              plan will not make its deadline.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               <Link
                 href="/signup"
                 className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-lg text-lg font-medium transition-colors w-full sm:w-auto"
               >
-                Start Free Trial
+                Create an account
                 <ArrowRight className="ml-2 h-5 w-5 inline-block" />
               </Link>
               <Link
-                href="#demo"
+                href="#how-it-works"
                 className="border border-input bg-background hover:bg-accent px-8 py-3 rounded-lg text-lg font-medium transition-colors w-full sm:w-auto"
               >
-                View Demo
+                How it works
               </Link>
             </div>
-            <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
               <span className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                SOC2 Compliant
+                <FileSearch className="h-4 w-4" />
+                Evidence on every finding
               </span>
               <span className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Multi-Tenant
+                <KeyRound className="h-4 w-4" />
+                Works with no LLM key
               </span>
               <span className="flex items-center gap-2">
-                <Brain className="h-4 w-4" />
-                AI-Powered
+                <ShieldCheck className="h-4 w-4" />
+                Roles enforced on every request
               </span>
             </div>
           </div>
@@ -82,9 +85,9 @@ export default function HomePage() {
       <section id="features" className="py-20 md:py-32 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why TeamSync AI?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What it does</h2>
             <p className="text-lg text-muted-foreground">
-              Traditional tools track tasks. TeamSync AI understands your project.
+              A task board, and an analysis you can check rather than take on trust.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -101,7 +104,7 @@ export default function HomePage() {
           <div className="max-w-4xl mx-auto text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
             <p className="text-lg text-muted-foreground">
-              Three steps to project intelligence
+              The numbers come from the graph. A language model, if you configure one, only puts them into words.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -112,20 +115,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Demo Section */}
-      <section id="demo" className="py-20 md:py-32 bg-muted/50">
+      {/* Evaluation */}
+      <section id="evaluation" className="py-20 md:py-32 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">See It in Action</h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Watch how TeamSync AI predicts risks and recommends actions
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Measured, not claimed</h2>
+            <p className="text-lg text-muted-foreground">
+              Evaluated on real Jira histories from open-source projects (the TAWOS dataset).
             </p>
-            <div className="aspect-video bg-muted rounded-xl border border-border flex items-center justify-center">
-              <div className="text-center p-8">
-                <Brain className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
-                <p className="text-muted-foreground">Demo video placeholder</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {results.map((result) => (
+              <div key={result.value} className="p-6 bg-card border border-border rounded-xl text-center">
+                <p className="text-4xl font-bold text-primary mb-2">{result.value}</p>
+                <p className="text-muted-foreground">{result.label}</p>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -134,15 +139,15 @@ export default function HomePage() {
       <section className="py-20 md:py-32">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready for Project Intelligence?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Try it on your own board</h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Join teams using TeamSync AI to predict coordination failures early and ship with confidence.
+              Create a project, add your tasks and team, and run the analysis.
             </p>
             <Link
               href="/signup"
               className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-lg text-lg font-medium transition-colors inline-block"
             >
-              Start Free Trial
+              Create an account
               <ArrowRight className="ml-2 h-5 w-5 inline-block" />
             </Link>
           </div>
@@ -151,48 +156,22 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-border py-12 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <Link href="/" className="flex items-center space-x-2 mb-4">
-                <Brain className="h-8 w-8 text-primary" />
-                <span className="font-bold text-xl">TeamSync AI</span>
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                Explainable multi-agent project intelligence platform for software and student teams.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground transition-colors">Features</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Pricing</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Integrations</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">API Docs</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground transition-colors">About</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Blog</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Careers</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Contact</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground transition-colors">Documentation</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Community</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Security</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Privacy</Link></li>
-              </ul>
-            </div>
+        <div className="container mx-auto px-4 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div>
+            <Link href="/" className="flex items-center space-x-2 mb-2">
+              <Brain className="h-6 w-6 text-primary" />
+              <span className="font-bold text-lg">TeamSync AI</span>
+            </Link>
+            <p className="text-sm text-muted-foreground">
+              Explainable, graph-grounded project intelligence — a final-year project prototype.
+            </p>
           </div>
-          <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>© 2024 TeamSync AI. All rights reserved.</p>
+          <div className="flex gap-6 text-sm text-muted-foreground">
+            <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
+            <Link href="#how-it-works" className="hover:text-foreground transition-colors">How it works</Link>
+            <Link href="/login" className="hover:text-foreground transition-colors">Sign in</Link>
           </div>
+          <p className="text-sm text-muted-foreground">© 2026 Sanjay Kumar N B · MIT License</p>
         </div>
       </footer>
     </div>
@@ -201,50 +180,59 @@ export default function HomePage() {
 
 const features = [
   {
-    icon: Brain,
-    title: "Multi-Agent Intelligence",
-    description: "Specialized agents for planning, progress, meetings, communication, workload, and risk—orchestrated by a coordinator.",
+    icon: Network,
+    title: "Six risks from one graph",
+    description:
+      "Delay, workload, knowledge concentration, dependencies, coordination and silent members — computed from your project's own graph, the same way every time.",
   },
   {
-    icon: BarChart3,
-    title: "Predictive Risk Scores",
-    description: "6 risk types (delay, coordination, workload, dependency, knowledge, silent member) with evidence and trends.",
+    icon: FileSearch,
+    title: "Evidence you can check",
+    description: "Every finding names the tasks and people it rests on, so a warning can be verified or challenged, not just believed.",
   },
   {
-    icon: Shield,
-    title: "Explainable Recommendations",
-    description: "Every recommendation includes clear reasoning traceable to specific signals and evidence.",
+    icon: Wrench,
+    title: "Fixes you can apply",
+    description:
+      "Workload recommendations come with the reassignments that carry them out and their predicted effect. Apply one, re-run, and see what changed.",
   },
   {
-    icon: Users,
-    title: "Organizational Memory",
-    description: "Long-term knowledge base of decisions, blockers, lessons learned—queryable by the team.",
+    icon: Timer,
+    title: "A warning before the deadline",
+    description: "Compares work done with time elapsed and warns while the sprint is still running, not after it has slipped.",
   },
   {
-    icon: Zap,
-    title: "Professional Review Trio",
-    description: "Frontend, Backend, and AI/ML agents review proposals like an engineering panel.",
+    icon: FolderKanban,
+    title: "A full task board",
+    description: "Kanban with sprints, components, blocking dependencies (cycles refused) and task discussion.",
   },
   {
-    icon: BarChart3,
-    title: "Team Intelligence Index",
-    description: "Single measurable score (0-100) combining health, risk, communication, workload, and memory.",
+    icon: ShieldCheck,
+    title: "Roles that are enforced",
+    description: "Owner, admin, project manager, developer and viewer — checked by the API on every request, not just hidden in the interface.",
   },
 ]
 
 const steps = [
   {
-    title: "Connect Your Data",
-    description: "Import tasks, meetings, and communication from your existing tools or use our built-in workspace.",
+    title: "Work on the board",
+    description: "Tasks, assignees, story points, sprints, dependencies and comments — the data your team already keeps.",
   },
   {
-    title: "AI Analyzes Patterns",
-    description: "Specialized agents process multiple signals—planning, progress, meetings, chat, workload—to build a complete picture.",
+    title: "The graph computes the risk",
+    description:
+      "Critical paths, single owners, load skew and pace are graph calculations: no language model decides whether a risk exists.",
   },
   {
-    title: "Get Actionable Intelligence",
-    description: "Receive prioritized recommendations with clear reasoning. Know exactly what to do next and why.",
+    title: "Act on the evidence",
+    description: "Each warning cites what it rests on and suggests what to do. A language model is optional and only narrates.",
   },
+]
+
+const results = [
+  { value: "0.79", label: "AUC at the halfway point of a sprint, on 22 projects the system had never seen" },
+  { value: "487×", label: "fewer tokens than sending the whole project to a language model, at 2,003 tasks" },
+  { value: "200/200", label: "fabricated citations caught and removed before reaching the user" },
 ]
 
 function FeatureCard({ feature }: { feature: typeof features[0] }) {

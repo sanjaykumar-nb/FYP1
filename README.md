@@ -19,7 +19,8 @@ citations that are mechanically checked rather than merely requested (**200/200*
 references caught and stripped). A held-out real-world evaluation shows the zero-parameter graph
 rule **beating a tuned machine-learning model** on unseen projects.
 
-[**Read the full research write-up →**](IEEE_PAPER_REPORT.md) · [PDF version](IEEE_PAPER_REPORT.pdf)
+[**Read the full research write-up →**](IEEE_PAPER_REPORT.md) · [PDF version](IEEE_PAPER_REPORT.pdf) ·
+[**MVP release notes**](RELEASE_NOTES.md) · [API reference](docs/API.md)
 
 ---
 
@@ -255,9 +256,9 @@ full walkthrough, including what is real and what the replay derives, is in [DEM
 
 ```bash
 make test               # everything
-make test-backend       # backend: 63 tests
-make test-ai            # AI service: 68 tests
-make test-frontend      # frontend: 50 tests (vitest)
+make test-backend       # backend: 65 tests
+make test-ai            # AI service: 73 tests
+make test-frontend      # frontend: 53 tests (vitest)
 ```
 
 Or per-service, without Docker:
@@ -272,10 +273,14 @@ cd frontend && npm run type-check && npm run test:ci
 data source in the product yet, so their tests stay in the tree rather than being deleted, and two
 of them currently fail — see [Known Limitations](#known-limitations).
 
-All three suites and the frontend type check run on every push and pull request
-([`.github/workflows/ci.yml`](.github/workflows/ci.yml)). A fourth job starts both services and
-runs `python -m app.scripts.check_demo`, which replays the real Mesos sprint and fails if the demo
-no longer shows any number [the demo script](docs/DEMO_SCRIPT.md) quotes.
+Every push and pull request runs ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)):
+
+- all three suites and the frontend type check, with the backend suite on **both SQLite and
+  PostgreSQL 16** (set `TEST_DATABASE_URL` to run it against a PostgreSQL of your own);
+- `python -m app.scripts.check_demo` against both services on each database — it replays the real
+  Mesos sprint and fails if the demo no longer shows any number [the demo script](docs/DEMO_SCRIPT.md)
+  quotes;
+- `docker compose up --build`, then the same demo check against the running stack.
 
 ## Datasets & Reproducing the Evaluation
 
@@ -308,6 +313,8 @@ python -m eval.make_figures                  # regenerate every figure in docs/i
 | [MVP_OVERVIEW.md](MVP_OVERVIEW.md) | Plain-language walkthrough of the MVP for a non-technical reader |
 | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | Six-minute demo recording script — setup, shot list, expected numbers |
 | [docs/SLIDES.md](docs/SLIDES.md) | Presentation outline — 14 slides with the numbers to quote and the claims to avoid |
+| [RELEASE_NOTES.md](RELEASE_NOTES.md) | v1.0-mvp — what the bundle contains, how to run it, how it was verified |
+| [docs/API.md](docs/API.md) | Every endpoint of both services, marked by whether the app uses it and a test covers it; OpenAPI specs in `docs/api/` |
 | `ai-service/eval/figures/README.md` | Figure sourcing, palette/accessibility rationale, LaTeX captions |
 
 ## Known Limitations

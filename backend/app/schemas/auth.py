@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Literal, Optional
 from datetime import datetime
 from uuid import UUID
 
@@ -155,10 +155,15 @@ class ProjectCreate(ProjectBase):
     team_id: Optional[UUID] = None
 
 
+# The statuses the product understands. "archived" hides a project from the workspace
+# without deleting it; setting any other status restores it.
+ProjectStatus = Literal["active", "on_hold", "completed", "archived"]
+
+
 class ProjectUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
-    status: Optional[str] = None
+    status: Optional[ProjectStatus] = None
     start_date: Optional[datetime] = None
     target_end_date: Optional[datetime] = None
     actual_end_date: Optional[datetime] = None
