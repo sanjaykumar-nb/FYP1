@@ -25,9 +25,9 @@ def build_story2(d):
     s.append(tbl([
         ["Item", "Value"],
         ["Backend tests", "63 / 63 pass"],
-        ["AI service tests", "67 / 67 pass (pytest -m \"not deferred\")"],
+        ["AI service tests", "68 / 68 pass (pytest -m \"not deferred\")"],
         ["Frontend tests", "50 / 50 pass (vitest), tsc clean"],
-        ["Continuous integration", "all three suites and the type check run on every push"],
+        ["Continuous integration", "all three suites, the type check, and a replay of the demo that checks every number the demo script quotes, on every push"],
         ["Code size", "approx. 21,000 lines"],
         ["Quality gates", "ruff, mypy, eslint, prettier, tsc"],
     ], [0.3, 0.7]))
@@ -451,7 +451,7 @@ def build_story2(d):
         ["Command", "Effect"],
         ["cp .env.example .env", "GROQ_API_KEY optional - full fallback mode works without it"],
         ["make up && make db-seed", "Start the full stack and seed demo data (tables are created on startup)"],
-        ["make test", "backend 63, ai-service 67, frontend 50 - also run in CI on every push"],
+        ["make test", "backend 63, ai-service 68, frontend 50 - also run in CI on every push"],
     ], [0.44, 0.56]))
     s.append(Spacer(1, 8))
     s.append(P("Reproducing every number in this report (run from <font face='Courier'>ai-service/</font>):"))

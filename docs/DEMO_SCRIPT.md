@@ -3,8 +3,10 @@
 A shot-by-shot script for recording the project demo. [DEMO.md](../DEMO.md) is the full
 walkthrough and explains what is real in the data; this file is only the recording plan.
 
-Every number below was checked on a fresh import on 19 September 2026. If a number on your screen
-differs, see [If a number looks wrong](#if-a-number-looks-wrong) before re-recording.
+Every number below is checked automatically: `python -m app.scripts.check_demo` (from `backend/`,
+with both services up) replays the sprint and fails if any claim in this script no longer holds, and
+CI runs it on every push. Run it before you record. If a number on your screen still differs, see
+[If a number looks wrong](#if-a-number-looks-wrong).
 
 ---
 
@@ -112,9 +114,12 @@ Insights**.
 > the comments written by then. The deadline is a week away, so nothing is overdue, and the board
 > looks unremarkable.
 >
-> The system already says delay: critical. 'Fifty-five percent through its schedule with eighteen
-> percent of the work done; at this pace sixty-six percent will still be open at the deadline.'
-> Recommendation: re-plan before the deadline.
+> The system already says delay: critical. '[Read the first number] percent through its schedule
+> with eighteen percent of the work done; at this pace [read the last number] percent will still be
+> open at the deadline.' Recommendation: re-plan before the deadline.
+
+**Read the two percentages off the screen** — they depend on the hour you imported (milestone dates
+are whole days): 50% through / 63% open just after midnight UTC, up to 57% / 67% just before it.
 >
 > The real sprint ended with twenty of thirty issues unfinished — sixty-seven percent. One sprint
 > proves nothing on its own, so this was measured across two hundred and seventy sprints from
@@ -172,7 +177,8 @@ the deck.
 | Different graph size than 45 nodes / 117 links | The database wasn't fresh, or extra tasks exist | `rm demo.db`, restart the backend, re-import |
 | Workload still `high` after applying the moves | The re-run happened before all three applied | Check each row reads *Applied*, then re-run |
 | No **Apply** buttons | The run predates the board's current state, or you are signed in as a viewer | Re-run the analysis as the owner |
-| Different move list | The planner is deterministic, but a re-run after a change re-plans from the new board | Re-import for a clean recording |
+| Different move list | Every fresh import suggests MESOS-8383, MESOS-8524, MESOS-8492 in that order; anything else means the board changed after the import | Re-import for a clean recording |
+| Anything else | Something in the code changed what the demo shows | Run `python -m app.scripts.check_demo` — it names the claim that broke |
 | Halfway replay shows nothing overdue | Correct — that is the point of the shot | — |
 
 ## If you have only three minutes

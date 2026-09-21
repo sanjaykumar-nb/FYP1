@@ -140,9 +140,12 @@ No language model produces any of these numbers, which is why each one can be tr
 computed on the same graph as the finding. Each move takes one open task from whoever carries the most
 at that point and hands it to the teammate that leaves the pair most even:
 
-1. MESOS-8492 (3 pts) — contributor #3409 → #3415 (who had no open work)
-2. MESOS-8524 (2 pts) — contributor #3391 → #3569
-3. MESOS-8383 (3 pts) — contributor #3409 → #3361
+1. MESOS-8383 (3 pts) — contributor #3409 → #3415 (who had no open work)
+2. MESOS-8524 (2 pts) — contributor #3391 → #3361
+3. MESOS-8492 (3 pts) — contributor #3409 → #3569
+
+Where two moves are equally good, the tie goes by issue key and person name, so every import of
+this sprint suggests these same three.
 
 *Expected: heaviest open load falls from 9 to 6 points against a team mean of 3.8 — load skew high →
 medium.* Click **Apply** on each: the task's assignee changes on the board and the row reads
@@ -168,9 +171,13 @@ deadline is a week away, so nothing is overdue, yet AI Insights already reads **
 > *"'Mesosphere Sprint 74' is 55% through its schedule with 18% of its work done; at this pace 66%
 > will still be open at the deadline"*, with the recommendation **Re-plan before the deadline**.
 
+The first and last percentages depend on the hour you import: anywhere from *50% through … 63% still
+open* just after midnight UTC to *57% through … 67%* just before it.
+
 The real sprint ended with 20 of its 30 issues unfinished (67%). One sprint proves little on its own:
 the evaluation across 270 held-out sprints is in `METRICS_INFERENCE.md` §16 (AUC 0.79 halfway
-through). The schedule reads 55% rather than 50% because milestone dates are stored as whole days.
+through). The schedule reads more than 50% because milestone dates are stored as whole days, so the
+sprint's start is counted from midnight.
 
 **Sprints — the warning on a sprint you create yourself.** In the **Sprints** tab, create a sprint that
 started a week ago and ends a week from now. Each sprint shows its dates, its task count, and two bars:

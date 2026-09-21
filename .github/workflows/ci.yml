@@ -63,3 +63,41 @@ jobs:
         working-directory: frontend
       - run: npm run test:ci
         working-directory: frontend
+
+  demo:
+    name: Demo still shows what the script says
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            backend/requirements.txt
+            ai-service/requirements.txt
+      - run: pip install -r backend/requirements.txt -r ai-service/requirements.txt
+      # Both services exactly as the demo runs them: SQLite, and no GROQ_API_KEY.
+      - name: Start the AI service
+        working-directory: ai-service
+        run: nohup python -m uvicorn app.main:app --port 8001 > ai.log 2>&1 &
+      - name: Start the backend
+        working-directory: backend
+        env:
+          DATABASE_URL: sqlite+aiosqlite:///./demo.db
+          JWT_SECRET: ci-only-secret-key-at-least-32-characters-long
+        run: nohup python -m uvicorn app.main:app --port 8000 > backend.log 2>&1 &
+      - name: Wait for both services
+        run: |
+          for attempt in $(seq 60); do
+            curl -sf http://localhost:8000/health && curl -sf http://localhost:8001/health && exit 0
+            sleep 2
+          done
+          exit 1
+      # Replays the real Mesos sprint and checks every number docs/DEMO_SCRIPT.md quotes.
+      - name: Check the demo's claims
+        working-directory: backend
+        run: python -m app.scripts.check_demo
+      - name: Service logs
+        if: failure()
+        run: tail -n 60 ai-service/ai.log backend/backend.log

@@ -256,7 +256,7 @@ full walkthrough, including what is real and what the replay derives, is in [DEM
 ```bash
 make test               # everything
 make test-backend       # backend: 63 tests
-make test-ai            # AI service: 67 tests
+make test-ai            # AI service: 68 tests
 make test-frontend      # frontend: 50 tests (vitest)
 ```
 
@@ -273,7 +273,9 @@ data source in the product yet, so their tests stay in the tree rather than bein
 of them currently fail — see [Known Limitations](#known-limitations).
 
 All three suites and the frontend type check run on every push and pull request
-([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)). A fourth job starts both services and
+runs `python -m app.scripts.check_demo`, which replays the real Mesos sprint and fails if the demo
+no longer shows any number [the demo script](docs/DEMO_SCRIPT.md) quotes.
 
 ## Datasets & Reproducing the Evaluation
 

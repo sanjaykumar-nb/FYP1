@@ -49,6 +49,7 @@ from pathlib import Path
 import httpx
 
 PASSWORD = "realsprint-2018"
+DEFAULT_API = "http://localhost:8000"
 PRIORITY = {"Blocker": "critical", "Critical": "critical", "Major": "high", "Minor": "medium", "Trivial": "low"}
 # Current Jira status of an issue that was still open at sprint end, mapped to
 # where it most plausibly stood then: never-started stays planned.
@@ -68,23 +69,31 @@ def check(response: httpx.Response) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("fixture", type=Path)
-    ap.add_argument("--api", default="http://localhost:8000")
+    ap.add_argument("--api", default=DEFAULT_API)
     ap.add_argument("--at", type=float, default=None, metavar="FRACTION",
                     help="replay the sprint as it stood this far through (e.g. 0.5) instead of at its end")
     args = ap.parse_args()
     if args.at is not None and not 0 < args.at < 1:
         sys.exit("--at must be between 0 and 1")
+    import_sprint(args.fixture, args.api, args.at)
 
-    fx = json.loads(args.fixture.read_text(encoding="utf-8"))
+
+def import_sprint(fixture: Path, api: str = DEFAULT_API, at: float | None = None) -> dict:
+    """Replay the sprint through the API and analyse it.
+
+    Returns the importer's login, the project id and the analysis run, so a caller
+    (app.scripts.check_demo) can carry on from where the import leaves the project.
+    """
+    fx = json.loads(fixture.read_text(encoding="utf-8"))
     sprint_start, sprint_end = parse(fx["sprint"]["start"]), parse(fx["sprint"]["end"])
     now = datetime.now(timezone.utc)
-    if args.at is None:
+    if at is None:
         # The replayed moment is sprint end, placed at yesterday.
         cutoff, moment = sprint_end, "sprint end"
         shift = (now - timedelta(days=1)) - sprint_end
     else:
         # The replayed moment is part-way through, placed at now: the deadline is still ahead.
-        cutoff, moment = sprint_start + (sprint_end - sprint_start) * args.at, f"{args.at:.0%} through the sprint"
+        cutoff, moment = sprint_start + (sprint_end - sprint_start) * at, f"{at:.0%} through the sprint"
         shift = now - cutoff
 
     def replayed(ts: datetime) -> str:
@@ -100,7 +109,7 @@ def main() -> None:
     tag = time.strftime("%m%d%H%M%S")  # keeps emails unique across repeated imports
     project_key = fx["project"]["key"]
 
-    with httpx.Client(base_url=f"{args.api}/api/v1", timeout=180) as http:
+    with httpx.Client(base_url=f"{api}/api/v1", timeout=180) as http:
         tokens: dict[str, str] = {}
 
         def auth(email: str) -> dict:
@@ -207,6 +216,7 @@ def main() -> None:
             print(f"  [{rec['priority']}] {rec['title']} — {rec['description']}")
 
     print(f"\nSign in at http://localhost:3000 as {pm_email} / {PASSWORD}")
+    return {"email": pm_email, "project_id": pid, "run": run}
 
 
 if __name__ == "__main__":

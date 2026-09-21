@@ -1,9 +1,12 @@
 """Suggested reassignments for workload findings (app.graph.actions)."""
 
+import uuid
+
 import pytest
 
 from app.graph.actions import MAX_MOVES, plan_rebalance
 from app.graph.metrics import open_point_loads
+from app.graph.snapshot import MemberSnapshot, TaskSnapshot
 from app.services.graph_pipeline import build_graph, recommendation_output_from_graph
 from app.tests.factories import healthy_project, member, milestone, snapshot, task, uid
 
@@ -91,3 +94,35 @@ def test_effect_quotes_the_same_team_mean_as_the_finding():
     )
     assert "team mean of 3.8" in skew.title
     assert "team mean of 3.8" in workload.expected_effect
+
+
+def _tied(import_label: str):
+    """busy holds three identical 3-point tasks; two idle teammates are equally good receivers.
+
+    Every candidate move ties on load, familiarity and status, so only the final
+    tie-break decides. import_label stands in for a fresh import: same people, same
+    tasks, newly minted ids.
+    """
+    namespace = uuid.uuid5(uuid.NAMESPACE_URL, import_label)
+
+    def ident(label: str) -> uuid.UUID:
+        return uuid.uuid5(namespace, label)
+
+    members = [
+        MemberSnapshot(id=ident(name), full_name=name, email=f"{name}@example.com", role="developer")
+        for name in ("busy", "ann", "bob")
+    ]
+    tasks = [
+        TaskSnapshot(id=ident(title), title=title, status="in_progress", priority="medium",
+                     story_points=3, assignee_id=ident("busy"))
+        for title in ("MESOS-3", "MESOS-1", "MESOS-2")
+    ]
+    return snapshot(members=members, tasks=tasks)
+
+
+def test_the_same_project_gets_the_same_moves_whatever_its_ids():
+    for import_label in ("first import", "second import", "third import", "fourth import"):
+        graph, _ = build_graph(_tied(import_label))
+        plan = plan_rebalance(graph)
+        moves = [(graph.attrs(m.task_id)["title"], graph.attrs(m.to_person)["name"]) for m in plan.moves]
+        assert moves == [("MESOS-1", "ann"), ("MESOS-2", "bob")], import_label

@@ -128,7 +128,8 @@ Both differences: exact McNemar *p* < 0.001.
 
 ### 12 · Engineering
 
-- Three services, 63 + 67 + 50 automated tests, all run in CI on every push.
+- Three services, 63 + 68 + 50 automated tests, all run in CI on every push — plus a replay of
+  the real sprint that fails the build if the demo stops showing what this deck says it shows.
 - Works with no API key; the model is optional.
 - Real bugs found by evaluating on real data, listed in the report — e.g. the witness subgraph
   once grew with the project (4.31×, now 1.007×), and the grounding check once treated an empty

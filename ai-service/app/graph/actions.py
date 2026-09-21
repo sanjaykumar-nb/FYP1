@@ -54,7 +54,12 @@ def plan_rebalance(graph: ProjectGraph, max_moves: int = MAX_MOVES) -> Optional[
     leaves the pair most even — ties going to the less-loaded teammate, then to
     one who already knows the task's component, then to work not yet started.
     A move must strictly lighten the busiest person. Returns None when load skew
-    is already low or no move helps. Deterministic for identical graphs.
+    is already low or no move helps.
+
+    Remaining ties go by task title and person name, not node id. Ids are minted
+    by the database, so two imports of the same sprint get different ones; ordering
+    by them made the same project get different (equally good) suggestions each
+    time it was loaded. Titles and names are what the user reads, and they stay put.
     """
     load, assignments = open_point_loads(graph)
     if len(load) < 2 or not any(load.values()):
@@ -73,16 +78,20 @@ def plan_rebalance(graph: ProjectGraph, max_moves: int = MAX_MOVES) -> Optional[
     for task, comp in graph.edges_of_kind(TOUCHES):
         components.setdefault(task, set()).add(comp)
 
+    def label(node: str) -> tuple[str, str]:
+        attrs = graph.attrs(node)
+        return (attrs.get("title") or attrs.get("name") or "", node)
+
     moves: list[Reassignment] = []
     while len(moves) < max_moves:
-        busiest = max(sorted(load), key=lambda p: load[p])
+        busiest = max(sorted(load, key=label), key=lambda p: load[p])
         if _skew_severity(load[busiest], mean) == "low":
             break
 
         best = None
-        for task in sorted(t for t, p in owner.items() if p == busiest):
+        for task in sorted((t for t, p in owner.items() if p == busiest), key=label):
             w = weight[task]
-            for receiver in sorted(load):
+            for receiver in sorted(load, key=label):
                 if receiver == busiest:
                     continue
                 pair_peak = max(load[busiest] - w, load[receiver] + w)
@@ -90,7 +99,7 @@ def plan_rebalance(graph: ProjectGraph, max_moves: int = MAX_MOVES) -> Optional[
                     continue
                 familiar = any((receiver, c) in knows for c in components.get(task, ()))
                 key = (pair_peak, load[receiver], not familiar,
-                       status.get(task) not in NOT_STARTED, task, receiver)
+                       status.get(task) not in NOT_STARTED, label(task), label(receiver))
                 if best is None or key < best[0]:
                     best = (key, task, receiver)
         if best is None:
