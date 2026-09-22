@@ -216,13 +216,13 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
 
 <div class="wrap">
   <header class="top">
-    <span class="eyebrow">TeamSync AI · v1.0.1-mvp · Phase 1</span>
+    <span class="eyebrow">TeamSync AI · Phase 1 · v1.0.1-mvp, updated with the gaps closed since</span>
     <h1>How well the agents perform, measured</h1>
     <p class="lede">Every agent run through the live analysis endpoint on all <span id="nSprints"></span> real sprints from the TAWOS dataset, plus the published evaluations re-run and every main feature timed. No language-model key was used, which is how the product ships. Each chart says what it shows, what it lets you claim, and what it does not.</p>
     <div class="meta"><span>Data: 31 open-source projects, 22 of them held out and never used for tuning</span><span>Measured 21–22 September 2026</span><span>Source: <code>VALIDATION_REPORT.md</code></span></div>
     <div class="tiles" id="tiles"></div>
     <nav class="toc" aria-label="Sections">
-      <a href="#correct">Correctness</a><a href="#predict">Prediction</a><a href="#agents">Each agent's verdict</a><a href="#fixes">Suggested fixes</a><a href="#cost">Cost and speed</a><a href="#llm">Language model</a><a href="#quality">Engineering quality</a><a href="#complete">Is it complete?</a>
+      <a href="#correct">Correctness</a><a href="#predict">Prediction</a><a href="#agents">Each agent's verdict</a><a href="#fixes">Suggested fixes</a><a href="#cost">Cost and speed</a><a href="#load">Under load</a><a href="#llm">Language model</a><a href="#quality">Engineering quality</a><a href="#complete">Is it complete?</a>
     </nav>
   </header>
 
@@ -306,12 +306,13 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
       <div><h3>F1 of each agent's warning, held-out sprints</h3><p class="sub">A warning is any risk level above low. 270 sprints from 22 unseen projects.</p></div>
       <div class="legend"><span><i class="key" style="background:var(--s1)"></i>Risk agent — the product's verdict</span><span><i class="key" style="background:var(--base)"></i>Specialist agents</span></div>
       <div class="chart" id="agentsChart"></div>
+      <p class="sub" id="capacityNote"></p>
       <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="agentsTable"></div></details>
     </div>
     <dl class="infer">
-      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0">The <strong>Planning</strong> agent never warns — <strong>0 of 270</strong> sprints — because its only warning is planned work exceeding team capacity, and no capacity is ever supplied. The <strong>Progress</strong> agent's simple completion rule matches the Risk agent halfway through (F1 0.712 vs 0.706); at sprint end its perfect precision is built in, since a sprint under half done is late by definition. The <strong>Workload</strong> agent is a weak lateness signal (F1 0.58) — it measures uneven load, not delay.</dd></div>
-      <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">The product's verdict rests on the Risk agent, which is the one validated here; the specialists supply <strong>descriptive context</strong> whose figures are exactly right (section 1).</dd></div>
-      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">That the Planning agent's risk level carries information — as shipped it is always low. Supplying team capacity is a Phase 2 fix. Nor that the pace projection beats a plain completion-rate rule halfway through: they perform the same.</dd></div>
+      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0">The <strong>Planning</strong> agent now warns when a sprint plans more story points than the team can finish — the capacity set in project settings, or else the average its last three finished sprints completed. (Before this, no capacity ever reached it and it never warned.) Its warning is <strong>weak</strong>: F1 <strong>0.500</strong> halfway, below flagging every sprint (0.657), because most teams here plan more than they finish; the plan-to-capacity ratio ranks late sprints above on-time ones with AUC <strong>0.60</strong>, against 0.79 for the Risk agent. The <strong>Progress</strong> agent's simple completion rule matches the Risk agent halfway through (F1 0.712 vs 0.706); at sprint end its perfect precision is built in, since a sprint under half done is late by definition. The <strong>Workload</strong> agent is a weak lateness signal (F1 0.58) — it measures uneven load, not delay.</dd></div>
+      <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">The product's verdict rests on the Risk agent, which is the one validated here; the specialists supply <strong>descriptive context</strong> whose figures are exactly right (section 1), the Planning agent's capacity and plan included.</dd></div>
+      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">That the Planning agent predicts late sprints: it is a planning check, and on this data a weak one. Its threshold was fixed in advance, not tuned on these sprints. Nor that the pace projection beats a plain completion-rate rule halfway through: they perform the same.</dd></div>
     </dl>
   </section>
 
@@ -361,6 +362,18 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
         <div class="chart" id="api"></div>
         <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="apiTable"></div></details>
       </div>
+      <div class="card" id="load">
+        <div><h3>Many people at once: the slowest 1% of requests</h3><p class="sub">Simultaneous users repeating a session mix (board, dashboard, team, sprints, a discussion, create-move-delete a task) with no pause. Logarithmic axis.</p></div>
+        <div class="legend"><span><i class="key line" style="background:var(--base)"></i>Before the fixes</span><span><i class="key line" style="background:var(--s1)"></i>After</span><span><i class="key" style="background:var(--critical)"></i>Failed requests</span></div>
+        <div class="chart" id="loadChart"></div>
+        <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="loadTable"></div></details>
+      </div>
+      <div class="card">
+        <div><h3>A burst of sign-ins: the longest wait</h3><p class="sub">That many people signing in at the same moment. Password hashing is deliberately slow; it used to block every other request while it ran.</p></div>
+        <div class="legend"><span><i class="key" style="background:var(--base)"></i>Before the fixes</span><span><i class="key" style="background:var(--s1)"></i>After</span></div>
+        <div class="chart" id="signinChart"></div>
+        <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="signinTable"></div></details>
+      </div>
       <div class="card">
         <div><h3>Analysis time by sprint size</h3><p class="sub">The agent pipeline alone, in process, across 1,974 real-sprint analyses.</p></div>
         <div class="chart" id="pipeline"></div>
@@ -368,9 +381,9 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
       </div>
     </div>
     <dl class="infer">
-      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0">As the project grows from 13 to 2,003 tasks, the prompt grows only from 266 to <strong>390 tokens (1.47×)</strong>, while sending the whole project grows to 189,834 — <strong>487× larger</strong> (515× re-measured today, as tasks gained two fields). Every page and edit answers in <strong>8–42 ms</strong>; a full analysis, backend and AI service together, takes <strong>715 ms</strong>, of which the agent pipeline is about 50 ms. Sign-in's 390 ms is deliberate: password hashing is made slow to resist guessing.</dd></div>
-      <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">Prompt cost <strong>tracks the number of problems, not project size</strong>, and the product is fast enough to re-analyse on every change: everything but a full analysis responds well inside the 100 ms that feels instant.</dd></div>
-      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">Production-scale performance. These times are from one laptop on SQLite with a 30-task project. Token counts are estimates from character length, not a tokenizer.</dd></div>
+      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0">As the project grows from 13 to 2,003 tasks, the prompt grows only from 266 to <strong>390 tokens (1.47×)</strong>, while sending the whole project grows to 189,834 — <strong>487× larger</strong> (515× re-measured today, as tasks gained two fields). Every page and edit answers in <strong>8–42 ms</strong>; a full analysis, backend and AI service together, takes <strong>715 ms</strong>, of which the agent pipeline takes under 50 ms (22–37 ms median in the latest run, by sprint size). Sign-in's 390 ms is deliberate: password hashing is made slow to resist guessing. <strong>Under load</strong>, with up to 50 people at once and no pause between requests, the server peaks near <strong>78 requests a second</strong> with <strong>no failed requests</strong> and the slowest 1% within 1.4 s — after fixing three defects the load test itself found (7 failed requests before; 25 simultaneous sign-ins took 9.5 s).</dd></div>
+      <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">Prompt cost <strong>tracks the number of problems, not project size</strong>, and the product is fast enough to re-analyse on every change: everything but a full analysis responds well inside the 100 ms that feels instant, and 50 simultaneous users cause waits, not errors.</dd></div>
+      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">Production-scale performance. These times and the load test are from one laptop on SQLite with a 30-task project, the load generator on the same machine; CI repeats the load test on PostgreSQL on a shared runner. Token counts are estimates from character length, not a tokenizer.</dd></div>
     </dl>
   </section>
 
@@ -403,15 +416,15 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
     </div>
     <div class="tiles" id="qualityTiles"></div>
     <div class="card">
-      <div><h3>Code covered by the automated tests, by area</h3><p class="sub">Share of statements the test suites execute. Frontend coverage is not measured.</p></div>
+      <div><h3>Code covered by the automated tests, by area</h3><p class="sub">Share of statements (for the frontend, lines) the test suites execute, every source file counted.</p></div>
       <div class="legend"><span><i class="key" style="background:var(--s1)"></i>Part of the MVP</span><span><i class="key" style="background:var(--base)"></i>Outside the MVP (unused by the app)</span></div>
       <div class="chart" id="codecov"></div>
       <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="codecovTable"></div></details>
     </div>
     <dl class="infer">
-      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0"><strong>207 automated tests</strong> pass, the backend's on both SQLite and PostgreSQL, and a role matrix read off the code checks every protected endpoint against every role: <strong>170 of 170</strong>. Tests cover <strong>74%</strong> of the backend code the MVP uses and <strong>81%</strong> of the AI service, <strong>93%</strong> of the knowledge graph. The validation found and fixed seven defects, five of them security holes or crashes in endpoints the app does not use.</dd></div>
+      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0"><strong>225 automated tests</strong> pass, the backend's on both SQLite and PostgreSQL, and a role matrix read off the code checks every protected endpoint against every role: <strong>170 of 170</strong>. Tests cover <strong>74%</strong> of the backend code the MVP uses, <strong>81%</strong> of the AI service and <strong>93%</strong> of the knowledge graph; in the frontend, <strong>88%</strong> of the analysis panel, hooks and API client, but only <strong>24%</strong> of all its code. The validation found and fixed ten defects: six security holes or crashes in endpoints the app does not use, a broken evaluation clock, and three that only showed under load.</dd></div>
       <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">The MVP is <strong>well tested where it matters</strong>, its access control is verified exhaustively rather than by example, and every push re-runs all of it.</dd></div>
-      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">High coverage overall: code outside the MVP is only 18% covered, and frontend coverage is unmeasured. No load test has been run, so behaviour under many simultaneous users is unknown.</dd></div>
+      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">High coverage overall: code outside the MVP is only 18% covered, and most frontend pages have no unit tests; they are exercised by the demo replay and by hand.</dd></div>
     </dl>
   </section>
 
@@ -432,15 +445,15 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
       <ul>
         <li><strong>The delay label is a proxy.</strong> TAWOS has no due dates, so "late" means 30% or more of a sprint's issues unresolved at its end.</li>
         <li><strong>The first quarter of a sprint.</strong> The pace warning is off by design until a quarter of the schedule has passed.</li>
-        <li><strong>One machine.</strong> Response times come from one laptop, on SQLite, with a 30-task project.</li>
+        <li><strong>One machine.</strong> Response times and the load test come from one laptop, on SQLite, with a 30-task project; CI repeats the load test on PostgreSQL.</li>
         <li><strong>The language-model results are from earlier runs</strong> on a rate-limited free key; they were not re-measured.</li>
       </ul>
     </div>
   </section>
 
   <footer>
-    <span>Every figure on this page is read from committed result files: <code>ai-service/eval/phase1_validation_result.json</code>, <code>phase1_api_latency_result.json</code>, <code>datasets/tawos_midsprint_result.json</code>, <code>datasets/tawos_holdout_result.json</code>, <code>figure_token_sweep.json</code>, <code>live_llm_result_v3.json</code>.</span>
-    <span>Reproduce: <code>python -m eval.validate_phase1</code> (from <code>ai-service/</code>) and <code>python -m app.scripts.measure_latency</code> (from <code>backend/</code>).</span>
+    <span>Every figure on this page is read from committed result files: <code>ai-service/eval/phase1_validation_result.json</code>, <code>phase1_api_latency_result.json</code>, <code>phase1_load_test_result.json</code>, <code>datasets/tawos_midsprint_result.json</code>, <code>datasets/tawos_holdout_result.json</code>, <code>figure_token_sweep.json</code>, <code>live_llm_result_v3.json</code>.</span>
+    <span>Reproduce: <code>python -m eval.validate_phase1</code> (from <code>ai-service/</code>) and <code>python -m app.scripts.measure_latency</code> / <code>load_test --quick</code> (from <code>backend/</code>).</span>
   </footer>
 </div>
 <div id="tip" hidden></div>
@@ -464,8 +477,8 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
   },
   {
    "id": "evidence.references_resolve",
-   "ok": 7102,
-   "total": 7102
+   "ok": 7831,
+   "total": 7831
   },
   {
    "id": "planning.figures_match",
@@ -1291,29 +1304,29 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
  "pipeline_latency": {
   "all": {
    "n": 1974,
-   "p50_ms": 50.2,
-   "p95_ms": 72.8,
-   "max_ms": 670.8
+   "p50_ms": 23.0,
+   "p95_ms": 31.3,
+   "max_ms": 371.6
   },
   "<25 tasks": {
    "n": 1129,
-   "p50_ms": 47.9,
-   "p95_ms": 65.8
+   "p50_ms": 21.8,
+   "p95_ms": 27.3
   },
   "25-49": {
    "n": 726,
-   "p50_ms": 52.7,
-   "p95_ms": 74.1
+   "p50_ms": 24.4,
+   "p95_ms": 31.8
   },
   "50-99": {
    "n": 115,
-   "p50_ms": 61.9,
-   "p95_ms": 89.0
+   "p50_ms": 29.0,
+   "p95_ms": 41.7
   },
   "100+": {
    "n": 4,
-   "p50_ms": 80.3,
-   "p95_ms": 83.9
+   "p50_ms": 36.9,
+   "p95_ms": 41.1
   }
  },
  "api_latency": {
@@ -1456,14 +1469,14 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
   "Halfway": {
    "planning": {
     "n": 270,
-    "tp": 0,
-    "fp": 0,
-    "fn": 132,
-    "tn": 138,
-    "precision": 0.0,
-    "recall": 0.0,
-    "f1": 0.0,
-    "accuracy": 0.5111
+    "tp": 73,
+    "fp": 87,
+    "fn": 59,
+    "tn": 51,
+    "precision": 0.4562,
+    "recall": 0.553,
+    "f1": 0.5,
+    "accuracy": 0.4593
    },
    "progress": {
     "n": 270,
@@ -1502,14 +1515,14 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
   "Sprint end": {
    "planning": {
     "n": 270,
-    "tp": 0,
-    "fp": 0,
-    "fn": 132,
-    "tn": 138,
-    "precision": 0.0,
-    "recall": 0.0,
-    "f1": 0.0,
-    "accuracy": 0.5111
+    "tp": 76,
+    "fp": 90,
+    "fn": 56,
+    "tn": 48,
+    "precision": 0.4578,
+    "recall": 0.5758,
+    "f1": 0.5101,
+    "accuracy": 0.4593
    },
    "progress": {
     "n": 270,
@@ -1554,22 +1567,269 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
    "AI: agents, pipeline, LLM client": 69.0,
    "AI: deferred agents (outside the MVP)": 63.2,
    "AI: API and models": 86.5,
-   "AI: knowledge graph and metrics": 93.2
+   "AI: knowledge graph and metrics": 93.2,
+   "Frontend: pages and other components": 14.3,
+   "Frontend: analysis panel, hooks, API client": 87.7
   },
   "backend_mvp": 74.2,
   "backend_all": 60.1,
-  "ai_all": 80.8
+  "ai_all": 80.8,
+  "frontend_all": 24.0
  },
  "engineering": {
   "tests": {
-   "backend": 79,
-   "ai_service": 75,
-   "frontend": 53
+   "backend": 82,
+   "ai_service": 85,
+   "frontend": 58
   },
   "role_checks": 170,
   "ci_jobs": 7,
   "demo_claims": 14,
-  "defects_fixed": 7
+  "defects_fixed": 10
+ },
+ "planning_capacity": {
+  "end.all": {
+   "sprints_with_capacity": 860,
+   "of_sprints": 987,
+   "over_capacity_share": 0.8791,
+   "auc_plan_to_capacity_ratio": 0.6859,
+   "delayed_share": 0.5535
+  },
+  "end.holdout": {
+   "sprints_with_capacity": 207,
+   "of_sprints": 270,
+   "over_capacity_share": 0.8019,
+   "auc_plan_to_capacity_ratio": 0.6163,
+   "delayed_share": 0.4251
+  },
+  "end.tuning": {
+   "sprints_with_capacity": 653,
+   "of_sprints": 717,
+   "over_capacity_share": 0.9035,
+   "auc_plan_to_capacity_ratio": 0.6998,
+   "delayed_share": 0.5942
+  },
+  "mid.all": {
+   "sprints_with_capacity": 860,
+   "of_sprints": 987,
+   "over_capacity_share": 0.8477,
+   "auc_plan_to_capacity_ratio": 0.6563,
+   "delayed_share": 0.5535
+  },
+  "mid.holdout": {
+   "sprints_with_capacity": 207,
+   "of_sprints": 270,
+   "over_capacity_share": 0.7729,
+   "auc_plan_to_capacity_ratio": 0.5975,
+   "delayed_share": 0.4251
+  },
+  "mid.tuning": {
+   "sprints_with_capacity": 653,
+   "of_sprints": 717,
+   "over_capacity_share": 0.8714,
+   "auc_plan_to_capacity_ratio": 0.6676,
+   "delayed_share": 0.5942
+  }
+ },
+ "load": {
+  "setup": "SQLite, one uvicorn worker per service, load generator on the same machine",
+  "levels": [
+   {
+    "users": 1,
+    "before": {
+     "throughput_rps": 57.3,
+     "p50_ms": 14.5,
+     "p95_ms": 31.0,
+     "p99_ms": 36.5,
+     "max_ms": 100.3,
+     "errors": 0,
+     "seconds": 8.0
+    },
+    "after": {
+     "throughput_rps": 57.2,
+     "p50_ms": 15.2,
+     "p95_ms": 27.1,
+     "p99_ms": 33.0,
+     "max_ms": 109.0,
+     "errors": 0,
+     "seconds": 8.0
+    }
+   },
+   {
+    "users": 10,
+    "before": {
+     "throughput_rps": 59.4,
+     "p50_ms": 148.3,
+     "p95_ms": 344.5,
+     "p99_ms": 424.0,
+     "max_ms": 575.1,
+     "errors": 0,
+     "seconds": 8.4
+    },
+    "after": {
+     "throughput_rps": 76.8,
+     "p50_ms": 122.1,
+     "p95_ms": 212.0,
+     "p99_ms": 364.7,
+     "max_ms": 449.5,
+     "errors": 0,
+     "seconds": 8.2
+    }
+   },
+   {
+    "users": 25,
+    "before": {
+     "throughput_rps": 69.8,
+     "p50_ms": 262.7,
+     "p95_ms": 746.3,
+     "p99_ms": 2011.3,
+     "max_ms": 4137.2,
+     "errors": 0,
+     "seconds": 8.7
+    },
+    "after": {
+     "throughput_rps": 74.0,
+     "p50_ms": 306.5,
+     "p95_ms": 603.0,
+     "p99_ms": 695.2,
+     "max_ms": 903.2,
+     "errors": 0,
+     "seconds": 8.3
+    }
+   },
+   {
+    "users": 50,
+    "before": {
+     "throughput_rps": 60.4,
+     "p50_ms": 455.1,
+     "p95_ms": 2356.4,
+     "p99_ms": 7109.3,
+     "max_ms": 7978.0,
+     "errors": 3,
+     "seconds": 10.1
+    },
+    "after": {
+     "throughput_rps": 77.6,
+     "p50_ms": 564.3,
+     "p95_ms": 1072.4,
+     "p99_ms": 1419.9,
+     "max_ms": 1582.8,
+     "errors": 0,
+     "seconds": 8.7
+    }
+   }
+  ],
+  "analysis": [
+   {
+    "concurrent": 1,
+    "before": {
+     "throughput_rps": 1.4,
+     "p50_ms": 718.6,
+     "p95_ms": 743.1,
+     "p99_ms": 758.2,
+     "max_ms": 758.2,
+     "errors": 0,
+     "seconds": 8.6
+    },
+    "after": {
+     "throughput_rps": 1.4,
+     "p50_ms": 732.2,
+     "p95_ms": 801.8,
+     "p99_ms": 801.8,
+     "max_ms": 801.8,
+     "errors": 0,
+     "seconds": 8.0
+    }
+   },
+   {
+    "concurrent": 5,
+    "before": {
+     "throughput_rps": 2.3,
+     "p50_ms": 1948.7,
+     "p95_ms": 3243.7,
+     "p99_ms": 3302.1,
+     "max_ms": 3302.1,
+     "errors": 0,
+     "seconds": 9.0
+    },
+    "after": {
+     "throughput_rps": 2.2,
+     "p50_ms": 2235.7,
+     "p95_ms": 3608.4,
+     "p99_ms": 3634.5,
+     "max_ms": 3634.5,
+     "errors": 0,
+     "seconds": 9.7
+    }
+   }
+  ],
+  "sign_in": [
+   {
+    "n": 1,
+    "before": {
+     "throughput_rps": 1.0,
+     "p50_ms": 619.2,
+     "p95_ms": 619.2,
+     "p99_ms": 619.2,
+     "max_ms": 619.2,
+     "errors": 0,
+     "seconds": 1.0
+    },
+    "after": {
+     "throughput_rps": 1.0,
+     "p50_ms": 628.4,
+     "p95_ms": 628.4,
+     "p99_ms": 628.4,
+     "max_ms": 628.4,
+     "errors": 0,
+     "seconds": 1.0
+    }
+   },
+   {
+    "n": 10,
+    "before": {
+     "throughput_rps": 2.2,
+     "p50_ms": 3885.1,
+     "p95_ms": 4087.8,
+     "p99_ms": 4087.8,
+     "max_ms": 4087.8,
+     "errors": 0,
+     "seconds": 4.5
+    },
+    "after": {
+     "throughput_rps": 8.6,
+     "p50_ms": 718.6,
+     "p95_ms": 763.6,
+     "p99_ms": 763.6,
+     "max_ms": 763.6,
+     "errors": 0,
+     "seconds": 1.2
+    }
+   },
+   {
+    "n": 25,
+    "before": {
+     "throughput_rps": 2.5,
+     "p50_ms": 9257.0,
+     "p95_ms": 9445.6,
+     "p99_ms": 9471.0,
+     "max_ms": 9471.0,
+     "errors": 4,
+     "seconds": 9.8
+    },
+    "after": {
+     "throughput_rps": 13.2,
+     "p50_ms": 1146.7,
+     "p95_ms": 1459.6,
+     "p99_ms": 1507.8,
+     "max_ms": 1507.8,
+     "errors": 0,
+     "seconds": 1.9
+    }
+   }
+  ],
+  "failed_before": 7,
+  "failed_after": 0
  }
 }</script>
 <script>
@@ -1979,6 +2239,11 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
     }
     return s;
   });
+  const PC = D.planning_capacity, pcm = PC["mid.holdout"], pce = PC["end.holdout"];
+  document.getElementById("capacityNote").textContent =
+    `Planning can only judge a sprint once capacity is known: ${pcm.sprints_with_capacity} of ${pcm.of_sprints} held-out sprints had a finished sprint before them. ` +
+    `${Math.round(pcm.over_capacity_share * 100)}% of those planned more than the team's recent average, which is why it warns so often. ` +
+    `Ranking quality of the plan-to-capacity ratio (AUC): ${fmt(pcm.auc_plan_to_capacity_ratio, 3)} halfway, ${fmt(pce.auc_plan_to_capacity_ratio, 3)} at sprint end; the Risk agent's pace signal halfway: ${fmt(D.auc[0].system, 3)}.`;
   table("agentsTable", ["When", "Agent", "Warned", "Precision", "Recall", "F1", "Accuracy"],
     ["Halfway", "Sprint end"].flatMap((mode) => AGENTS.map(([k, name]) => { const c = D.specialists[mode][k]; return [mode, name, `${c.tp + c.fp} / ${c.n}`, fmt(c.precision, 3), fmt(c.recall, 3), fmt(c.f1, 3), fmt(c.accuracy, 3)]; })), [2, 3, 4, 5, 6]);
 
@@ -2108,6 +2373,76 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
   });
   table("apiTable", ["Feature", "Median (ms)", "95th percentile (ms)", "Samples"], API.map((r) => [NICE(r.name), r.p50_ms.toFixed(1), r.p95_ms.toFixed(1), String(r.n)]), [1, 2, 3]);
 
+  // ---- under load
+  const LD = D.load;
+  const ms = (v) => (v >= 1000 ? (v / 1000).toFixed(1) + " s" : Math.round(v) + " ms");
+  mount("loadChart", (w) => {
+    const m = { l: 52, r: 58, t: 20, b: 30 }, h = 230;
+    const s = svg(w, h);
+    const n = LD.levels.length;
+    const sx = (i) => m.l + i / (n - 1) * (w - m.l - m.r);
+    const sy = (v) => h - m.b - (Math.log10(v) - 1) / 3 * (h - m.t - m.b);
+    for (const t of [10, 100, 1000, 10000]) {
+      el("line", { x1: m.l, x2: w - m.r, y1: sy(t), y2: sy(t), stroke: "var(--grid)" }, s);
+      text(s, m.l - 8, sy(t) + 4, t >= 1000 ? t / 1000 + " s" : t + " ms", { "text-anchor": "end", fill: "var(--muted)", "font-size": 11 });
+    }
+    LD.levels.forEach((l, i) => text(s, sx(i), h - m.b + 18, l.users + (i === n - 1 ? " users" : i === 0 ? " user" : ""),
+      { "text-anchor": i === 0 ? "start" : i === n - 1 ? "end" : "middle", fill: "var(--muted)", "font-size": 11 }));
+    [["before", "var(--base)"], ["after", "var(--s1)"]].forEach(([k, col]) => {
+      el("path", { d: LD.levels.map((l, i) => `${i ? "L" : "M"}${sx(i)},${sy(l[k].p99_ms)}`).join(" "), fill: "none", stroke: col, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, s);
+      LD.levels.forEach((l, i) => el("circle", { cx: sx(i), cy: sy(l[k].p99_ms), r: 4, fill: l[k].errors ? "var(--critical)" : col, stroke: "var(--surface)", "stroke-width": 2 }, s));
+      const last = LD.levels[n - 1][k];
+      text(s, sx(n - 1) + 8, sy(last.p99_ms) + 4, ms(last.p99_ms), { fill: "var(--ink)", "font-weight": 600 });
+    });
+    LD.levels.forEach((l, i) => {
+      if (l.before.errors) text(s, sx(i) - 9, sy(l.before.p99_ms) + 4, `${l.before.errors} failed`, { "text-anchor": "end", fill: "var(--critical)", "font-size": 11.5, "font-weight": 600 });
+    });
+    LD.levels.forEach((l, i) => {
+      const left = i ? (sx(i - 1) + sx(i)) / 2 : m.l - 10, right = i < n - 1 ? (sx(i) + sx(i + 1)) / 2 : w - m.r + 10;
+      const g = el("g", {}, s);
+      el("rect", { x: left, y: m.t, width: right - left, height: h - m.t - m.b, fill: "transparent" }, g);
+      hover(g, `${l.users} simultaneous ${l.users === 1 ? "user" : "users"}`, [
+        { label: "Slowest 1%, before", value: ms(l.before.p99_ms), color: "var(--base)" },
+        { label: "Slowest 1%, after", value: ms(l.after.p99_ms), color: "var(--s1)" },
+        { label: "Requests a second", value: `${l.before.throughput_rps} → ${l.after.throughput_rps}` },
+        { label: "Failed requests", value: `${l.before.errors} → ${l.after.errors}` }]);
+    });
+    return s;
+  });
+  const ba = (a, b, f) => `${f(a)} → ${f(b)}`;
+  table("loadTable", ["Simultaneous users", "Requests a second", "Median", "95th percentile", "Slowest 1%", "Failed requests"],
+    LD.levels.map((l) => [String(l.users), ba(l.before.throughput_rps, l.after.throughput_rps, String), ba(l.before.p50_ms, l.after.p50_ms, ms),
+      ba(l.before.p95_ms, l.after.p95_ms, ms), ba(l.before.p99_ms, l.after.p99_ms, ms), ba(l.before.errors, l.after.errors, String)])
+      .concat(LD.analysis.map((a) => [`${a.concurrent} ${a.concurrent === 1 ? "analysis" : "analyses"} at once`, "—", ba(a.before.p50_ms, a.after.p50_ms, ms), ba(a.before.p95_ms, a.after.p95_ms, ms), "—", ba(a.before.errors, a.after.errors, String)])),
+    [1, 2, 3, 4, 5]);
+
+  mount("signinChart", (w) => {
+    const m = { l: 96, r: 96, t: 6 }, bh = 13, inner = 3, group = 14;
+    const h = m.t + LD.sign_in.length * (2 * bh + inner + group) + 20;
+    const s = svg(w, h);
+    const top = Math.max(...LD.sign_in.map((r) => r.before.max_ms)) / 1000;
+    const hi = Math.ceil(top / 2) * 2;
+    const sx = (v) => m.l + v / hi * (w - m.l - m.r);
+    const ticks = []; for (let t = 0; t <= hi; t += 2) ticks.push(t);
+    xgrid(s, m.l, w - m.r, m.t, h - 20, ticks, sx, (v) => v + " s");
+    LD.sign_in.forEach((r, i) => {
+      const y = m.t + i * (2 * bh + inner + group);
+      text(s, 0, y + bh + 4, `${r.n} at once`, { fill: "var(--ink)", "font-size": 12 });
+      [["before", "var(--base)", 0], ["after", "var(--s1)", bh + inner]].forEach(([k, col, dy]) => {
+        const v = r[k].max_ms / 1000;
+        const g = el("g", {}, s);
+        el("rect", { x: m.l, y: y + dy - 1, width: w - m.l - m.r + 80, height: bh + 2, fill: "transparent" }, g);
+        el("path", { class: "mark", d: hbar(sx(0), y + dy, Math.max(2, sx(v) - sx(0)), bh), fill: col }, g);
+        const note = r[k].errors ? ` · ${r[k].errors} failed` : "";
+        text(g, sx(v) + 6, y + dy + 11, v.toFixed(1) + " s" + note, { fill: r[k].errors ? "var(--critical)" : "var(--ink)", "font-size": 11.5, "font-weight": r[k].errors ? 600 : 400 });
+        hover(g, `${r.n} signing in at once, ${k} the fixes`, [{ label: "Longest wait", value: v.toFixed(2) + " s", color: col }, { label: "Median wait", value: ms(r[k].p50_ms) }, { label: "Failed", value: String(r[k].errors) }]);
+      });
+    });
+    return s;
+  });
+  table("signinTable", ["Signing in at once", "Median wait", "Longest wait", "Failed"],
+    LD.sign_in.map((r) => [String(r.n), ba(r.before.p50_ms, r.after.p50_ms, ms), ba(r.before.max_ms, r.after.max_ms, ms), ba(r.before.errors, r.after.errors, String)]), [1, 2, 3]);
+
   const PIPE = ["<25 tasks", "25-49", "50-99", "100+"].map((k) => ({ k, ...D.pipeline_latency[k] }));
   mount("pipeline", (w) => {
     const m = { l: 110, r: 60, t: 8 }, rowH = 26;
@@ -2134,7 +2469,7 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
   const E = D.engineering, CC = D.code_coverage;
   tile("qualityTiles", "Automated tests passing", int(E.tests.backend + E.tests.ai_service + E.tests.frontend), `backend ${E.tests.backend} · AI service ${E.tests.ai_service} · frontend ${E.tests.frontend}`);
   tile("qualityTiles", "Role checks", `${E.role_checks} / ${E.role_checks}`, "every protected endpoint × every role");
-  tile("qualityTiles", "MVP code covered by tests", `${Math.round(CC.backend_mvp)}% · ${Math.round(CC.ai_all)}%`, "backend MVP code · AI service");
+  tile("qualityTiles", "MVP code covered by tests", `${Math.round(CC.backend_mvp)}% · ${Math.round(CC.ai_all)}%`, `backend MVP code · AI service (frontend, all code: ${Math.round(CC.frontend_all)}%)`);
   tile("qualityTiles", "Defects found and fixed", String(E.defects_fixed), `in this validation; ${E.ci_jobs} CI jobs re-check everything on each push`);
   const AREAS = Object.entries(CC.areas).sort((a, b) => b[1] - a[1]);
   mount("codecov", (w) => {
@@ -2148,7 +2483,7 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
       const y = m.t + i * (bh + gap);
       const outside = /outside|deferred/.test(name);
       const col = outside ? "var(--base)" : "var(--s1)";
-      const label = narrow ? name.replace("Backend: ", "BE: ").replace("AI: ", "AI: ").replace(" (meetings, admin, jobs)", "").replace(" (outside the MVP)", "") : name;
+      const label = narrow ? name.replace("Backend: ", "BE: ").replace("Frontend: ", "FE: ").replace("AI: ", "AI: ").replace(" (meetings, admin, jobs)", "").replace(" (outside the MVP)", "") : name;
       text(s, 0, y + 12, label, { fill: "var(--ink)", "font-size": narrow ? 11 : 12 });
       const g = el("g", {}, s);
       el("rect", { x: m.l, y: y - 3, width: w - m.l - m.r + 40, height: bh + 6, fill: "transparent" }, g);
@@ -2159,21 +2494,21 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
     return s;
   });
   table("codecovTable", ["Area", "Statements covered"], AREAS.map(([n, v]) => [n, v.toFixed(1) + "%"])
-    .concat([["Backend, all non-test code", CC.backend_all.toFixed(1) + "%"], ["Backend, MVP code", CC.backend_mvp.toFixed(1) + "%"], ["AI service, all non-test code", CC.ai_all.toFixed(1) + "%"], ["Frontend", "not measured"]]), [1]);
+    .concat([["Backend, all non-test code", CC.backend_all.toFixed(1) + "%"], ["Backend, MVP code", CC.backend_mvp.toFixed(1) + "%"], ["AI service, all non-test code", CC.ai_all.toFixed(1) + "%"], ["Frontend, all source lines", CC.frontend_all.toFixed(1) + "%"]]), [1]);
 
   // ================= 7. completeness matrix
   const Y = ["yes", "measured"], P = ["part", "partial"], N = ["no", "missing"], X = ["na", "n/a"];
   const COLS = ["Correct output", "Accurate on real data", "Compared with a baseline", "Statistically tested", "Speed and cost", "Repeatable", "Human evaluation"];
   const ROWS = [
     ["Coordinator", [Y, X, X, X, Y, Y, X]],
-    ["Planning agent", [Y, ["part", "measured: never warns"], N, N, Y, Y, N]],
+    ["Planning agent", [Y, ["yes", "measured: weak"], Y, N, Y, Y, N]],
     ["Progress agent", [Y, Y, P, N, Y, Y, N]],
     ["Workload agent", [Y, Y, P, N, Y, Y, N]],
     ["Risk agent — delay", [Y, Y, Y, Y, Y, Y, N]],
     ["Risk agent — other five risks", [Y, P, N, N, Y, Y, N]],
     ["Recommendation agent", [Y, P, N, X, Y, Y, N]],
     ["Language-model narration (optional)", [Y, P, Y, P, Y, N, N]],
-    ["Web app and API", [Y, Y, X, X, P, Y, N]],
+    ["Web app and API", [Y, Y, X, X, ["yes", "measured, incl. load"], Y, N]],
   ];
   const mt = document.getElementById("matrix");
   const thead = document.createElement("thead"), hr = document.createElement("tr");
@@ -2191,12 +2526,12 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
   }
   mt.appendChild(tb);
   const GAPS = [
-    ["Human evaluation of the explanations and the app", "Does a manager find the right problem faster with the evidence than without? A usability score (SUS) for the app. The largest gap for an explainable-AI project, and no automated test can close it.", "About 2 weeks · 8–12 participants"],
-    ["The Planning agent's verdict", "It never warns, because the product never supplies team capacity. Add a capacity setting per sprint, then score it again.", "A Phase 2 feature · 1–2 days"],
-    ["Load and concurrency", "Response times are single-user. Measure throughput and latency with many simultaneous users on PostgreSQL.", "Half a day · automated"],
+    ["Human evaluation of the explanations and the app", "Does a manager find the right problem faster with the evidence than without? A usability score (SUS) for the app. The largest gap for an explainable-AI project, and no automated test can close it. Everything else is ready in docs/user-study/: protocol, forms, two real sprints, setup script, answer key, analysis script.", "About 2 weeks · 8–12 participants"],
+    ["A better planning signal", "The capacity warning now works but barely predicts lateness (AUC 0.60): most teams here plan more than they finish. Worth testing a plan measured against the team's own usual over-commitment.", "Phase 2 · a few days"],
+    ["Load on production hardware", "Load tested on one laptop (SQLite) and on a shared CI runner (PostgreSQL), up to 50 users. Not on a production server, nor beyond 50.", "Half a day · a staging server"],
     ["The other five risk types on real data", "Knowledge and coordination never reach medium inside one sprint of TAWOS. Evaluate over releases, or on a dataset with component ownership.", "Days to weeks · needs data"],
     ["The language model, re-measured", "Replace the 54–95% validity range with one number and thicken the κ sample, with per-call logging.", "About an hour · paid API key"],
-    ["Frontend code coverage", "Frontend tests pass but their coverage is not measured.", "Minutes · one npm package"],
+    ["Frontend page tests", "Coverage is now measured: 24% of all frontend code. The analysis panel is well covered; most pages have no unit tests.", "1–2 days"],
   ];
   const gh = document.getElementById("gaps");
   for (const [title, what, effort] of GAPS) {

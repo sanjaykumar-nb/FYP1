@@ -36,8 +36,8 @@ the moment analysed is "now", exactly as the evaluation scripts pin their clocks
 | Analysis completes | 1,974 / 1,974 |
 | Returns all five specialist outputs | 1,974 / 1,974 |
 | Same sprint, analysed twice, gives an identical result | 987 / 987 |
-| Response time, in process (all 1,974) | median **48 ms**, 95th percentile **70 ms** |
-| … for sprints under 25 tasks / 25–49 / 50–99 / 100+ | 45 / 51 / 62 / 81 ms median |
+| Response time, in process (all 1,974) | median **23 ms**, 95th percentile **31 ms** (48 / 70 ms in the first run: timings vary with the laptop's load) |
+| … for sprints under 25 tasks / 25–49 / 50–99 / 100+ | 22 / 24 / 29 / 37 ms median |
 
 ### Planning, Progress and Workload
 
@@ -208,7 +208,7 @@ tasks, 13 people), SQLite, no LLM key, one Windows laptop; 15 timed requests eac
 | Analysis history | 24 ms | 42 ms |
 
 Sign-in is slow by design: password hashing (bcrypt) is deliberately expensive. Of the analysis time,
-the AI pipeline itself is about 50 ms; the rest is the backend loading the project, calling the AI
+the AI pipeline itself takes under 50 ms; the rest is the backend loading the project, calling the AI
 service and saving the result.
 
 **Many people at once** ([`load_test.py`](backend/app/scripts/load_test.py), quick levels; same laptop,
