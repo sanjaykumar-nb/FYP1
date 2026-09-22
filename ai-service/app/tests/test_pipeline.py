@@ -220,3 +220,25 @@ class TestRawResponseValidation:
         # propagating a half-built AgentOutput.
         assert "agent failed" not in result.specialist_outputs["planning"]["summary"].lower()
         assert result.specialist_outputs["planning"]["confidence"] > 0
+
+
+class TestTeamCapacity:
+    """Where the planning agent's capacity comes from (graph_pipeline.team_capacity)."""
+
+    def test_the_teams_own_figure_wins(self):
+        from app.services.graph_pipeline import team_capacity
+
+        snapshot = healthy_project(4).model_copy(update={"team_capacity_points": 30, "velocity_history": [10.0, 12.0]})
+        assert team_capacity(snapshot) == {"total_points": 30, "source": "set by the team"}
+
+    def test_otherwise_the_average_of_the_last_three_sprints(self):
+        from app.services.graph_pipeline import team_capacity
+
+        snapshot = healthy_project(4).model_copy(update={"velocity_history": [50.0, 10.0, 20.0, 30.0]})
+        assert team_capacity(snapshot) == {"total_points": 20.0, "source": "average completed in the last 3 sprints"}
+
+    def test_unknown_without_a_finished_sprint(self):
+        from app.services.graph_pipeline import team_capacity
+
+        assert team_capacity(healthy_project(4)) == {}
+        assert team_capacity(healthy_project(4).model_copy(update={"velocity_history": [0.0, 0.0]})) == {}

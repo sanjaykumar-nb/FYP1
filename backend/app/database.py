@@ -1,4 +1,4 @@
-from sqlalchemy import inspect, text
+from sqlalchemy import event, inspect, text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from app.config import get_settings
@@ -9,11 +9,24 @@ settings = get_settings()
 # models are deliberately dialect-neutral (see models/base.py) so the same code
 # runs on SQLite for tests and local runs without Postgres — the engine config
 # has to be dialect-aware too, or startup fails with a TypeError.
-_engine_kwargs = {"echo": settings.DEBUG}
-if not settings.DATABASE_URL.startswith("sqlite"):
+_engine_kwargs = {"echo": settings.SQL_ECHO}
+_sqlite = settings.DATABASE_URL.startswith("sqlite")
+if _sqlite:
+    # SQLite has one writer at a time. Its default 5 s wait for the lock turned
+    # concurrent writes into 500s under load; wait longer instead.
+    _engine_kwargs["connect_args"] = {"timeout": 30}
+else:
     _engine_kwargs.update(pool_pre_ping=True, pool_size=10, max_overflow=20)
 
 engine = create_async_engine(settings.DATABASE_URL, **_engine_kwargs)
+
+if _sqlite and ":memory:" not in settings.DATABASE_URL:
+    @event.listens_for(engine.sync_engine, "connect")
+    def _sqlite_write_ahead_log(dbapi_connection, _record) -> None:
+        # Write-ahead logging lets reads carry on while a write holds the lock.
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.close()
 
 async_session_maker = async_sessionmaker(
     engine,
@@ -41,6 +54,7 @@ async def get_db() -> AsyncSession:
 _ADDED_COLUMNS = [
     ("milestones", "start_date", "DATE"),
     ("tasks", "component", "VARCHAR(100)"),
+    ("projects", "sprint_capacity_points", "INTEGER"),
 ]
 
 

@@ -1,0 +1,638 @@
+{
+  "method": "Load-test the Phase 1 stack: many people using it at once, end to end over HTTP.",
+  "environment": {
+    "api": "http://localhost:8000",
+    "setup": "SQLite, one uvicorn worker per service, load generator on the same machine",
+    "machine": "Windows-10-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 154 Stepping 4, GenuineIntel",
+    "cpus": 12,
+    "python": "3.11.9",
+    "project": "Apache Mesos sprint 74 (30 tasks, 13 people)",
+    "seconds_per_level": 8,
+    "session_mix_weights": {
+      "task board": 30,
+      "dashboard": 15,
+      "project": 10,
+      "team": 8,
+      "sprints": 8,
+      "dependencies": 8,
+      "task discussion": 8,
+      "create-move-delete a task": 13
+    }
+  },
+  "interactive": [
+    {
+      "users": 1,
+      "seconds": 8.0,
+      "requests": 458,
+      "throughput_rps": 57.2,
+      "n": 458,
+      "p50_ms": 15.2,
+      "p95_ms": 27.1,
+      "p99_ms": 33.0,
+      "max_ms": 109.0,
+      "errors": 0,
+      "error_rate": 0.0,
+      "by_request": {
+        "create task": {
+          "n": 45,
+          "p50_ms": 27.1,
+          "p95_ms": 44.1,
+          "p99_ms": 109.0,
+          "max_ms": 109.0
+        },
+        "dashboard": {
+          "n": 58,
+          "p50_ms": 14.5,
+          "p95_ms": 16.8,
+          "p99_ms": 17.2,
+          "max_ms": 18.8
+        },
+        "delete task": {
+          "n": 45,
+          "p50_ms": 22.0,
+          "p95_ms": 24.4,
+          "p99_ms": 25.6,
+          "max_ms": 25.6
+        },
+        "dependencies": {
+          "n": 38,
+          "p50_ms": 11.5,
+          "p95_ms": 12.5,
+          "p99_ms": 13.1,
+          "max_ms": 13.1
+        },
+        "move task": {
+          "n": 45,
+          "p50_ms": 24.1,
+          "p95_ms": 26.2,
+          "p99_ms": 26.4,
+          "max_ms": 26.4
+        },
+        "project": {
+          "n": 43,
+          "p50_ms": 10.7,
+          "p95_ms": 12.9,
+          "p99_ms": 14.4,
+          "max_ms": 14.4
+        },
+        "sprints": {
+          "n": 30,
+          "p50_ms": 13.4,
+          "p95_ms": 15.7,
+          "p99_ms": 15.7,
+          "max_ms": 15.7
+        },
+        "task board": {
+          "n": 97,
+          "p50_ms": 15.2,
+          "p95_ms": 18.0,
+          "p99_ms": 19.0,
+          "max_ms": 20.3
+        },
+        "task discussion": {
+          "n": 31,
+          "p50_ms": 13.4,
+          "p95_ms": 14.7,
+          "p99_ms": 19.7,
+          "max_ms": 19.7
+        },
+        "team": {
+          "n": 26,
+          "p50_ms": 16.6,
+          "p95_ms": 18.3,
+          "p99_ms": 19.3,
+          "max_ms": 19.3
+        }
+      },
+      "error_examples": []
+    },
+    {
+      "users": 10,
+      "seconds": 8.2,
+      "requests": 629,
+      "throughput_rps": 76.8,
+      "n": 629,
+      "p50_ms": 122.1,
+      "p95_ms": 212.0,
+      "p99_ms": 364.7,
+      "max_ms": 449.5,
+      "errors": 0,
+      "error_rate": 0.0,
+      "by_request": {
+        "create task": {
+          "n": 67,
+          "p50_ms": 178.2,
+          "p95_ms": 248.7,
+          "p99_ms": 305.2,
+          "max_ms": 449.5
+        },
+        "dashboard": {
+          "n": 77,
+          "p50_ms": 105.2,
+          "p95_ms": 194.6,
+          "p99_ms": 364.7,
+          "max_ms": 379.8
+        },
+        "delete task": {
+          "n": 67,
+          "p50_ms": 156.8,
+          "p95_ms": 231.8,
+          "p99_ms": 280.4,
+          "max_ms": 292.4
+        },
+        "dependencies": {
+          "n": 30,
+          "p50_ms": 74.8,
+          "p95_ms": 128.2,
+          "p99_ms": 157.6,
+          "max_ms": 157.6
+        },
+        "move task": {
+          "n": 67,
+          "p50_ms": 163.1,
+          "p95_ms": 210.2,
+          "p99_ms": 232.5,
+          "max_ms": 252.6
+        },
+        "project": {
+          "n": 39,
+          "p50_ms": 62.5,
+          "p95_ms": 85.3,
+          "p99_ms": 91.0,
+          "max_ms": 91.0
+        },
+        "sprints": {
+          "n": 53,
+          "p50_ms": 89.0,
+          "p95_ms": 137.3,
+          "p99_ms": 166.4,
+          "max_ms": 167.1
+        },
+        "task board": {
+          "n": 150,
+          "p50_ms": 124.2,
+          "p95_ms": 178.7,
+          "p99_ms": 428.1,
+          "max_ms": 438.1
+        },
+        "task discussion": {
+          "n": 43,
+          "p50_ms": 93.5,
+          "p95_ms": 157.9,
+          "p99_ms": 354.7,
+          "max_ms": 354.7
+        },
+        "team": {
+          "n": 36,
+          "p50_ms": 111.7,
+          "p95_ms": 167.8,
+          "p99_ms": 387.7,
+          "max_ms": 387.7
+        }
+      },
+      "error_examples": []
+    },
+    {
+      "users": 25,
+      "seconds": 8.3,
+      "requests": 613,
+      "throughput_rps": 74.0,
+      "n": 613,
+      "p50_ms": 306.5,
+      "p95_ms": 603.0,
+      "p99_ms": 695.2,
+      "max_ms": 903.2,
+      "errors": 0,
+      "error_rate": 0.0,
+      "by_request": {
+        "create task": {
+          "n": 56,
+          "p50_ms": 410.1,
+          "p95_ms": 493.6,
+          "p99_ms": 513.5,
+          "max_ms": 529.4
+        },
+        "dashboard": {
+          "n": 72,
+          "p50_ms": 230.4,
+          "p95_ms": 355.5,
+          "p99_ms": 615.2,
+          "max_ms": 617.9
+        },
+        "delete task": {
+          "n": 56,
+          "p50_ms": 352.0,
+          "p95_ms": 461.7,
+          "p99_ms": 541.8,
+          "max_ms": 555.2
+        },
+        "dependencies": {
+          "n": 38,
+          "p50_ms": 191.6,
+          "p95_ms": 286.6,
+          "p99_ms": 573.8,
+          "max_ms": 573.8
+        },
+        "move task": {
+          "n": 56,
+          "p50_ms": 354.5,
+          "p95_ms": 464.8,
+          "p99_ms": 520.9,
+          "max_ms": 572.0
+        },
+        "project": {
+          "n": 50,
+          "p50_ms": 148.8,
+          "p95_ms": 551.8,
+          "p99_ms": 576.1,
+          "max_ms": 576.1
+        },
+        "sprints": {
+          "n": 41,
+          "p50_ms": 214.9,
+          "p95_ms": 319.4,
+          "p99_ms": 617.7,
+          "max_ms": 617.7
+        },
+        "task board": {
+          "n": 164,
+          "p50_ms": 475.8,
+          "p95_ms": 664.6,
+          "p99_ms": 825.2,
+          "max_ms": 903.2
+        },
+        "task discussion": {
+          "n": 45,
+          "p50_ms": 231.7,
+          "p95_ms": 316.2,
+          "p99_ms": 603.0,
+          "max_ms": 603.0
+        },
+        "team": {
+          "n": 35,
+          "p50_ms": 271.8,
+          "p95_ms": 377.8,
+          "p99_ms": 711.1,
+          "max_ms": 711.1
+        }
+      },
+      "error_examples": []
+    },
+    {
+      "users": 50,
+      "seconds": 8.7,
+      "requests": 679,
+      "throughput_rps": 77.6,
+      "n": 679,
+      "p50_ms": 564.3,
+      "p95_ms": 1072.4,
+      "p99_ms": 1419.9,
+      "max_ms": 1582.8,
+      "errors": 0,
+      "error_rate": 0.0,
+      "by_request": {
+        "create task": {
+          "n": 66,
+          "p50_ms": 758.8,
+          "p95_ms": 1201.8,
+          "p99_ms": 1419.9,
+          "max_ms": 1439.1
+        },
+        "dashboard": {
+          "n": 75,
+          "p50_ms": 431.8,
+          "p95_ms": 561.3,
+          "p99_ms": 1040.9,
+          "max_ms": 1056.0
+        },
+        "delete task": {
+          "n": 66,
+          "p50_ms": 646.7,
+          "p95_ms": 856.0,
+          "p99_ms": 980.2,
+          "max_ms": 1341.8
+        },
+        "dependencies": {
+          "n": 44,
+          "p50_ms": 324.7,
+          "p95_ms": 437.7,
+          "p99_ms": 896.0,
+          "max_ms": 896.0
+        },
+        "move task": {
+          "n": 66,
+          "p50_ms": 678.0,
+          "p95_ms": 945.3,
+          "p99_ms": 1113.2,
+          "max_ms": 1558.1
+        },
+        "project": {
+          "n": 54,
+          "p50_ms": 282.2,
+          "p95_ms": 368.7,
+          "p99_ms": 777.9,
+          "max_ms": 844.3
+        },
+        "sprints": {
+          "n": 44,
+          "p50_ms": 388.2,
+          "p95_ms": 960.4,
+          "p99_ms": 1064.2,
+          "max_ms": 1064.2
+        },
+        "task board": {
+          "n": 156,
+          "p50_ms": 941.6,
+          "p95_ms": 1252.1,
+          "p99_ms": 1441.5,
+          "max_ms": 1582.8
+        },
+        "task discussion": {
+          "n": 55,
+          "p50_ms": 414.6,
+          "p95_ms": 561.2,
+          "p99_ms": 977.9,
+          "max_ms": 1029.5
+        },
+        "team": {
+          "n": 53,
+          "p50_ms": 536.1,
+          "p95_ms": 678.3,
+          "p99_ms": 715.8,
+          "max_ms": 997.4
+        }
+      },
+      "error_examples": []
+    }
+  ],
+  "analysis": [
+    {
+      "concurrent": 1,
+      "seconds": 8.0,
+      "requests": 11,
+      "throughput_rps": 1.4,
+      "n": 11,
+      "p50_ms": 732.2,
+      "p95_ms": 801.8,
+      "p99_ms": 801.8,
+      "max_ms": 801.8,
+      "errors": 0,
+      "error_rate": 0.0,
+      "by_request": {
+        "run analysis": {
+          "n": 11,
+          "p50_ms": 732.2,
+          "p95_ms": 801.8,
+          "p99_ms": 801.8,
+          "max_ms": 801.8
+        }
+      },
+      "error_examples": [],
+      "analyses_per_minute": 82.5
+    },
+    {
+      "concurrent": 5,
+      "seconds": 9.7,
+      "requests": 21,
+      "throughput_rps": 2.2,
+      "n": 21,
+      "p50_ms": 2235.7,
+      "p95_ms": 3608.4,
+      "p99_ms": 3634.5,
+      "max_ms": 3634.5,
+      "errors": 0,
+      "error_rate": 0.0,
+      "by_request": {
+        "run analysis": {
+          "n": 21,
+          "p50_ms": 2235.7,
+          "p95_ms": 3608.4,
+          "p99_ms": 3634.5,
+          "max_ms": 3634.5
+        }
+      },
+      "error_examples": [],
+      "analyses_per_minute": 129.9
+    }
+  ],
+  "sign_in_burst": [
+    {
+      "simultaneous": 1,
+      "seconds": 1.0,
+      "requests": 1,
+      "throughput_rps": 1.0,
+      "n": 1,
+      "p50_ms": 628.4,
+      "p95_ms": 628.4,
+      "p99_ms": 628.4,
+      "max_ms": 628.4,
+      "errors": 0,
+      "error_rate": 0.0,
+      "by_request": {
+        "sign in": {
+          "n": 1,
+          "p50_ms": 628.4,
+          "p95_ms": 628.4,
+          "p99_ms": 628.4,
+          "max_ms": 628.4
+        }
+      },
+      "error_examples": []
+    },
+    {
+      "simultaneous": 10,
+      "seconds": 1.2,
+      "requests": 10,
+      "throughput_rps": 8.6,
+      "n": 10,
+      "p50_ms": 718.6,
+      "p95_ms": 763.6,
+      "p99_ms": 763.6,
+      "max_ms": 763.6,
+      "errors": 0,
+      "error_rate": 0.0,
+      "by_request": {
+        "sign in": {
+          "n": 10,
+          "p50_ms": 718.6,
+          "p95_ms": 763.6,
+          "p99_ms": 763.6,
+          "max_ms": 763.6
+        }
+      },
+      "error_examples": []
+    },
+    {
+      "simultaneous": 25,
+      "seconds": 1.9,
+      "requests": 25,
+      "throughput_rps": 13.2,
+      "n": 25,
+      "p50_ms": 1146.7,
+      "p95_ms": 1459.6,
+      "p99_ms": 1507.8,
+      "max_ms": 1507.8,
+      "errors": 0,
+      "error_rate": 0.0,
+      "by_request": {
+        "sign in": {
+          "n": 25,
+          "p50_ms": 1146.7,
+          "p95_ms": 1459.6,
+          "p99_ms": 1507.8,
+          "max_ms": 1507.8
+        }
+      },
+      "error_examples": []
+    }
+  ],
+  "failed_requests": 0,
+  "before_fixes": {
+    "note": "Same run before the three fixes the load test prompted: bcrypt moved off the event loop, SQL statement logging made opt-in (it was on whenever DEBUG was), SQLite WAL mode and a 30 s lock wait.",
+    "interactive": [
+      {
+        "users": 1,
+        "seconds": 8.0,
+        "requests": 459,
+        "throughput_rps": 57.3,
+        "n": 459,
+        "p50_ms": 14.5,
+        "p95_ms": 31.0,
+        "p99_ms": 36.5,
+        "max_ms": 100.3,
+        "errors": 0,
+        "error_rate": 0.0,
+        "error_examples": []
+      },
+      {
+        "users": 10,
+        "seconds": 8.4,
+        "requests": 502,
+        "throughput_rps": 59.4,
+        "n": 502,
+        "p50_ms": 148.3,
+        "p95_ms": 344.5,
+        "p99_ms": 424.0,
+        "max_ms": 575.1,
+        "errors": 0,
+        "error_rate": 0.0,
+        "error_examples": []
+      },
+      {
+        "users": 25,
+        "seconds": 8.7,
+        "requests": 604,
+        "throughput_rps": 69.8,
+        "n": 604,
+        "p50_ms": 262.7,
+        "p95_ms": 746.3,
+        "p99_ms": 2011.3,
+        "max_ms": 4137.2,
+        "errors": 0,
+        "error_rate": 0.0,
+        "error_examples": []
+      },
+      {
+        "users": 50,
+        "seconds": 10.1,
+        "requests": 607,
+        "throughput_rps": 60.4,
+        "n": 607,
+        "p50_ms": 455.1,
+        "p95_ms": 2356.4,
+        "p99_ms": 7109.3,
+        "max_ms": 7978.0,
+        "errors": 3,
+        "error_rate": 0.0049,
+        "error_examples": [
+          "create task: POST /projects/4a10adf2-a015-4c35-a6fc-4800a61974d9/tasks -> 500 Internal Server Error",
+          "create task: POST /projects/4a10adf2-a015-4c35-a6fc-4800a61974d9/tasks -> 500 Internal Server Error",
+          "delete task: DELETE /projects/4a10adf2-a015-4c35-a6fc-4800a61974d9/tasks/f2208ce2-87a8-4686-bb51-c60901638415 -> 500 Internal Server Error"
+        ]
+      }
+    ],
+    "analysis": [
+      {
+        "concurrent": 1,
+        "seconds": 8.6,
+        "requests": 12,
+        "throughput_rps": 1.4,
+        "n": 12,
+        "p50_ms": 718.6,
+        "p95_ms": 743.1,
+        "p99_ms": 758.2,
+        "max_ms": 758.2,
+        "errors": 0,
+        "error_rate": 0.0,
+        "error_examples": [],
+        "analyses_per_minute": 83.7
+      },
+      {
+        "concurrent": 5,
+        "seconds": 9.0,
+        "requests": 21,
+        "throughput_rps": 2.3,
+        "n": 21,
+        "p50_ms": 1948.7,
+        "p95_ms": 3243.7,
+        "p99_ms": 3302.1,
+        "max_ms": 3302.1,
+        "errors": 0,
+        "error_rate": 0.0,
+        "error_examples": [],
+        "analyses_per_minute": 140.0
+      }
+    ],
+    "sign_in_burst": [
+      {
+        "simultaneous": 1,
+        "seconds": 1.0,
+        "requests": 1,
+        "throughput_rps": 1.0,
+        "n": 1,
+        "p50_ms": 619.2,
+        "p95_ms": 619.2,
+        "p99_ms": 619.2,
+        "max_ms": 619.2,
+        "errors": 0,
+        "error_rate": 0.0,
+        "error_examples": []
+      },
+      {
+        "simultaneous": 10,
+        "seconds": 4.5,
+        "requests": 10,
+        "throughput_rps": 2.2,
+        "n": 10,
+        "p50_ms": 3885.1,
+        "p95_ms": 4087.8,
+        "p99_ms": 4087.8,
+        "max_ms": 4087.8,
+        "errors": 0,
+        "error_rate": 0.0,
+        "error_examples": []
+      },
+      {
+        "simultaneous": 25,
+        "seconds": 9.8,
+        "requests": 25,
+        "throughput_rps": 2.5,
+        "n": 25,
+        "p50_ms": 9257.0,
+        "p95_ms": 9445.6,
+        "p99_ms": 9471.0,
+        "max_ms": 9471.0,
+        "errors": 4,
+        "error_rate": 0.16,
+        "error_examples": [
+          "sign in: POST /auth/login -> 500 Internal Server Error",
+          "sign in: POST /auth/login -> 500 Internal Server Error",
+          "sign in: POST /auth/login -> 500 Internal Server Error",
+          "sign in: POST /auth/login -> 500 Internal Server Error"
+        ]
+      }
+    ],
+    "failed_requests": 7
+  }
+}

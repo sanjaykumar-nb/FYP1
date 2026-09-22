@@ -22,6 +22,7 @@ export interface Project {
   actual_end_date: string | null
   health_score: number | null
   risk_score: number | null
+  sprint_capacity_points: number | null
   created_at: string
 }
 

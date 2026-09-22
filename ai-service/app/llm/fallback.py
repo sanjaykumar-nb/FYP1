@@ -1,3 +1,4 @@
+from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 from app.models.agent_base import (
     PlanningInput, PlanningOutput,
@@ -10,6 +11,38 @@ from app.models.agent_base import (
     AgentOutput, AgentSignal, AgentEvidence, AgentRecommendation,
 )
 from uuid import uuid4
+
+# A plan this far over capacity is a high risk, not just a medium one (the same
+# 1.5x bar the workload agent uses for an overloaded person).
+OVER_CAPACITY_HIGH = 1.5
+
+
+def _as_utc(value) -> Optional[datetime]:
+    if value is None or value == "":
+        return None
+    if isinstance(value, str):
+        value = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if not isinstance(value, datetime) and isinstance(value, date):
+        value = datetime(value.year, value.month, value.day)
+    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+
+
+def planned_sprints(milestones: list[dict], tasks: list[dict], now: datetime) -> list[tuple[Optional[dict], int]]:
+    """The sprints whose plan still matters, each with the story points it commits to.
+
+    Without milestones the tasks are the one plan (a snapshot of a single sprint).
+    A sprint that is completed, or a day past its end date, is history and is skipped.
+    """
+    points = lambda ts: sum(t.get("story_points") or 0 for t in ts)  # noqa: E731
+    if not milestones:
+        return [(None, points(tasks))]
+    open_sprints = []
+    for m in milestones:
+        end = _as_utc(m.get("target_date"))
+        if m.get("status") == "completed" or (end is not None and end + timedelta(days=1) <= now):
+            continue
+        open_sprints.append((m, points(t for t in tasks if str(t.get("milestone_id")) == str(m.get("id")))))
+    return open_sprints
 
 
 class RuleBasedFallback:
@@ -36,35 +69,67 @@ class RuleBasedFallback:
         milestones_with_tasks = sum(1 for m in milestones if any(t.get('milestone_id') == m.get('id') for t in tasks))
         sprint_readiness = milestones_with_tasks / max(len(milestones), 1) if milestones else 0.5
         
-        # Check capacity
-        # An unestimated task has story_points=None (key present), which .get(k, 0) would pass through.
-        total_points = sum(t.get('story_points') or 0 for t in tasks)
-        capacity = team_capacity.get('total_points', total_points * 1.2)
-        capacity_gap = max(0, total_points - capacity)
-        
+        # Capacity: what the team can finish in one sprint — the figure it set, or the
+        # average it actually completed recently (app.services.graph_pipeline.team_capacity).
+        # With neither there is nothing to compare a plan against, so no warning is made up.
+        capacity = team_capacity.get('total_points') or None
+        source = team_capacity.get('source') or "set by the team"
+        sprints = planned_sprints(milestones, tasks, datetime.now(timezone.utc))
+        largest = max((p for _, p in sprints), default=0)
+        over = [(m, p) for m, p in sprints if capacity and p > capacity]
+        name = lambda m: (m or {}).get('name') or "The sprint"  # noqa: E731
+
+        risk_level = "low"
+        if over:
+            risk_level = "high" if largest >= capacity * OVER_CAPACITY_HIGH else "medium"
+        summary = f"Planning analysis: {len(milestones)} milestones, {len(tasks)} tasks. Sprint readiness: {sprint_readiness:.0%}."
+        if capacity:
+            summary += (f" Capacity: {capacity:g} points per sprint ({source}). Largest plan: {largest} points"
+                        + (", over capacity." if over else "."))
+        else:
+            summary += " Capacity unknown: set it in project settings, or finish a sprint to measure it."
+
+        feasibility = {str(m.get('id', 'unknown')): {'feasible': True} for m in milestones}
+        for m, p in sprints:
+            if m is not None:
+                feasibility[str(m.get('id'))] = {'feasible': not capacity or p <= capacity,
+                                                 'planned_points': p, 'capacity_points': capacity}
+        worst_m, worst_p = max(over, key=lambda o: o[1]) if over else (None, 0)
+
         return PlanningOutput(
-            summary=f"Planning analysis: {len(milestones)} milestones, {len(tasks)} tasks. Sprint readiness: {sprint_readiness:.0%}",
-            risk_level="medium" if capacity_gap > 0 else "low",
+            summary=summary,
+            risk_level=risk_level,
             confidence=0.6,
             signals=[
                 AgentSignal(name="milestone_coverage", value=sprint_readiness, weight=0.5),
-                AgentSignal(name="capacity_utilization", value=min(total_points/capacity, 1.0) if capacity > 0 else 0.5, weight=0.5),
+                AgentSignal(name="capacity_utilization", value=min(largest / capacity, 1.0) if capacity else 0.5, weight=0.5),
             ],
-            evidence=[],
+            evidence=[
+                AgentEvidence(
+                    source="milestone",
+                    reference_id=f"milestone:{m['id']}",
+                    excerpt=f"{name(m)} plans {p} points; capacity is {capacity:g} ({source})",
+                    relevance=1.0,
+                )
+                for m, p in over if m is not None and m.get('id')
+            ],
             recommendations=[
                 AgentRecommendation(
                     type="replan_sprint",
                     title="Adjust sprint scope",
-                    description=f"Capacity gap of {capacity_gap} points detected",
-                    reasoning="Team capacity insufficient for planned work",
-                    priority="high" if capacity_gap > 0 else "low",
+                    description=f"{name(worst_m)} plans {worst_p} points; the team's capacity is {capacity:g} per sprint ({source})",
+                    reasoning="Committing to more than the team can finish is the plainest way for a sprint to miss",
+                    priority="high" if risk_level == "high" else "medium",
                     confidence=0.7,
                 )
-            ] if capacity_gap > 0 else [],
+            ] if over else [],
             next_action="Review sprint planning with team",
+            metadata={"capacity_points": capacity, "capacity_source": source if capacity else None,
+                      "largest_plan_points": largest},
             sprint_readiness=sprint_readiness,
-            milestone_feasibility={m.get('id', 'unknown'): {'feasible': True} for m in milestones},
-            capacity_gaps=[f"Gap of {capacity_gap} points"] if capacity_gap > 0 else [],
+            milestone_feasibility=feasibility,
+            capacity_gaps=[f"{name(m)}: plans {p} points against {capacity:g} (Gap of {p - capacity:g} points)"
+                           for m, p in over],
         )
     
     def progress_analysis(self, input_data: ProgressInput) -> ProgressOutput:

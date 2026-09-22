@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from uuid import UUID
 from jose import jwt, JWTError
+from starlette.concurrency import run_in_threadpool
 from app.config import get_settings
 
 settings = get_settings()
@@ -14,6 +15,18 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+# bcrypt is slow on purpose (~0.3 s a call). Called directly in a request handler it
+# holds the event loop, so every other request waits behind each sign-in; the load
+# test (app.scripts.load_test) measured 10 simultaneous sign-ins taking 4.5 s in series.
+# On a worker thread (bcrypt releases the GIL) they run side by side.
+async def verify_password_async(plain_password: str, hashed_password: str) -> bool:
+    return await run_in_threadpool(verify_password, plain_password, hashed_password)
+
+
+async def get_password_hash_async(password: str) -> str:
+    return await run_in_threadpool(get_password_hash, password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

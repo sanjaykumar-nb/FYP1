@@ -110,7 +110,7 @@ All numbers below are reproducible from `ai-service/eval/`. Nothing here is
 estimated or illustrative.
 
 ### 10.1 Engineering baseline
-- **Tests**: backend 79, ai-service 75 (`pytest -m "not deferred"`), frontend 53 (`vitest run`), all run in CI on every push
+- **Tests**: backend 82, ai-service 85 (`pytest -m "not deferred"`), frontend 58 (`vitest run`), all run in CI on every push
 - **Quality**: ruff/mypy (Py), eslint/prettier/tsc (TS)
 - **Demo seed**: `make db-seed` → 1 org, 5 users, 3 projects, 50+ tasks
 

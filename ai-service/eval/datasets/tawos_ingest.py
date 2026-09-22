@@ -132,8 +132,36 @@ def _eligible_sprints(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     ).fetchall()
 
 
+def velocity_history(conn: sqlite3.Connection, sprint_row: sqlite3.Row, window: int = 6) -> list[float]:
+    """Story points the project completed in each sprint that had ended before this
+    one started, oldest first — all its tracker could have known at sprint start.
+
+    A sprint's completed points are those of its issues resolved by its end. (TAWOS
+    files an issue under its last sprint, so work carried over counts where it finished.)
+    """
+    if not sprint_row["start_date"]:
+        return []
+    rows = conn.execute(
+        """
+        SELECT COALESCE(s.end_date, s.complete_date) AS ended,
+               COALESCE(SUM(CASE WHEN i.resolution_date <= COALESCE(s.end_date, s.complete_date)
+                            THEN i.story_point END), 0) AS done_points
+        FROM sprint s
+        JOIN issue i ON i.sprint_id = s.id
+        WHERE s.project_id = ? AND s.id != ? AND s.state = 'CLOSED'
+          AND COALESCE(s.end_date, s.complete_date) <= ?
+        GROUP BY s.id
+        ORDER BY ended DESC, s.id DESC
+        LIMIT ?
+        """,
+        (sprint_row["project_id"], sprint_row["id"], sprint_row["start_date"], window),
+    ).fetchall()
+    return [float(r["done_points"]) for r in reversed(rows)]
+
+
 def build_sprint_cases(
-    conn: sqlite3.Connection, limit: Optional[int] = None, checkpoint: Optional[float] = None
+    conn: sqlite3.Connection, limit: Optional[int] = None, checkpoint: Optional[float] = None,
+    with_velocity: bool = False,
 ) -> Iterator[SprintCase]:
     """Yield one case per eligible sprint.
 
@@ -142,6 +170,10 @@ def build_sprint_cases(
     issues created by then are in scope, only those resolved by then are done, and
     the sprint becomes a milestone carrying its start and end dates, so the pace
     signal can project it. The label is always the sprint's real outcome at its end.
+
+    `with_velocity` adds the project's velocity before the sprint (velocity_history),
+    from which the planning agent estimates capacity. It is off by default so the
+    published evaluations' inputs stay exactly as they were.
     """
     sprints = _eligible_sprints(conn)
     if limit:
@@ -245,5 +277,6 @@ def build_sprint_cases(
                 tasks=tasks,
                 dependencies=deps,
                 comments=comments,
+                velocity_history=velocity_history(conn, sprint_row) if with_velocity else [],
             ),
         )

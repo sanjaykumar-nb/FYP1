@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select, func
 from sqlalchemy.orm import selectinload
 from app.api.deps import get_db, get_current_user, get_current_user_id, get_current_org_id, get_pagination_params
-from app.core.security import get_password_hash
+from app.core.security import get_password_hash_async
 from app.models.organization import Organization
 from app.models.user import User
 from app.models.project import Project, ProjectMember
@@ -209,7 +209,7 @@ async def add_member(
     user = User(
         organization_id=org_id,
         email=member.email,
-        password_hash=get_password_hash(member.password),
+        password_hash=await get_password_hash_async(member.password),
         full_name=member.full_name,
     )
     db.add(user)

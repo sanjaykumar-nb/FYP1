@@ -256,9 +256,9 @@ full walkthrough, including what is real and what the replay derives, is in [DEM
 
 ```bash
 make test               # everything
-make test-backend       # backend: 79 tests
-make test-ai            # AI service: 75 tests
-make test-frontend      # frontend: 53 tests (vitest)
+make test-backend       # backend: 82 tests
+make test-ai            # AI service: 85 tests
+make test-frontend      # frontend: 58 tests (vitest)
 ```
 
 Or per-service, without Docker:

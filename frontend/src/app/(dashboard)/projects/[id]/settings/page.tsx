@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { toast } from "@/hooks/use-toast"
 import { usePermissions } from "@/hooks/use-permissions"
 import { api } from "@/lib/api"
+import { parseCapacity } from "@/lib/utils"
 import type { Project } from "@/types"
 
 const STATUSES = [
@@ -42,7 +43,9 @@ export default function ProjectSettingsPage() {
   const canEdit = can("project:update")
   const canArchive = can("project:delete")
 
-  const [form, setForm] = useState({ name: "", description: "", status: "active", start_date: "", target_end_date: "" })
+  const [form, setForm] = useState({
+    name: "", description: "", status: "active", start_date: "", target_end_date: "", capacity: "",
+  })
   const [confirmArchive, setConfirmArchive] = useState(false)
 
   const { data: project } = useQuery({
@@ -58,11 +61,13 @@ export default function ProjectSettingsPage() {
         status: project.status,
         start_date: toDay(project.start_date),
         target_end_date: toDay(project.target_end_date),
+        capacity: project.sprint_capacity_points?.toString() ?? "",
       })
     }
   }, [project])
 
   const datesValid = !form.start_date || !form.target_end_date || form.start_date < form.target_end_date
+  const capacity = parseCapacity(form.capacity)
 
   const save = useMutation({
     mutationFn: () =>
@@ -72,6 +77,7 @@ export default function ProjectSettingsPage() {
         status: form.status,
         start_date: toDateTime(form.start_date),
         target_end_date: toDateTime(form.target_end_date),
+        sprint_capacity_points: capacity,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["project", projectId] })
@@ -147,9 +153,28 @@ export default function ProjectSettingsPage() {
                 </div>
               </div>
               {!datesValid && <p className="text-xs text-destructive">The end date must be after the start date.</p>}
+              <div className="space-y-1.5">
+                <Label htmlFor="project-capacity">Sprint capacity (story points)</Label>
+                <Input
+                  id="project-capacity"
+                  inputMode="numeric"
+                  placeholder="Measured from finished sprints"
+                  value={form.capacity}
+                  onChange={set("capacity")}
+                  className="sm:w-64"
+                />
+                {capacity === undefined ? (
+                  <p className="text-xs text-destructive">Enter a whole number of points from 1 to 10000, or leave it empty.</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    The planning agent warns when a sprint plans more than this. Leave it empty to use the average the
+                    team completed in its last three finished sprints.
+                  </p>
+                )}
+              </div>
             </fieldset>
             {canEdit ? (
-              <Button type="submit" disabled={save.isPending || !form.name.trim() || !datesValid}>
+              <Button type="submit" disabled={save.isPending || !form.name.trim() || !datesValid || capacity === undefined}>
                 {save.isPending ? "Saving…" : "Save changes"}
               </Button>
             ) : (

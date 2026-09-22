@@ -10,7 +10,10 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json-summary', 'html'],
+      // Every source file counts, tested or not, so the figure cannot flatter.
+      all: true,
+      include: ['src/**'],
       exclude: [
         'node_modules/',
         'src/tests/',

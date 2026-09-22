@@ -1746,6 +1746,17 @@
             ],
             "title": "Risk Score"
           },
+          "sprint_capacity_points": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sprint Capacity Points"
+          },
           "start_date": {
             "anyOf": [
               {
@@ -1835,6 +1846,19 @@
               }
             ],
             "title": "Name"
+          },
+          "sprint_capacity_points": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sprint Capacity Points"
           },
           "start_date": {
             "anyOf": [

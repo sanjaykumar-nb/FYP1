@@ -139,6 +139,17 @@ jobs:
       - name: Check the demo's claims
         working-directory: backend
         run: python -m app.scripts.check_demo
+      # Up to 50 people at once, several analyses together, a burst of sign-ins. Fails on
+      # any failed request (5xx, timeout), not on speed: runner timings vary too much.
+      - name: Load test (quick)
+        working-directory: backend
+        run: python -m app.scripts.load_test --quick --label "${{ matrix.database }}, GitHub runner" --out load-${{ matrix.database }}.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: load-test-${{ matrix.database }}
+          path: backend/load-${{ matrix.database }}.json
+          if-no-files-found: ignore
       - name: Service logs
         if: failure()
         run: tail -n 60 ai-service/ai.log backend/backend.log

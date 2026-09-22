@@ -559,7 +559,7 @@ labels bypassing the ORM layer entirely.
 
 ### 12.1 Engineering baseline
 
-- **Tests:** backend 79, ai-service 75 (`pytest -m "not deferred"`), frontend 53 (`vitest run`),
+- **Tests:** backend 82, ai-service 85 (`pytest -m "not deferred"`), frontend 58 (`vitest run`),
   all run in CI on every push.
 - **Quality gates:** ruff/mypy (Python), eslint/prettier/tsc (TypeScript).
 - **Demo seed:** `make db-seed` → 1 org, 5 users, 3 projects, 50+ tasks.
@@ -856,9 +856,9 @@ make up && make db-seed
 
 ```bash
 make test            # all services
-make test-backend    # backend 79
-make test-ai         # ai-service 75
-make test-frontend   # frontend 53 (vitest)
+make test-backend    # backend 82
+make test-ai         # ai-service 85
+make test-frontend   # frontend 58 (vitest)
 ```
 
 Evaluation reproduction commands are in §12.8.

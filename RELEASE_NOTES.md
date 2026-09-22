@@ -96,6 +96,27 @@ Every push runs, on GitHub Actions:
 
 ---
 
+## Since v1.0.1-mvp — closing the validation gaps
+
+- **Sprint capacity.** A project's settings take a sprint capacity in story points; left empty, the
+  average the team completed in its last three finished sprints is used. The Planning agent now
+  warns when a sprint plans more than that, citing the sprint. It never warned before: no capacity
+  ever reached it. On real data its warning is a weak predictor of a late sprint (AUC 0.60), which
+  the validation report states plainly.
+- **Load tested, and three defects fixed.** Password hashing no longer freezes the server during
+  sign-in (25 at once: 9.8 s with 4 failures → 1.9 s, none); SQL statement logging is its own
+  setting, off by default, instead of following `DEBUG`; SQLite waits for a write lock instead of
+  failing. At 50 simultaneous users: 0 failed requests. CI runs the quick load test on SQLite and
+  PostgreSQL.
+- **Frontend coverage measured** (24% of all source lines; `npm run test:coverage`), with the
+  first page test.
+- **User study ready to run** — protocol, forms, a second real sprint (LSST Data Management), a
+  setup script that imports both sprints with and without analysis for read-only participant
+  accounts, an answer key read from the board, and the analysis script: `docs/user-study/`.
+- The importer also reads blocking links named "Blocks" (LSST's Jira), not only "Blocker".
+
+Tests: backend 82, AI service 85, frontend 58.
+
 ## Since v1.0-mvp — found by the Phase 1 validation
 
 The [validation report](VALIDATION_REPORT.md) ran every agent on all 987 real sprints and tried every

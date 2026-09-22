@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
+    # Log every SQL statement. Useful when debugging a query, and slow: it was on
+    # whenever DEBUG was (the default) until the load test showed the cost.
+    SQL_ECHO: bool = False
 
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://teamsync:teamsync_dev_password@localhost:5432/teamsync"

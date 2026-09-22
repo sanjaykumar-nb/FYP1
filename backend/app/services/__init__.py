@@ -7,7 +7,7 @@ from app.models.organization import Organization
 from app.models.project import Project, ProjectMember
 from app.models.task import Task, TaskDependency
 from app.models.role import Role, UserRole
-from app.core.security import get_password_hash, verify_password
+from app.core.security import get_password_hash_async, verify_password_async
 from app.core.exceptions import NotFoundError, ConflictError, ValidationError
 
 
@@ -19,7 +19,7 @@ class AuthService:
         result = await self.db.execute(select(User).where(User.email == email))
         user = result.scalar_one_or_none()
         
-        if not user or not verify_password(password, user.password_hash):
+        if not user or not await verify_password_async(password, user.password_hash):
             return None
         
         if not user.is_active:
@@ -77,7 +77,7 @@ class AuthService:
         user = User(
             organization_id=org.id,
             email=email,
-            password_hash=get_password_hash(password),
+            password_hash=await get_password_hash_async(password),
             full_name=full_name,
         )
         self.db.add(user)

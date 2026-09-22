@@ -23,8 +23,9 @@ How the history is replayed faithfully:
     were assigned sprint work; reporters and commenters are organization users.
   * Epics carry roll-up points from their children, so they import without
     points rather than counting as their assignee's personal load.
-  * Only "Blocker" links are imported as dependencies: Jira's outward "blocks"
-    has an unambiguous direction; other link types do not mean "blocks".
+  * Only blocking links are imported as dependencies: Jira's outward "blocks" has
+    an unambiguous direction; other link types do not mean "blocks". Trackers name
+    the type differently (Apache's Jira "Blocker", LSST's "Blocks"); both are read.
 
 Mid-sprint replay (--at 0.5): the same reconstruction, but as the sprint stood
 that far through. Only issues created by then are imported, done means resolved
@@ -35,6 +36,9 @@ Run with the backend (and AI service) up:
     cd backend
     python -m app.scripts.import_real_sprint app/scripts/fixtures/mesos_sprint_74.json
     python -m app.scripts.import_real_sprint app/scripts/fixtures/mesos_sprint_74.json --at 0.5
+
+--no-analysis leaves the project un-analysed, as a team would see it before anyone
+presses Run analysis (the user study's baseline condition, docs/user-study/).
 """
 
 from __future__ import annotations
@@ -50,6 +54,7 @@ import httpx
 
 PASSWORD = "realsprint-2018"
 DEFAULT_API = "http://localhost:8000"
+BLOCKING_LINK_TYPES = {"Blocker", "Blocks"}
 PRIORITY = {"Blocker": "critical", "Critical": "critical", "Major": "high", "Minor": "medium", "Trivial": "low"}
 # Current Jira status of an issue that was still open at sprint end, mapped to
 # where it most plausibly stood then: never-started stays planned.
@@ -72,17 +77,19 @@ def main() -> None:
     ap.add_argument("--api", default=DEFAULT_API)
     ap.add_argument("--at", type=float, default=None, metavar="FRACTION",
                     help="replay the sprint as it stood this far through (e.g. 0.5) instead of at its end")
+    ap.add_argument("--no-analysis", action="store_true", help="import only; do not run the analysis")
     args = ap.parse_args()
     if args.at is not None and not 0 < args.at < 1:
         sys.exit("--at must be between 0 and 1")
-    import_sprint(args.fixture, args.api, args.at)
+    import_sprint(args.fixture, args.api, args.at, analyze=not args.no_analysis)
 
 
-def import_sprint(fixture: Path, api: str = DEFAULT_API, at: float | None = None) -> dict:
-    """Replay the sprint through the API and analyse it.
+def import_sprint(fixture: Path, api: str = DEFAULT_API, at: float | None = None, analyze: bool = True) -> dict:
+    """Replay the sprint through the API and, unless analyze is False, analyse it.
 
-    Returns the importer's login, the project id and the analysis run, so a caller
-    (app.scripts.check_demo) can carry on from where the import leaves the project.
+    Returns the importer's login, the project id and the analysis run (None when not
+    analysed), so a caller (app.scripts.check_demo) can carry on from where the import
+    leaves the project.
     """
     fx = json.loads(fixture.read_text(encoding="utf-8"))
     sprint_start, sprint_end = parse(fx["sprint"]["start"]), parse(fx["sprint"]["end"])
@@ -191,7 +198,7 @@ def import_sprint(fixture: Path, api: str = DEFAULT_API, at: float | None = None
         for link in fx["links"]:
             if link["from"] not in task_ids or link["to"] not in task_ids:
                 continue  # one end was not created yet at the replayed moment
-            if link["type"] == "Blocker" and link["direction"] == "OUTBOUND":
+            if link["type"] in BLOCKING_LINK_TYPES and link["direction"] == "OUTBOUND":
                 blocker, blocked = task_ids[link["from"]], task_ids[link["to"]]
                 check(http.post(f"/projects/{pid}/tasks/{blocked}/dependencies", headers=auth(pm_email),
                                 json={"blocking_task_id": blocker, "dependency_type": "blocks"}))
@@ -206,6 +213,9 @@ def import_sprint(fixture: Path, api: str = DEFAULT_API, at: float | None = None
                             json={"content": (c["text"] or "").strip() or "(comment had no plain text)"}))
         print(f"comments: {len(comments)} written by {moment} ({len(fx['comments']) - len(comments)} later ones excluded)")
 
+        if not analyze:
+            print(f"\nnot analysed (--no-analysis). Sign in at http://localhost:3000 as {pm_email} / {PASSWORD}")
+            return {"email": pm_email, "project_id": pid, "run": None}
         run = check(http.post(f"/analytics/projects/{pid}/analyze", headers=auth(pm_email)))
         out = run.get("coordinator_output") or {}
         print(f"\nanalysis {run['status']}: overall risk {out.get('overall_risk_level')}")

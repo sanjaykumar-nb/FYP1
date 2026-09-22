@@ -46,9 +46,60 @@ class TestPlanningFallback:
         )
         result = fallback.planning_analysis(input_data)
 
-        assert result.risk_level == "medium"
+        assert result.risk_level == "high"  # 30 points is 1.5x the capacity of 20
         assert len(result.capacity_gaps) == 1
         assert "Gap of 10 points" in result.capacity_gaps[0]
+        # The warning cites the sprint it is about, as a knowledge-graph node.
+        assert [e.reference_id for e in result.evidence] == ["milestone:m1"]
+        assert result.recommendations[0].type == "replan_sprint"
+
+    def test_planning_slightly_over_capacity_is_medium(self, fallback):
+        input_data = PlanningInput(
+            project_id=uuid4(),
+            milestones=[{"id": "m1", "name": "Sprint 1"}],
+            tasks=[{"id": "t1", "milestone_id": "m1", "story_points": 24, "status": "backlog"}],
+            team_capacity={"total_points": 20, "source": "average completed in the last 3 sprints"},
+        )
+        result = fallback.planning_analysis(input_data)
+
+        assert result.risk_level == "medium"
+        assert "Capacity: 20 points per sprint (average completed in the last 3 sprints)" in result.summary
+        assert "Largest plan: 24 points, over capacity." in result.summary
+
+    def test_planning_without_capacity_makes_no_warning(self, fallback):
+        # No capacity set and no finished sprint: nothing to compare the plan against.
+        input_data = PlanningInput(
+            project_id=uuid4(),
+            milestones=[{"id": "m1", "name": "Sprint 1"}],
+            tasks=[{"id": "t1", "milestone_id": "m1", "story_points": 300, "status": "backlog"}],
+            team_capacity={},
+        )
+        result = fallback.planning_analysis(input_data)
+
+        assert result.risk_level == "low"
+        assert result.capacity_gaps == []
+        assert "Capacity unknown" in result.summary
+
+    def test_planning_ignores_finished_sprints(self, fallback):
+        # A sprint that has ended is history; only the one still running is judged.
+        input_data = PlanningInput(
+            project_id=uuid4(),
+            milestones=[
+                {"id": "old", "name": "Sprint 1", "target_date": "2024-02-01"},
+                {"id": "done", "name": "Sprint 2", "status": "completed"},
+                {"id": "now", "name": "Sprint 3"},
+            ],
+            tasks=[
+                {"id": "t1", "milestone_id": "old", "story_points": 50, "status": "done"},
+                {"id": "t2", "milestone_id": "done", "story_points": 50, "status": "done"},
+                {"id": "t3", "milestone_id": "now", "story_points": 15, "status": "planned"},
+            ],
+            team_capacity={"total_points": 20},
+        )
+        result = fallback.planning_analysis(input_data)
+
+        assert result.risk_level == "low"
+        assert result.milestone_feasibility["now"] == {"feasible": True, "planned_points": 15, "capacity_points": 20}
 
     def test_planning_no_milestones(self, fallback):
         input_data = PlanningInput(

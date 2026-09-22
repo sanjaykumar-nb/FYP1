@@ -10,7 +10,8 @@ What is checked, per agent:
 - Coordinator      completes, returns every specialist, valid schema, same answer twice
 - Planning /
   Progress /
-  Workload         each figure it reports equals an independent recount from the raw sprint
+  Workload         each figure it reports equals an independent recount from the raw sprint;
+                   Planning's capacity (the project's velocity before the sprint) included
 - Risk             scores equal a direct GraphMetrics computation; every citation is a real
                    graph node; delay predictions scored against what the sprint really did
 - Recommendation   covers every medium-or-worse risk; each suggested reassignment is applied
@@ -62,6 +63,7 @@ from app.models.agent_base import (  # noqa: E402
     WorkloadIntelOutput,
 )
 from eval.datasets.tawos_ingest import build_sprint_cases, connect  # noqa: E402
+from eval.datasets.tawos_score import _auc  # noqa: E402
 
 EVAL = Path(__file__).parent
 OUT = EVAL / "phase1_validation_result.json"
@@ -144,11 +146,25 @@ class LLMCounter:
 
 
 # ------------------------------------------------ independent recounts (not agent code)
-def expected_planning_summary(s: ProjectSnapshot) -> str:
+def expected_planning(s: ProjectSnapshot, now: datetime) -> tuple[str, str, float | None]:
+    """(summary, risk level, largest plan / capacity) the planning agent should report."""
     milestones = len(s.milestones)
     covered = sum(1 for m in s.milestones if any(t.milestone_id == m.id for t in s.tasks))
     readiness = covered / milestones if milestones else 0.5
-    return f"Planning analysis: {milestones} milestones, {len(s.tasks)} tasks. Sprint readiness: {readiness:.0%}"
+    summary = f"Planning analysis: {milestones} milestones, {len(s.tasks)} tasks. Sprint readiness: {readiness:.0%}."
+    recent = s.velocity_history[-3:]
+    if not recent or sum(recent) <= 0:
+        return summary + " Capacity unknown: set it in project settings, or finish a sprint to measure it.", "low", None
+    capacity = round(sum(recent) / len(recent), 1)
+    points = lambda m: sum(t.story_points or 0 for t in s.tasks if m is None or t.milestone_id == m.id)  # noqa: E731
+    ended = lambda m: m.target_date is not None and _aware(m.target_date.isoformat()) + timedelta(days=1) <= now  # noqa: E731
+    plans = [points(m) for m in s.milestones if m.status != "completed" and not ended(m)] if s.milestones else [points(None)]
+    largest = max(plans, default=0)
+    source = f"average completed in the last {len(recent)} sprint{'s' if len(recent) > 1 else ''}"
+    summary += (f" Capacity: {capacity:g} points per sprint ({source}). Largest plan: {largest} points"
+                + (", over capacity." if largest > capacity else "."))
+    level = "low" if largest <= capacity else ("high" if largest >= 1.5 * capacity else "medium")
+    return summary, level, largest / capacity
 
 
 def expected_progress(s: ProjectSnapshot) -> tuple[float, set[str]]:
@@ -191,6 +207,7 @@ class Tally:
         self.latency: list[tuple[int, float]] = []
         self.delay_pairs: dict[str, list[tuple[bool, bool]]] = defaultdict(list)
         self.specialist_pairs: dict[str, list[tuple[bool, bool]]] = defaultdict(list)
+        self.capacity_ratio: dict[str, list[tuple[bool, float]]] = defaultdict(list)
         self.rec_by_type: Counter = Counter()
         self.rec_needed_by_type: Counter = Counter()
         self.peak_drops: list[int] = []
@@ -227,8 +244,9 @@ def validate_run(t: Tally, case, mode: str, body: dict, eval_time: datetime, hol
 
     # -- planning / progress / workload against independent recounts
     planning, progress, workload = outputs.get("planning", {}), outputs.get("progress", {}), outputs.get("workload", {})
-    t.check("planning.figures_match", planning.get("summary") == expected_planning_summary(snap),
-            f"{where} got {planning.get('summary')!r} want {expected_planning_summary(snap)!r}")
+    want_summary, want_level, ratio = expected_planning(snap, eval_time)
+    t.check("planning.figures_match", planning.get("summary") == want_summary and planning.get("risk_level") == want_level,
+            f"{where} got {planning.get('risk_level')} {planning.get('summary')!r} want {want_level} {want_summary!r}")
     completion, blocked = expected_progress(snap)
     t.check("progress.completion_matches", progress.get("completion_rate") == completion,
             f"{where} got {progress.get('completion_rate')} want {completion}")
@@ -269,6 +287,13 @@ def validate_run(t: Tally, case, mode: str, body: dict, eval_time: datetime, hol
         flagged = (outputs.get(name) or {}).get("risk_level", "low") != "low"
         t.specialist_pairs[f"{name}.{mode}.{split}"].append((case.label_delayed, flagged))
         t.specialist_pairs[f"{name}.{mode}.all"].append((case.label_delayed, flagged))
+    # Planning can only judge a sprint once the team's capacity is known (a sprint before it).
+    if ratio is not None:
+        level = planning.get("risk_level", "low")
+        for s in (split, "all"):
+            t.capacity_ratio[f"{mode}.{s}"].append((case.label_delayed, ratio))
+            t.specialist_pairs[f"planning_capacity_known.{mode}.{s}"].append((case.label_delayed, level != "low"))
+            t.specialist_pairs[f"planning_high_or_worse.{mode}.{s}"].append((case.label_delayed, level in ("high", "critical")))
 
     # -- recommendation: one per medium+ risk type, each grounded in a finding
     recs = result.get("merged_recommendations") or []
@@ -334,8 +359,10 @@ async def main() -> None:
     holdout = set(split["holdout_projects"])
     conn = connect()
     limit = int(os.environ.get("VALIDATE_LIMIT", "0")) or None  # a quick sample; the cross-check needs all
-    cases = {"end": list(build_sprint_cases(conn, limit=limit)),
-             "mid": list(build_sprint_cases(conn, limit=limit, checkpoint=0.5))}
+    # with_velocity: each sprint carries the project's velocity before it, as the backend
+    # sends a real project's finished sprints, so the planning agent can know capacity.
+    cases = {"end": list(build_sprint_cases(conn, limit=limit, with_velocity=True)),
+             "mid": list(build_sprint_cases(conn, limit=limit, checkpoint=0.5, with_velocity=True))}
     clocks = {
         "end": lambda c: _aware(c.sprint_end) + timedelta(days=1),  # as tawos_score / tawos_holdout_eval
         "mid": lambda c: _aware(c.as_of),                          # as tawos_midsprint_eval
@@ -390,6 +417,13 @@ async def main() -> None:
         "checks": {k: t.get(k) for k in keys},
         "delay_prediction": {k: confusion(v) for k, v in sorted(t.delay_pairs.items())},
         "specialist_verdicts_vs_outcome": {k: confusion(v) for k, v in sorted(t.specialist_pairs.items())},
+        "planning_capacity": {
+            k: {"sprints_with_capacity": len(v), "of_sprints": len(t.specialist_pairs[f"planning.{k}"]),
+                "over_capacity_share": round(sum(r > 1 for _, r in v) / len(v), 4),
+                "auc_plan_to_capacity_ratio": round(_auc([y for y, _ in v], [r for _, r in v]), 4),
+                "delayed_share": round(sum(y for y, _ in v) / len(v), 4)}
+            for k, v in sorted(t.capacity_ratio.items())
+        },
         "cross_check_with_published": {
             "end_of_sprint_all_987": {"published": {k: published_end[k] for k in ("tp", "fp", "fn", "tn")},
                                       "via_api": {k: ours_end[k] for k in ("tp", "fp", "fn", "tn")},

@@ -83,6 +83,22 @@ def _snapshot_dict_index(snapshot: ProjectSnapshot) -> tuple[list[dict], list[di
     return milestones, tasks, assignments
 
 
+# "Yesterday's weather": a team finishes about what it finished in its last few sprints.
+VELOCITY_WINDOW = 3
+
+
+def team_capacity(snapshot: ProjectSnapshot) -> dict:
+    """Story points the team can finish in one sprint, and how that is known."""
+    if snapshot.team_capacity_points:
+        return {"total_points": snapshot.team_capacity_points, "source": "set by the team"}
+    recent = snapshot.velocity_history[-VELOCITY_WINDOW:]
+    if recent and sum(recent) > 0:
+        n = len(recent)
+        return {"total_points": round(sum(recent) / n, 1),
+                "source": f"average completed in the last {n} sprint{'s' if n > 1 else ''}"}
+    return {}
+
+
 def build_planning_input(
     project_id: UUID, snapshot: ProjectSnapshot, graph: ProjectGraph, analysis: GraphAnalysis
 ) -> PlanningInput:
@@ -93,7 +109,7 @@ def build_planning_input(
         project_id=project_id,
         milestones=milestones,
         tasks=tasks,
-        team_capacity={"total_points": snapshot.team_capacity_points} if snapshot.team_capacity_points else {},
+        team_capacity=team_capacity(snapshot),
         graph_context=witness.render(),
         finding_ids=list(witness.allowed_ids()),
     )

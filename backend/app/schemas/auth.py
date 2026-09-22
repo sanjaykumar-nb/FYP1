@@ -167,6 +167,8 @@ class ProjectUpdate(BaseModel):
     start_date: Optional[datetime] = None
     target_end_date: Optional[datetime] = None
     actual_end_date: Optional[datetime] = None
+    # Story points per sprint; null clears it, so the team's measured velocity is used.
+    sprint_capacity_points: Optional[int] = Field(None, ge=1, le=10000)
 
 
 class ProjectResponse(ProjectBase):
@@ -177,6 +179,7 @@ class ProjectResponse(ProjectBase):
     health_score: Optional[float] = None
     risk_score: Optional[float] = None
     actual_end_date: Optional[datetime] = None
+    sprint_capacity_points: Optional[int] = None
     created_at: datetime
 
     class Config:

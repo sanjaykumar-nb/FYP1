@@ -1,0 +1,1637 @@
+{
+ "source": "TAWOS",
+ "citation": "Tawosi, V., Al-Subaihin, A., Moussa, R., & Sarro, F. A Versatile Dataset of Agile Open Source Software Projects. MSR 2022. doi:10.1145/3524842.3528029 (Apache License 2.0)",
+ "project": {
+  "key": "DM",
+  "name": "Lsstcorp Data management"
+ },
+ "sprint": {
+  "tawos_id": 3166,
+  "name": "Alert Production S17 - 12",
+  "start": "2016-12-02 17:53:10",
+  "end": "2016-12-31 00:38:00"
+ },
+ "issues": [
+  {
+   "tawos_id": 242327,
+   "key": "DM-5699",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-04-01 14:18:01",
+   "resolved": "2017-02-28 15:07:10",
+   "story_points": 4.0,
+   "assignee": 145772,
+   "reporter": 145772,
+   "title": "\"Run many sky simulations through DCR correction to find edge cases\"",
+   "description": "\"\"\"Once a complete DCR correction prototype is finished, we will want to run many different sky simulations from StarFast with different densities of sources, noise properties, airmasses, and astrometric errors to find the limitations and edge cases where it fails. There are likely to be several thousand simulations needed which will take an as-yet undefined number of CPU hours, but this ticket is for the work in setting up and analyzing the results from the run.\"\"\""
+  },
+  {
+   "tawos_id": 241784,
+   "key": "DM-6252",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-05-24 13:23:04",
+   "resolved": "2016-12-30 19:55:51",
+   "story_points": 6.0,
+   "assignee": 145772,
+   "reporter": 145723,
+   "title": "\"Do bakeoff between the two algorithms in simplified case\"",
+   "description": "\"\"\"The original matrix inversion technique and the competing technique will likely have different sensitivities.  This should be a comparison of the algorithms, likely based on numbers of dipoles, along with performance (memory and runtime) considerations.    This will be done on 2-D images with DCR along one axis.\"\"\""
+  },
+  {
+   "tawos_id": 241783,
+   "key": "DM-6253",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-05-24 13:24:03",
+   "resolved": "2016-12-30 19:55:43",
+   "story_points": 6.0,
+   "assignee": 145772,
+   "reporter": 145723,
+   "title": "\"Bakeoff between algorithms extended to arbitrary rotation.\"",
+   "description": "\"\"\"Redo bakeoff in the case of arbitrary rotation in DCR effect.\"\"\""
+  },
+  {
+   "tawos_id": 241231,
+   "key": "DM-6824",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-06-29 18:15:40",
+   "resolved": "2017-01-18 16:37:19",
+   "story_points": 2.0,
+   "assignee": 145792,
+   "reporter": 145762,
+   "title": "\"Use meas.algorithms.astrometrySourceSelector in measOptimisticB\"",
+   "description": "\"\"\"Now that there is a working astrometrySourceSelector (just merged in meas_algorithms from DM-5933), we should get matchOptimisticB working with it. This would entail replacing matchOptimisticB.SourceInfo with AstrometrySourceSelectorTask and tweaking the latter to do whatever matchOptimisticB needs, and removing SourceInfo.\"\"\""
+  },
+  {
+   "tawos_id": 240260,
+   "key": "DM-7801",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-09-29 14:31:32",
+   "resolved": "2016-12-13 09:02:39",
+   "story_points": 8.0,
+   "assignee": 145748,
+   "reporter": 145745,
+   "title": "\"Wrap afw::cameraGeom with pybind11\"",
+   "description": "\"\"\"The generated wrappers will live parallel to the Swig wrappers. This ticket only covers the C++ wrappers themselves, not the Python layer on top (which will continue to use the old wrappers) all work will stay on a separate branch and will not be merged to master until DM-6168 is complete.    The tests included in this ticket are:  # testDetector.py  # testMakePixelToTanPixel.py  # testExposure.py  # testCamGeomFitsUtils.py  # testCameraGeom.py  # testDistortedTanWcs.py  # testCameraTransformMap.py  # testColor.py  # testOrientation.py  # testCameraSys.py  # testWarper.py (moved to DM-8619)\"\"\""
+  },
+  {
+   "tawos_id": 240219,
+   "key": "DM-7842",
+   "type": "Epic",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-09-30 18:41:32",
+   "resolved": "2017-02-24 14:57:37",
+   "story_points": 20.0,
+   "assignee": 145940,
+   "reporter": 145940,
+   "title": "\"Comparison of ZOGY and A&L+decorrelation\"",
+   "description": "\"\"\"This Epic has been restarted as the shoot-out between A&L and ZOGY on simulated images is still ongoing.    This epic will now include:    1. include forced photometry on sources in diffim's to ascertain true and expected SNR and reasons for lack of (or positive) detection  2. more realistic PSFs in simulations - Moffat, double Gaussian, and/or real PSFs extracted from DECam images  3. re-run of shootout using these improvements, similar to DM-7766\"\"\""
+  },
+  {
+   "tawos_id": 239646,
+   "key": "DM-8419",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-11-28 16:55:16",
+   "resolved": "2017-01-17 17:02:35",
+   "story_points": 6.0,
+   "assignee": 145736,
+   "reporter": 145928,
+   "title": "\"Wrap meas_base with pybind11\"",
+   "description": "\"\"\"Wrap {{meas_base}} with pybind11.\"\"\""
+  },
+  {
+   "tawos_id": 239645,
+   "key": "DM-8420",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-11-28 16:56:39",
+   "resolved": "2016-12-29 18:06:54",
+   "story_points": 2.0,
+   "assignee": 145736,
+   "reporter": 145928,
+   "title": "\"Wrap coadd_utils with pybind11\"",
+   "description": "\"\"\"May not require any wrapping, if so then this ticket is just for tracking. Otherwise, adjust SP.\"\"\""
+  },
+  {
+   "tawos_id": 239644,
+   "key": "DM-8421",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-11-28 16:58:48",
+   "resolved": "2016-12-26 17:46:55",
+   "story_points": 0.0,
+   "assignee": 145748,
+   "reporter": 145928,
+   "title": "\"Wrap pipe_base with pybind11\"",
+   "description": "\"\"\"May not require any wrapping, if so then this ticket is just for tracking. Otherwise, adjust SP.\"\"\""
+  },
+  {
+   "tawos_id": 239643,
+   "key": "DM-8422",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-11-28 16:59:46",
+   "resolved": "2016-12-27 17:14:02",
+   "story_points": 1.0,
+   "assignee": 145748,
+   "reporter": 145928,
+   "title": "\"Wrap obs_test with pybind11\"",
+   "description": "\"\"\"May not require any wrapping, if so then this ticket is just for tracking. Otherwise, adjust SP.\"\"\""
+  },
+  {
+   "tawos_id": 239642,
+   "key": "DM-8423",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-11-28 17:01:27",
+   "resolved": "2016-12-19 11:58:57",
+   "story_points": 4.0,
+   "assignee": 145736,
+   "reporter": 145928,
+   "title": "\"Wrap obs_base (was daf_butlerUtils) with pybind11\"",
+   "description": "\"\"\"May not require any wrapping, if so then this ticket is just for tracking. Otherwise, adjust SP.\"\"\""
+  },
+  {
+   "tawos_id": 239641,
+   "key": "DM-8424",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-11-28 17:02:22",
+   "resolved": "2016-12-26 17:41:16",
+   "story_points": 0.0,
+   "assignee": 145748,
+   "reporter": 145928,
+   "title": "\"Wrap skypix with pybind11\"",
+   "description": "\"\"\"May not require any wrapping, if so then this ticket is just for tracking. Otherwise, adjust SP.\"\"\""
+  },
+  {
+   "tawos_id": 239631,
+   "key": "DM-8434",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-11-29 10:10:03",
+   "resolved": "2016-12-27 17:13:10",
+   "story_points": 4.0,
+   "assignee": 145748,
+   "reporter": 145928,
+   "title": "\"Wrap leftover tests in afw with pybind11\"",
+   "description": "\"\"\"Wrap any afw tests in {{tests/test.txt}} that are not covered.    This includes:  # testExecutables.py  # -testLeastSquares.py-  # -testTableIO.py-  # -testVisitInfo.py-  # -testWeather.py-\"\"\""
+  },
+  {
+   "tawos_id": 239607,
+   "key": "DM-8458",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-11-29 18:07:28",
+   "resolved": "2017-01-19 16:22:01",
+   "story_points": 6.0,
+   "assignee": 145748,
+   "reporter": 145928,
+   "title": "\"Wrap meas_astrom with pybind11\"",
+   "description": ""
+  },
+  {
+   "tawos_id": 239538,
+   "key": "DM-8528",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-01 00:54:13",
+   "resolved": "2016-12-20 15:57:51",
+   "story_points": 1.0,
+   "assignee": 145762,
+   "reporter": 145762,
+   "title": "\"Port jointcal to python 3\"",
+   "description": "\"\"\"Now that the rest of the stack works with python3 (particularly the obs packages), it's time to bring jointcal into the fold.\"\"\""
+  },
+  {
+   "tawos_id": 239530,
+   "key": "DM-8536",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-01 11:29:50",
+   "resolved": "2016-12-20 15:29:54",
+   "story_points": 5.0,
+   "assignee": 145926,
+   "reporter": 145926,
+   "title": "\"Add postage stamp transmission/collection to alert_stream\"",
+   "description": "\"\"\"DM-7452 extend the sample alert schema to include a postage stamp cutout file.  Need to  * modify alert_stream repo and Docker images to grab the new alert schema and postage stamp files  * modify producers to add ability to encode and transmit stamps (can only be done with encoding)  * add a consumer to decode and write stamp (to the local filesystem?)  \"\"\""
+  },
+  {
+   "tawos_id": 239529,
+   "key": "DM-8537",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-01 11:44:03",
+   "resolved": "2017-01-12 15:25:31",
+   "story_points": 5.0,
+   "assignee": 145926,
+   "reporter": 145926,
+   "title": "\"Update container networking in alert_stream to use non-host network\"",
+   "description": "\"\"\"Current version of the alert_stream producer/consumer + Kafka broker system (DM-7453 and DM-7454) uses Docker compose and just exposes all ports to the host network.  That won't work for scaling up to multiple hosts.  Need to replace this with better networking that will work for multiple hosts.\"\"\""
+  },
+  {
+   "tawos_id": 239516,
+   "key": "DM-8550",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-01 16:37:10",
+   "resolved": "2017-01-10 15:01:07",
+   "story_points": 10.0,
+   "assignee": 145762,
+   "reporter": 145762,
+   "title": "\"Figure out how to run photometric calibration\"",
+   "description": "\"\"\"Before I can write any tests for jointcal's photometric fitting, I need to at least get it to run. It may be as simple as the following, but it's not clear whether the code will even run, or what else might be necessary.    \"\"\""
+  },
+  {
+   "tawos_id": 239515,
+   "key": "DM-8551",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-01 16:51:59",
+   "resolved": "2017-01-13 15:40:46",
+   "story_points": 6.0,
+   "assignee": 145762,
+   "reporter": 145762,
+   "title": "\"Write lsstSim test for jointcal photometry\"",
+   "description": "\"\"\"Once I have shown that jointcal photometry can run, I should start testing it with lsstSim's twinkles1 data set. There are \"\"\"\"known\"\"\"\" values to compare to here, so this test can be more stringent than those using external catalogs.    As part of this, it would be good to make some plots showing the RMS/star across all visits, and compare those to the \"\"\"\"known\"\"\"\" values/star. That will also help us define the test metric.\"\"\""
+  },
+  {
+   "tawos_id": 239510,
+   "key": "DM-8556",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-01 17:59:56",
+   "resolved": "2016-12-20 18:54:39",
+   "story_points": 1.0,
+   "assignee": 145762,
+   "reporter": 145762,
+   "title": "\"Rename validation_data_jointcal to testdata_jointcal\"",
+   "description": "\"\"\"\"\"\"\"validation_data_jointcal\"\"\"\" is really \"\"\"\"testdata_jointcal\"\"\"\" and should be named accordingly, before jointcal becomes a stack dependency. Then all the test data I'm using can live there and we won't need optional dependencies on really large data sets (which are always installed by lsst distrib and lsstsw).\"\"\""
+  },
+  {
+   "tawos_id": 239485,
+   "key": "DM-8581",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-03 11:22:26",
+   "resolved": "2016-12-03 11:35:16",
+   "story_points": 1.0,
+   "assignee": 145748,
+   "reporter": 145748,
+   "title": "\"add python unit test of Citizen\"",
+   "description": "\"\"\"As part of tickets/DM-8417 I added a Python unit test of Citizen. [~<USER> would like me to add the same unit test to master.\"\"\""
+  },
+  {
+   "tawos_id": 239448,
+   "key": "DM-8619",
+   "type": "Improvement",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-09 12:56:36",
+   "resolved": "2016-12-15 19:10:54",
+   "story_points": 3.0,
+   "assignee": 145748,
+   "reporter": 145748,
+   "title": "\"Enable testWarper.py with pybind11\"",
+   "description": "\"\"\"Wrap as much code as needed to make {{testWarper.py}} and {{testWarpExposure.py}} work and enable that test.\"\"\""
+  },
+  {
+   "tawos_id": 239441,
+   "key": "DM-8626",
+   "type": "Bug",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-09 17:42:27",
+   "resolved": "2016-12-12 11:29:13",
+   "story_points": 1.0,
+   "assignee": 145748,
+   "reporter": 145748,
+   "title": "\"ConfigDictField cannot handle unicode keys in py2\"",
+   "description": "\"\"\"Trying to use a unicode string as a key in a ConfigDictField causes a type error in Python 2. Unfortunately unicode is difficult to avoid with pybind11. I suggest trying to auto-cast such keys to str if the key is string-like and the type doesn't match the expected key type.\"\"\""
+  },
+  {
+   "tawos_id": 239422,
+   "key": "DM-8645",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-12 16:37:59",
+   "resolved": "2017-01-18 16:33:02",
+   "story_points": 2.0,
+   "assignee": 145792,
+   "reporter": 145792,
+   "title": "\"Implement new matcherSourceSelector object for use in matchOptimisticB code. This links to DM-6824.\"",
+   "description": "\"\"\"astrometrySourceSelector can not be used alone in matchOptimisticB as it tests for two different criteria depending on if it's matching objects(needs good centroid, is a parent object, has a minimum S/N, valid flux) or returning those objects to astrometry.py(all the previous plus is not saturated, is not interpolated, and is not edge). The new source selector matcherSourceSelector will make former selection, astrometrySourceSelector will make the second test. This ticket extends the work of DM-6824.\"\"\""
+  },
+  {
+   "tawos_id": 239420,
+   "key": "DM-8647",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-12 17:49:36",
+   "resolved": "2016-12-12 18:13:01",
+   "story_points": 0.5,
+   "assignee": 145748,
+   "reporter": 145748,
+   "title": "\"Enable autobrief in Doxygen\"",
+   "description": "\"\"\"{{AUTOBRIEF}} is turned off by default in our Doxygen configuration. The developers guide   https://developer.lsst.io/docs/cpp_docs.html suggests using @brief but the very first example after that omits it and much of our code omits it. I think it should be optional and certainly much of our code reflects that.    The proposed fix is set the following to {{YES}} in in `doc/base.inc`:  - {{JAVADOC_AUTOBRIEF}}  - {{QT_AUTOBRIEF}}    We mostly use javadoc style, but there is no harm in supporting both, and some of our code may already use QT style.\"\"\""
+  },
+  {
+   "tawos_id": 239413,
+   "key": "DM-8654",
+   "type": "Bug",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-13 17:15:39",
+   "resolved": "2016-12-15 15:23:44",
+   "story_points": 1.0,
+   "assignee": 145736,
+   "reporter": 145736,
+   "title": "\"Policy::names(bool) ignores its argument\"",
+   "description": "\"\"\"The method {{names(bool topLevelOnly = false)}} in {{pex::policy::Policy}} does not use its argument, always behaving as if {{topLevelOnly}} were {{true}}. It appears that this bug went undetected because the swig wrapper for {{names(list<string> &, bool, bool)}} masked {{names(bool)}}, preventing it from ever being called from Python code.    I propose that the implementation of {{names(bool)}} be changed to share code with {{names(list<string> &, bool, bool)}}, both fixing the immediate problem and preventing inconsistent behavior from calling the wrong overload in the future.\"\"\""
+  },
+  {
+   "tawos_id": 239411,
+   "key": "DM-8656",
+   "type": "Bug",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-13 18:38:54",
+   "resolved": "2016-12-14 15:40:15",
+   "story_points": 1.0,
+   "assignee": 145748,
+   "reporter": 145934,
+   "title": "\"meas_astrom tests depend on PyQt4 and Qt4 and break with PyQt5 and Qt5\"",
+   "description": "\"\"\"When building meas_astrom with lsstsw using -b option on CentOS7 with gcc 4.8.5 tests break through a dependency on matplotlib.    \"\"\""
+  },
+  {
+   "tawos_id": 239393,
+   "key": "DM-8674",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-15 13:47:57",
+   "resolved": "2016-12-22 18:10:30",
+   "story_points": 6.0,
+   "assignee": 145748,
+   "reporter": 145928,
+   "title": "\"Wrap testSourceTable with pybind11\"",
+   "description": "\"\"\"Wrapping {{testSourceTable.py}} with pybind11 was part of DM-6297 but didn't really fit there.\"\"\""
+  },
+  {
+   "tawos_id": 239391,
+   "key": "DM-8676",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-15 14:09:23",
+   "resolved": "2016-12-19 18:41:51",
+   "story_points": 1.0,
+   "assignee": 145762,
+   "reporter": 145762,
+   "title": "\"Hide matplotlib imports in meas_algorithms\"",
+   "description": "\"\"\"meas_algorithms has several \"\"\"\"naked\"\"\"\" matplotlib imports that happen at the top level, and thus prevent anything that imports meas_algorithms from subsequently setting the backend. A simple fix is to move those imports into the functions where matplotlib is used, so they only occur if matplotlib is run, and preferably wrap them in try:except and log.warn on any errors.    This is a stop-gap until 5790 is properly dealt with.\"\"\""
+  },
+  {
+   "tawos_id": 239378,
+   "key": "DM-8689",
+   "type": "Bug",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-16 18:32:52",
+   "resolved": "2016-12-19 15:32:35",
+   "story_points": 0.0,
+   "assignee": 145748,
+   "reporter": 145748,
+   "title": "\"In one place code calls log.warning instead of log.warn\"",
+   "description": "\"\"\"In one place code from DM-8656 calls {{log.warning}} instead of {{log.warn}}\"\"\""
+  },
+  {
+   "tawos_id": 239359,
+   "key": "DM-8708",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-20 23:43:57",
+   "resolved": "2017-01-26 11:44:44",
+   "story_points": 2.0,
+   "assignee": 145723,
+   "reporter": 145723,
+   "title": "\"Implement RFC-262\"",
+   "description": "\"\"\"This is for the implementation of RFC-262: the re-organization of the {{/datasets}} directory to facilitate closing of RFC-257.\"\"\""
+  },
+  {
+   "tawos_id": 239319,
+   "key": "DM-8751",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-23 09:17:53",
+   "resolved": "2016-12-27 17:20:11",
+   "story_points": 2.0,
+   "assignee": 145748,
+   "reporter": 145748,
+   "title": "\"Fix skipped testPickle in testSourceTable.py\"",
+   "description": "\"\"\"There is one skipped test in {{testSourceTable.py}}: {{testPickle}}. This segfaults, likely when a source catalog is pickled. Fix this.     Should all kinds of catalog be pickleable? If so, make sure all are being tested.\"\"\""
+  },
+  {
+   "tawos_id": 239288,
+   "key": "DM-8795",
+   "type": "Story",
+   "priority": "",
+   "status": "Done",
+   "resolution": "Done",
+   "created": "2016-12-30 14:56:36",
+   "resolved": "2016-12-30 15:01:59",
+   "story_points": 8.0,
+   "assignee": 145940,
+   "reporter": 145940,
+   "title": "\"Improvements to diffim testing suite\"",
+   "description": "\"\"\"This ticket covers the first component of necessary improvements to the diffim algorithm testing suite:     1. implement noiseless templates  2. implement static noise plane (sky-limited) with no shot noise from stars  3. ensure realistic stellar flux distribution  4. better plots of comparisons rather than violin plots (histograms, etc.)  \"\"\""
+  }
+ ],
+ "links": [
+  {
+   "from": 239378,
+   "type": "Relates",
+   "direction": "INBOUND",
+   "to": 239411
+  },
+  {
+   "from": 239393,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239631
+  },
+  {
+   "from": 239411,
+   "type": "Relates",
+   "direction": "OUTBOUND",
+   "to": 239378
+  },
+  {
+   "from": 239413,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239642
+  },
+  {
+   "from": 239420,
+   "type": "Relates",
+   "direction": "INBOUND",
+   "to": 240260
+  },
+  {
+   "from": 239422,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 241231
+  },
+  {
+   "from": 239441,
+   "type": "Relates",
+   "direction": "INBOUND",
+   "to": 240260
+  },
+  {
+   "from": 239448,
+   "type": "Relates",
+   "direction": "INBOUND",
+   "to": 240260
+  },
+  {
+   "from": 239515,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239516
+  },
+  {
+   "from": 239516,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239515
+  },
+  {
+   "from": 239631,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239393
+  },
+  {
+   "from": 239641,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239646
+  },
+  {
+   "from": 239641,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239642
+  },
+  {
+   "from": 239642,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239646
+  },
+  {
+   "from": 239642,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239645
+  },
+  {
+   "from": 239642,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239644
+  },
+  {
+   "from": 239642,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239643
+  },
+  {
+   "from": 239642,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239413
+  },
+  {
+   "from": 239642,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 240260
+  },
+  {
+   "from": 239642,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239641
+  },
+  {
+   "from": 239643,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239646
+  },
+  {
+   "from": 239643,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239644
+  },
+  {
+   "from": 239643,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239642
+  },
+  {
+   "from": 239644,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239646
+  },
+  {
+   "from": 239644,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239645
+  },
+  {
+   "from": 239644,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239643
+  },
+  {
+   "from": 239644,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239642
+  },
+  {
+   "from": 239645,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239646
+  },
+  {
+   "from": 239645,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239644
+  },
+  {
+   "from": 239645,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239642
+  },
+  {
+   "from": 239646,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239645
+  },
+  {
+   "from": 239646,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239644
+  },
+  {
+   "from": 239646,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239643
+  },
+  {
+   "from": 239646,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239642
+  },
+  {
+   "from": 239646,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239641
+  },
+  {
+   "from": 240260,
+   "type": "Blocks",
+   "direction": "OUTBOUND",
+   "to": 239642
+  },
+  {
+   "from": 240260,
+   "type": "Relates",
+   "direction": "OUTBOUND",
+   "to": 239441
+  },
+  {
+   "from": 240260,
+   "type": "Relates",
+   "direction": "OUTBOUND",
+   "to": 239420
+  },
+  {
+   "from": 240260,
+   "type": "Relates",
+   "direction": "OUTBOUND",
+   "to": 239448
+  },
+  {
+   "from": 241231,
+   "type": "Blocks",
+   "direction": "INBOUND",
+   "to": 239422
+  }
+ ],
+ "comments": [
+  {
+   "tawos_id": 629720,
+   "issue": 239644,
+   "author": 145748,
+   "created": "2016-11-29 16:31:12",
+   "text": "\"pipe_base contains no C++ code but relies on a few C++ objects\""
+  },
+  {
+   "tawos_id": 629701,
+   "issue": 239641,
+   "author": 145748,
+   "created": "2016-11-29 16:32:50",
+   "text": "\"skypix has no C++ code so nothing needs to be done\""
+  },
+  {
+   "tawos_id": 629702,
+   "issue": 239641,
+   "author": 145928,
+   "created": "2016-11-29 16:44:00",
+   "text": "\"Even though it has no C++ code, it still may require additional wrappers at lower levels in the stack through its Python code. The only way to know for sure is to attempt to run it (i.e. `scons`) with the pybind11 stack setup.\""
+  },
+  {
+   "tawos_id": 629723,
+   "issue": 239645,
+   "author": 145736,
+   "created": "2016-11-30 15:44:44",
+   "text": "\"Has a non-trivial dependency on `cameraGeom`, and possibly other code. For now I'll assume this can be fixed as part of DM-8423.\""
+  },
+  {
+   "tawos_id": 631663,
+   "issue": 240219,
+   "author": 145940,
+   "created": "2016-11-30 16:18:37",
+   "text": "\"Duplicate of DM-7766 which is Done.\""
+  },
+  {
+   "tawos_id": 629713,
+   "issue": 239643,
+   "author": 145736,
+   "created": "2016-11-30 16:44:05",
+   "text": "\"Has a non-trivial dependency on `cameraGeom`, and possibly other code. For now I'll assume this can be fixed as part of DM-8423.\""
+  },
+  {
+   "tawos_id": 629707,
+   "issue": 239642,
+   "author": 145736,
+   "created": "2016-11-30 16:48:14",
+   "text": "\"Has a non-trivial dependency on `cameraGeom`, and possibly other code.\""
+  },
+  {
+   "tawos_id": 631717,
+   "issue": 240260,
+   "author": 145736,
+   "created": "2016-11-30 16:53:06",
+   "text": "\"It appears that DM-8420, DM-8422, and DM-8423 all require {{FOCAL_PLANE}} to be defined.\""
+  },
+  {
+   "tawos_id": 629708,
+   "issue": 239642,
+   "author": 145736,
+   "created": "2016-12-01 16:43:20",
+   "text": "\"{{coadd_utils}} depends on {{obs_base}}, so {{obs_base}} should be done first.\""
+  },
+  {
+   "tawos_id": 629703,
+   "issue": 239641,
+   "author": 145736,
+   "created": "2016-12-01 16:47:17",
+   "text": "\"{{obs_base}} depends on {{skypix}}, so {{skypix}} needs to be wrapped first\""
+  },
+  {
+   "tawos_id": 629709,
+   "issue": 239642,
+   "author": 145736,
+   "created": "2016-12-01 16:49:27",
+   "text": "\"{{obs_test}} and {{pipe_base}} depend on {{obs_base}}, so {{obs_base}} should be done first\""
+  },
+  {
+   "tawos_id": 629704,
+   "issue": 239641,
+   "author": 145748,
+   "created": "2016-12-02 10:49:43",
+   "text": "\"The # of story points is an upper limit.\""
+  },
+  {
+   "tawos_id": 629721,
+   "issue": 239644,
+   "author": 145748,
+   "created": "2016-12-02 10:49:57",
+   "text": "\"The # of story points is an upper limit.\""
+  },
+  {
+   "tawos_id": 629290,
+   "issue": 239485,
+   "author": 145748,
+   "created": "2016-12-03 11:35:16",
+   "text": "\"The new test is identical to that added on tickets/DM-8417 which [~<USER> already reviewed, so I am not submitting this ticket for review. Tested and merged.\""
+  },
+  {
+   "tawos_id": 629705,
+   "issue": 239641,
+   "author": 145748,
+   "created": "2016-12-06 16:18:10",
+   "text": "\"As of 2016-12-06 Jenkins builds {{skypix afw}} using tickets DM-8417 and DM-8467 without any changes. This should be tested again when afw is done, but at this point I would be surprised if skypix needs any work, so I have changed the number of story points to 0.\""
+  },
+  {
+   "tawos_id": 631718,
+   "issue": 240260,
+   "author": 145748,
+   "created": "2016-12-09 12:58:00",
+   "text": "\"I moved testWarper.py to a new ticket DM-8619 because I felt modifying afw.math was out of scope for cameraGeom work.\""
+  },
+  {
+   "tawos_id": 631719,
+   "issue": 240260,
+   "author": 145748,
+   "created": "2016-12-09 17:56:09",
+   "text": "\"`testCameraGeom.py` fails in Python 2 because `CameraSys.getName` returns unicode, and that test uses such a value as a key in a `pex.config.ConfigDictField` and pex_config rejects that. See DM-8626.    I may have a fix for that (which will require no changes to afw). Depending on how quickly I can get that fixed I will either disable `testCameraGeom.py` or get the fix merged to pex_config DM-8467 before merging this ticket and verify that the all tests pass.\""
+  },
+  {
+   "tawos_id": 629145,
+   "issue": 239441,
+   "author": 145748,
+   "created": "2016-12-09 18:33:31",
+   "text": "\"I fixed the problem by adding a call to {{_autocast}} in {{ConfigDict.\\_\\_setitem\\_\\_}} before checking the key type, just like {{Dict}} does. I also changed one key in the test of each to unicode to check the fix.\""
+  },
+  {
+   "tawos_id": 629146,
+   "issue": 239441,
+   "author": 145720,
+   "created": "2016-12-12 10:40:38",
+   "text": "\"Looks okay to me. I think we may want to use {{_autocast}} more widely but that's not the problem of this ticket to solve.\""
+  },
+  {
+   "tawos_id": 631720,
+   "issue": 240260,
+   "author": 145736,
+   "created": "2016-12-12 16:35:17",
+   "text": "\"I have a bunch of minor comments, but nothing show-stopping. Feel free to merge after resolving the comments.\""
+  },
+  {
+   "tawos_id": 629075,
+   "issue": 239422,
+   "author": 145792,
+   "created": "2016-12-12 16:38:53",
+   "text": "\"Started work on matcherSourceSelector.py\""
+  },
+  {
+   "tawos_id": 629071,
+   "issue": 239420,
+   "author": 145736,
+   "created": "2016-12-12 18:10:07",
+   "text": "\"Approved, but next time please create a PR.\""
+  },
+  {
+   "tawos_id": 631721,
+   "issue": 240260,
+   "author": 145748,
+   "created": "2016-12-13 09:02:26",
+   "text": "\"Thank you for the very helpful review. Regarding symbols in {{lsst::afw::image::detail}} I am emulating SWIG for now but filed DM-8651 to improve it later. Regarding missing {{@brief}} I fixed the doxygen config (on DM-8647) so it's no longer needed. I believe I adopted all your other suggested changes (except a few that were questions \"\"is this really needed?\"\" to which the answer was \"\"yes\"\").\""
+  },
+  {
+   "tawos_id": 629163,
+   "issue": 239448,
+   "author": 145748,
+   "created": "2016-12-13 18:33:42",
+   "text": "\"I had to wrap warping code, MaskedImage varieties of SinglePixel, and  DecoratedImage\""
+  },
+  {
+   "tawos_id": 635190,
+   "issue": 241231,
+   "author": 145792,
+   "created": "2016-12-13 18:41:28",
+   "text": "\"Added sourceSelector functionally to matchOptimisticB.py and modified it's unittests(testMatchOptimisticB, testAstrometry, testJoinMatchListWithCatalog) to contain a \"\"deblend_nChild\"\" column. The code currently passes all unittests and properly runs on a processCcd run of DECam data.     matchSourceSelector is currently used for replacement of the isUsable flag from the old SourceInfo. The other flag, isGood which is used after matches have been found, is currently hard coded. This is used as the current API of sourceSelector can not handle a matchList object.    The implemented changes can be found at https://github.com/lsst/meas_astrom/tree/u/morriscb/sourceSelector\""
+  },
+  {
+   "tawos_id": 629076,
+   "issue": 239422,
+   "author": 145792,
+   "created": "2016-12-13 18:45:15",
+   "text": "\"Implemented new sourceSelector matcherSourceSelector.py for use in meas.astrom.matchOptimisticB.py. Also added unittests for this matcher.    Currently the sourceSelector API does not allow for the use cases required in meas.astrom.matchOptimisticB.py. A method that in the base class that just returns a true/false table for an input list of sources instead of a sub-catalog would possibly take care of this.    The changes implemented can be found at https://github.com/lsst/meas_algorithms/tree/u/morriscb/matcherSourceSelector\""
+  },
+  {
+   "tawos_id": 629035,
+   "issue": 239411,
+   "author": 145720,
+   "created": "2016-12-13 19:15:11",
+   "text": "\"I haven't had a chance to look at what is going on here and why that test is requesting a QT backend. It may just be that it's some default backend and we need to use a different one. It seems clear to me that we need to get to the bottom of this now that it's entirely possible someone can update their conda environment without realizing that it will break things.\""
+  },
+  {
+   "tawos_id": 629036,
+   "issue": 239411,
+   "author": 145765,
+   "created": "2016-12-14 12:03:25",
+   "text": "\"Looks like this is related to [an open anaconda bug|https://github.com/ContinuumIO/anaconda-issues/issues/1068]. There is a workaround but no good solution at the moment.\""
+  },
+  {
+   "tawos_id": 629037,
+   "issue": 239411,
+   "author": 145934,
+   "created": "2016-12-14 12:07:40",
+   "text": "\"That is exactly the workaround I successfully used, but I didn't come by that bug. Thanks providing it.\""
+  },
+  {
+   "tawos_id": 629038,
+   "issue": 239411,
+   "author": 145720,
+   "created": "2016-12-14 12:08:39",
+   "text": "\"Ok, that explains why it's happening on the conda side but it doesn't explain why we have a test that is triggering a QT backend. That test file does have a {{plotWcs}} function that makes a plot but it should never trigger. Is the problem here that the {{matplotlib}} import will never work if QT has been updated and it is the act of importing matplotlib that is triggering a QT backend setup (despite that backend never being used)?    In which case, I suggest we move that import inside the {{plotWcs}} function. We have had previous discussions on {{matplotlib}} not importing: DM-2588 is the key one.\""
+  },
+  {
+   "tawos_id": 629039,
+   "issue": 239411,
+   "author": 145720,
+   "created": "2016-12-14 12:11:00",
+   "text": "\"I'll add that all other imports of {{matplotlib}} in {{meas_astrom}} are done inside the plotting function or are protected by a try block.\""
+  },
+  {
+   "tawos_id": 629040,
+   "issue": 239411,
+   "author": 145723,
+   "created": "2016-12-14 12:37:41",
+   "text": "\"[Here|https://github.com/lsst/meas_astrom/blob/1c23758cd36fcb3589145268594f34c6b8839041/tests/testFitTanSipWcsTask.py#L41] is another example of a safer way to import matplotlib.  I'm happy to do either that or import in the function.  I think it would be good to do the thing that is more idiomatic in the current stack.    Do we need any more discussion?  [~<USER> do you need someone to make the fix?\""
+  },
+  {
+   "tawos_id": 629041,
+   "issue": 239411,
+   "author": 145720,
+   "created": "2016-12-14 12:39:11",
+   "text": "\"I'm happy for that fix as well. If someone from your team could do that tweak it would be great.\""
+  },
+  {
+   "tawos_id": 629042,
+   "issue": 239411,
+   "author": 145748,
+   "created": "2016-12-14 14:25:58",
+   "text": "\"I standardized tests and library code to only try to import matplotlib when plotting is first attempted. Furthermore the library code logs a warning and continues without plotting if the import fails. The unit tests raise an exception because plotting is never the norm and if a user specifies it then they can put up with an exception if something is wrong.    I also standardized on {{import matplotlib.pyplot as plt}}, including some older code that used {{pylab}} instead of {{pyplot}}, and removed a few attempts to set the back end because I think that should be up to the user.    I left the examples unchanged.\""
+  },
+  {
+   "tawos_id": 629043,
+   "issue": 239411,
+   "author": 145720,
+   "created": "2016-12-14 14:27:20",
+   "text": "\"Thank you. Looks good to me and a far more comprehensive cleanup than I was expecting. Thanks for clarifying why you removed the backend setting from that test.\""
+  },
+  {
+   "tawos_id": 629164,
+   "issue": 239448,
+   "author": 145745,
+   "created": "2016-12-14 14:31:53",
+   "text": "\"I don't understand why {{SinglePixel}} had to be wrapped. It doesn't appear to be in the python API in the current (SWIG) stack and a quick grep didn't reveal {{SinglePixel}} used in any *.i or *.py files.\""
+  },
+  {
+   "tawos_id": 629044,
+   "issue": 239411,
+   "author": 145748,
+   "created": "2016-12-14 15:40:34",
+   "text": "\"Thank you for the helpful review. Merged and pushed.\""
+  },
+  {
+   "tawos_id": 629045,
+   "issue": 239411,
+   "author": 145934,
+   "created": "2016-12-14 15:56:39",
+   "text": "\"I just confirmed this works on Linux. I had a broken lsstsw install and ran it again with {{rebuild -r tickets/DM-8656}} and it built successfully. Thanks.    EDIT: Updated that it works on Linux specifically.\""
+  },
+  {
+   "tawos_id": 629448,
+   "issue": 239530,
+   "author": 145926,
+   "created": "2016-12-14 18:03:24",
+   "text": "\"This PR includes postage stamp cutouts in the alerts and also swaps in the fastavro module for much faster encoding (see [https://jira.lsstcorp.org/browse/DM-8160]).  I was mistaken in the description of the ticket here to say that stamps could only be sent with encoding.  This works with stamps for Avro encoding turned on or off.\""
+  },
+  {
+   "tawos_id": 629165,
+   "issue": 239448,
+   "author": 145748,
+   "created": "2016-12-14 18:50:35",
+   "text": "\"This was needed to provide the usual default value for the {{padValue}} argument of the warping functions templated on {{MaskedImage}}. I don't know how the SWIG handled that argument; it didn't occur to me to check if it was supported. It may prove useful, though I don't think it is currently specified by any python code.\""
+  },
+  {
+   "tawos_id": 629166,
+   "issue": 239448,
+   "author": 145745,
+   "created": "2016-12-14 18:52:32",
+   "text": "\"Everything looks good, just a few minor corrections.\""
+  },
+  {
+   "tawos_id": 629047,
+   "issue": 239413,
+   "author": 145736,
+   "created": "2016-12-15 14:00:24",
+   "text": "\"Hi [~<USER>, please review this fix.\""
+  },
+  {
+   "tawos_id": 629048,
+   "issue": 239413,
+   "author": 145748,
+   "created": "2016-12-15 14:55:37",
+   "text": "\"An excellent improvement to the code.    My one minor discomfort is that the existing test for {{policyNames}} seems weak, and you changed the implementation of that method. However, the existing test may be good enough and your new implementation is a significant improvement (and almost certainly correct by inspection).    I'm also a bit surprised you duplicated a test in C++ and Python. I realize that {{names(list, bool, bool)}} is not wrapped for Python and so much be tested in C++ , but why test {{names(bool)}} in both? However, I realize opinions may differ on this, and having written the C++ test it would be a waste to discard it.  \""
+  },
+  {
+   "tawos_id": 629049,
+   "issue": 239413,
+   "author": 145736,
+   "created": "2016-12-15 15:11:01",
+   "text": "\"I guess my reasoning was that, given that I know there are/were problems with how the code was wrapped, it would be useful to know if the method behaves differently in one language than the other -- information that could be used to diagnose future problems (indeed, prior to the implementation change, the C++ tests failed but the Python ones did not).\""
+  },
+  {
+   "tawos_id": 628996,
+   "issue": 239391,
+   "author": 145762,
+   "created": "2016-12-15 16:42:44",
+   "text": "\"Starting this while DM-7444 is in review, so I can maybe get them in together.\""
+  },
+  {
+   "tawos_id": 628997,
+   "issue": 239391,
+   "author": 145762,
+   "created": "2016-12-15 17:28:36",
+   "text": "\"Short review please (just a few lines changed)? This is the same basic thing you just fixed DM-8656.\""
+  },
+  {
+   "tawos_id": 628998,
+   "issue": 239391,
+   "author": 145748,
+   "created": "2016-12-15 18:22:01",
+   "text": "\"Unfortunately I found two bugs:  In  `objectSizeStarSelector.py` the global symbol `pyplot` is used twice, but is no longer available. In both cases the code reads:    and it can be fixed by deleting {{and plot}}. flake8 showed this.    Also you warn with {{log.warning}} in both files you changed, but the method is {{log.warn}}.    in {{objectSizeStarSelector.py}} please change {{pyplot}} to {{plt}} to modernize the code, as in {{import matplotlib.pyplot as plt}} and consider running auto-pep8 on the two files you touched (the pep8 changes should be a separate commit; I think pyplot->plt would be fine as part of the first commit or as its own, as you prefer).    I suggest you exercise the modified code before committing (by forcing it to plot), if you can find a reasonably simple way to do that. Feel free to temporarily hack up the code a bit if necessary.\""
+  },
+  {
+   "tawos_id": 629714,
+   "issue": 239643,
+   "author": 145736,
+   "created": "2016-12-16 17:17:51",
+   "text": "\"This package has some swig-specific code that needed editing, as well as a strange pickling problem. Therefore, it's not as trivial as first assumed.\""
+  },
+  {
+   "tawos_id": 628999,
+   "issue": 239391,
+   "author": 145762,
+   "created": "2016-12-16 17:48:47",
+   "text": "\"Good catch on those excess pyplots: I've refactored that whole thing now.    flake8 is somewhat not helpful because of the slew of warnings at the top due to \"\"module level import not at top of file because of the {{install_aliases()}} thing and the doxygen block around line 280: that's why I didn't see the undefined {{pyplot}}. Re-running autopep8 (it was run during the py3 conversion) wouldn't gain anything really.    Please take another look, and I'll see about exercising this plotting code (it's got a frightening number of requirements to make it go, so we'll see).\""
+  },
+  {
+   "tawos_id": 629710,
+   "issue": 239642,
+   "author": 145736,
+   "created": "2016-12-16 18:04:19",
+   "text": "\"Hi [~<USER>, can you do a quick review of this ticket? The changes themselves are small, but they deviate a bit from the \"\"normal\"\" wrapping workflow.\""
+  },
+  {
+   "tawos_id": 629365,
+   "issue": 239510,
+   "author": 145762,
+   "created": "2016-12-16 18:17:05",
+   "text": "\"Reminder to myself to do this on Monday.\""
+  },
+  {
+   "tawos_id": 628977,
+   "issue": 239378,
+   "author": 145748,
+   "created": "2016-12-16 18:50:17",
+   "text": "\"Fixed the single incidence of calling {{log.warning}} instead of {{log.warn}}, which was in {{ANetBasicAstrometryTask}}.    I was able to execute the code and verify that a warning was printed by hacking up the code a bit and calling {{testTicket-2155.py}} in {{pipe_tasks}}. Not ideal, but I hope good enough. It is not easy to test something this at the best of times, but it would be easier to exercise it a test in {{meas_algorithms}} actually called {{ANetBasicAstrometryTask}}.\""
+  },
+  {
+   "tawos_id": 629711,
+   "issue": 239642,
+   "author": 145928,
+   "created": "2016-12-16 21:46:05",
+   "text": "\"Looks good. One minor comment on PR.\""
+  },
+  {
+   "tawos_id": 629000,
+   "issue": 239391,
+   "author": 145748,
+   "created": "2016-12-19 10:50:12",
+   "text": "\"Done. I see what you mean about objectSizeStarSelector.py and flake8. Is there an easy way to eliminate the need to call {{install_aliases()}}? Our standards call for our code to pass the linter (e.g. by adding {{ # noqa ...}} but that seems impractical in this case.    I had a few comments on github.\""
+  },
+  {
+   "tawos_id": 629712,
+   "issue": 239642,
+   "author": 145736,
+   "created": "2016-12-19 11:58:57",
+   "text": "\"Merged after removing unnecessary scaffolding.\""
+  },
+  {
+   "tawos_id": 628978,
+   "issue": 239378,
+   "author": 145762,
+   "created": "2016-12-19 12:03:36",
+   "text": "\"Looks good. Thanks for the quick fix.\""
+  },
+  {
+   "tawos_id": 629077,
+   "issue": 239422,
+   "author": 145762,
+   "created": "2016-12-19 13:00:32",
+   "text": "\"See comments in github: you forgot the unittest, and we should clear up the docstrings to clarify the difference between astrometrySS and matcherSS.\""
+  },
+  {
+   "tawos_id": 629672,
+   "issue": 239631,
+   "author": 145736,
+   "created": "2016-12-19 16:45:56",
+   "text": "\"This issue should not be started until all other {{afw}} wrapping issues are merged, so that it can clean up any tests that slipped through the cracks.\""
+  },
+  {
+   "tawos_id": 629001,
+   "issue": 239391,
+   "author": 145762,
+   "created": "2016-12-19 18:33:18",
+   "text": "\"After poking with it a bit, I'd rather not touch {{install_aliases}} for now, just as a safety measure: that the file doesn't pass flake8 is sort of the least of my concerns about objectSizeStarSelector...\""
+  },
+  {
+   "tawos_id": 629002,
+   "issue": 239391,
+   "author": 145762,
+   "created": "2016-12-19 18:41:51",
+   "text": "\"Due to a timing problem when pushing (I forgot to push the ticket after I rebased to master) jira thinks the PR was declined, when instead it was successfully merged.    Ah-well. Ticket is done. Thanks for the review comments.\""
+  },
+  {
+   "tawos_id": 629475,
+   "issue": 239538,
+   "author": 145762,
+   "created": "2016-12-20 01:14:54",
+   "text": "\"Starting this, now that I've finished some python refactoring.\""
+  },
+  {
+   "tawos_id": 629366,
+   "issue": 239510,
+   "author": 145762,
+   "created": "2016-12-20 01:15:06",
+   "text": "\"Will take care of this in the morning.\""
+  },
+  {
+   "tawos_id": 629476,
+   "issue": 239538,
+   "author": 145762,
+   "created": "2016-12-20 01:26:00",
+   "text": "\"Ian, do you mind doing a short python3 conversion review? Once this is done, I can go fully py3 all the time!\""
+  },
+  {
+   "tawos_id": 629477,
+   "issue": 239538,
+   "author": 145772,
+   "created": "2016-12-20 12:38:44",
+   "text": "\"All of the changes look straightforward. Everything looks okay to commit as-is.\""
+  },
+  {
+   "tawos_id": 629449,
+   "issue": 239530,
+   "author": 145926,
+   "created": "2016-12-20 14:06:27",
+   "text": "\"I made changes to fix/add argparse arguments and responded in the github convo.  [~<USER>, can you let me know if there's anything else or ok to merge?\""
+  },
+  {
+   "tawos_id": 629450,
+   "issue": 239530,
+   "author": 145723,
+   "created": "2016-12-20 15:14:50",
+   "text": "\"Looks great.  Merge away.    P.S. I didn't know about {{add_mutually_exclusive_group}}.  Neat feature.\""
+  },
+  {
+   "tawos_id": 629451,
+   "issue": 239530,
+   "author": 145926,
+   "created": "2016-12-20 15:26:27",
+   "text": "\"Thanks!\""
+  },
+  {
+   "tawos_id": 629367,
+   "issue": 239510,
+   "author": 145762,
+   "created": "2016-12-20 15:49:14",
+   "text": "\"Please take a look: none of this will work until I do the github rename of validation_data_jointcal -> testdata_jointcal, but at least this one is less complicated than the daf_butlerUtils -> obs_base rename, since jointcal is not yet a stack dependency (hence why I'm doing this now).\""
+  },
+  {
+   "tawos_id": 629478,
+   "issue": 239538,
+   "author": 145762,
+   "created": "2016-12-20 15:57:51",
+   "text": "\"Thanks for the quick review. I had to make a minor change to get it to actually work on py3 (jointcal doesn't jenkins at the moment), but it's all happy now, and said change is better anyway. Merged and done.\""
+  },
+  {
+   "tawos_id": 629401,
+   "issue": 239516,
+   "author": 145762,
+   "created": "2016-12-20 16:03:28",
+   "text": "\"Time to start on this one!\""
+  },
+  {
+   "tawos_id": 629368,
+   "issue": 239510,
+   "author": 145926,
+   "created": "2016-12-20 16:18:06",
+   "text": "\"Ok, looks good to me on the 3 PRs.\""
+  },
+  {
+   "tawos_id": 629369,
+   "issue": 239510,
+   "author": 145762,
+   "created": "2016-12-20 18:54:39",
+   "text": "\"Thanks for the quick review. Renamed package and merged all PRs: travis wouldn't pass until package was renamed. Done.\""
+  },
+  {
+   "tawos_id": 629005,
+   "issue": 239393,
+   "author": 145748,
+   "created": "2016-12-20 21:37:28",
+   "text": "\"Work includes:  - Adding {{Record}} and {{Table}} attributes to all catalogs (as SWIG had before; this is needed for casting). Unfortunately this is done manually and is easy to forget. I could add it to {{declareCatalog}} but am not sure how to prevent getting the two attributes swapped (the record and table types would have to be template parameters and are treated equally). I decided explicit is safer.  - Added support for casting records, tables and catalogs. I implemented SWIG's {{_cast}} method as {{_castFrom}} because I found it confusing that {{_cast}} and {{cast}} work in opposite directions and I wanted to make it easier for some future programmer.  - Re-added the original support for caching column views. I feel the code (copied from the SWIG) is rather complicated and fragile and that we would be better off implementing this C++ (if we must have it) so I will file a ticket.  - Standardized the table wrapper files so they all look the same and work the same way. This did involve moving a lot of code into functions in an anonymous namespace, so it will look like a bigger change than it actually is. I hope the reviewer is comfortable with the chosen technique. I had several to choose from amongst the various wrapper files and picked the one I found most readable.\""
+  },
+  {
+   "tawos_id": 628909,
+   "issue": 239359,
+   "author": 145723,
+   "created": "2016-12-21 00:25:53",
+   "text": "\"As agreed upon in RFC-262, I have put links in {{/datasets/refcats/htm/htm_baseline}}.  Assigning to [~<USER> for the review.\""
+  },
+  {
+   "tawos_id": 629006,
+   "issue": 239393,
+   "author": 145928,
+   "created": "2016-12-21 08:52:37",
+   "text": "\"Looks fine. Minor suggestions on PR.\""
+  },
+  {
+   "tawos_id": 628910,
+   "issue": 239359,
+   "author": 145955,
+   "created": "2016-12-21 11:25:37",
+   "text": "\"Looks good to me. Adding [~<USER> to review list. I am, informally, handing off /datasets and rfc-249 issues to her.\""
+  },
+  {
+   "tawos_id": 628911,
+   "issue": 239359,
+   "author": 145747,
+   "created": "2016-12-21 13:20:05",
+   "text": "\"Looks good to me.     \""
+  },
+  {
+   "tawos_id": 629007,
+   "issue": 239393,
+   "author": 145748,
+   "created": "2016-12-21 15:30:25",
+   "text": "\"Thank you for the helpful review.    I adopted most of your suggestions.\""
+  },
+  {
+   "tawos_id": 629402,
+   "issue": 239516,
+   "author": 145762,
+   "created": "2016-12-22 14:06:55",
+   "text": "\"Notes from recent discussion: Need to add a {{jointcal}} object to obs_base templates (see the {{wcs}} template that jointcal currently uses) and write the updated WCS and Calib (with the new zeropoint) to it.\""
+  },
+  {
+   "tawos_id": 629715,
+   "issue": 239643,
+   "author": 145748,
+   "created": "2016-12-22 18:05:36",
+   "text": "\"I took this over since I had a bit of free time. I hope you don't mind [~<USER>.    The existing testComposite.py had a problem: it assumed that you could round trip {{raw}} and {{flat}}, which is not the case. It is persisted as {{DecoratedImageU}} but when the butler gets the data, it adapts the data to LSST standards and turns it into an {{ExposureU}}. My solution was two-fold:  - Divide the test into testing {{get}} and {{put}}.  - For the {{put}} test I manually create a {{raw}} and {{flat}} of the correct data type.    I also changed the use of pickle to write to a string instead of saving to a file, for simplicity.    Note that I changed {{RotType_x}} to {{RotType.x}}. This is the modern way to do things and I have not wrapped the old way (yet) in afw. If need be I'll add the old constants, but I really hope we can just update the few bits of code that use these constants, instead.\""
+  },
+  {
+   "tawos_id": 629403,
+   "issue": 239516,
+   "author": 145762,
+   "created": "2016-12-22 19:16:15",
+   "text": "\"In the interest of making the upcoming functionality review nicer, this review is almost entirely C++ code cleanups (comment reformatting, variable/method renaming, cruft removal), with just the beginnings of adding photometry to {{jointcal.py}}. Please look at everything except {{jointcal.py}}, i.e. all the {{src/}} and {{include/}} changes.\""
+  },
+  {
+   "tawos_id": 629673,
+   "issue": 239631,
+   "author": 145748,
+   "created": "2016-12-23 16:16:50",
+   "text": "\"I think we are ready for this now.    I found four tests that needed attention:  - A skip in {{testFunction.py}}  - A skip in {{testSpatialCell.py}}  - {{testTableMultiMatch.py}} which was not in {{test.txt}}  - {{testSpherePoint.py}} which was not in {{test.txt}}    Tests I did not change but have skips:  - The skip in {{testHeavyFootprint.py}} looks permanent. We should remove that test at some point, but I did not do it yet.  - The skip in {{testSourceTable.py}} is fixed in DM-8751.\""
+  },
+  {
+   "tawos_id": 629674,
+   "issue": 239631,
+   "author": 145748,
+   "created": "2016-12-23 17:31:57",
+   "text": "\"I enabled the skipped test in {{testFunction.py}}. In the process I found some errors in the C++ that I fixed (on a separate commit), including:  - {{IntegerDeltaFunction1::operator()}} took two arguments instead of one and ignored the second. Apparently we've never needed that function, but I'd rather it be fixed now and we can decide later whether to get rid of it.  - Many functions classes were not being instantiated. Our usual pattern is to instantiate all templated classes we expect to use in C++ or Python and apparently I messed up years ago.  - A typo in the pybind11 wrapper rendered {{clone}} unusable for one class.  \""
+  },
+  {
+   "tawos_id": 629675,
+   "issue": 239631,
+   "author": 145748,
+   "created": "2016-12-23 18:51:51",
+   "text": "\"I enabled the skipped test in {{testSpatialCell.py}}.    I also standardized the code in {{spacialCell.cc}} to not use {{pybind11/operators.h}} and to use namespaces in the usual way. I also added functions to declare classes because it declares so many classes. I felt it made the code significantly more readable.\""
+  },
+  {
+   "tawos_id": 629676,
+   "issue": 239631,
+   "author": 145748,
+   "created": "2016-12-24 17:51:05",
+   "text": "\"I wrapped {{SpherePoint}} and thus fixed {{testSpherePoint.py}}.    I fixed {{testTableMultiMatch.py}}. This test turned up several issues, including:  - {{SchemaMapper.editOutputSchema}} was incorrectly wrapped. The returned value was not a reference, so modifying it did not have the desired affect.  - Column views were incorrectly wrapped (every table has its own type).  - {{Schema}} was missing a useful string representation. I added {{Schema.\\_\\_repr\\_\\_}}. In SWIG the {{\\_\\_str\\_\\_}} was identical so I omitted it (since str is used if repr not found). I can add it if desired (and I admit we usually do, but I'm not sure why).\""
+  },
+  {
+   "tawos_id": 629404,
+   "issue": 239516,
+   "author": 145748,
+   "created": "2016-12-26 12:30:56",
+   "text": "\"This looks good. I had some requests on github. Mostly I'd like to see some clarification of the documentation if you have time; that would pay big dividends to anyone trying to use the code.    I am done with my review. I could not switch the state to \"\"Reviewed\"\" because JIRA isn't quite working right.\""
+  },
+  {
+   "tawos_id": 629706,
+   "issue": 239641,
+   "author": 145748,
+   "created": "2016-12-26 17:41:16",
+   "text": "\"Works with afw (and utils, pex_policy, and geom) as presently wrapped.\""
+  },
+  {
+   "tawos_id": 629722,
+   "issue": 239644,
+   "author": 145748,
+   "created": "2016-12-26 17:46:55",
+   "text": "\"It works with afw and obs_test as presently wrapped. I have no reason to suspect this will change, but will file a new ticket if something breaks.\""
+  },
+  {
+   "tawos_id": 629716,
+   "issue": 239643,
+   "author": 145762,
+   "created": "2016-12-27 17:04:36",
+   "text": "\"Reviewed. See comments on github.\""
+  },
+  {
+   "tawos_id": 629677,
+   "issue": 239631,
+   "author": 145748,
+   "created": "2016-12-27 17:13:10",
+   "text": "\"Thank you for the helpful review [~<USER>. I adopted your suggested changes, including taking advantage of {{utils::cppIndex}} for {{SpherePoint.\\_\\_getitem\\_\\_}}, which required an API simplification to {{cppIndex}}. I wanted to make that change anyway and I appreciate the impetus to do it.\""
+  },
+  {
+   "tawos_id": 629717,
+   "issue": 239643,
+   "author": 145748,
+   "created": "2016-12-27 17:14:02",
+   "text": "\"I made your suggested change to create the data ID in {{setUp}}.\""
+  },
+  {
+   "tawos_id": 628756,
+   "issue": 239319,
+   "author": 145748,
+   "created": "2016-12-27 17:21:18",
+   "text": "\"[~<USER> did half the work. Not sure how to split it.\""
+  },
+  {
+   "tawos_id": 629718,
+   "issue": 239643,
+   "author": 145736,
+   "created": "2016-12-29 12:44:07",
+   "text": "\"[~<USER> I made some changes on this branch; did they get wiped when you took over?\""
+  },
+  {
+   "tawos_id": 629724,
+   "issue": 239645,
+   "author": 145736,
+   "created": "2016-12-29 14:37:42",
+   "text": "\"Package does contain some C++ code, as well as various swigisms.\""
+  },
+  {
+   "tawos_id": 629719,
+   "issue": 239643,
+   "author": 145748,
+   "created": "2016-12-29 15:31:38",
+   "text": "\"I believe I preserved them.\""
+  },
+  {
+   "tawos_id": 629725,
+   "issue": 239645,
+   "author": 145928,
+   "created": "2016-12-29 17:17:05",
+   "text": "\"Looks fine. Minor issues on PR.\""
+  },
+  {
+   "tawos_id": 629726,
+   "issue": 239645,
+   "author": 145736,
+   "created": "2016-12-29 18:06:54",
+   "text": "\"Merged with all requested changes.\""
+  },
+  {
+   "tawos_id": 631664,
+   "issue": 240219,
+   "author": 145940,
+   "created": "2016-12-30 14:46:59",
+   "text": "\"Re-started this epic since the \"\"shootout\"\" of A&L vs ZOGY on simulations is still ongoing. \""
+  },
+  {
+   "tawos_id": 629405,
+   "issue": 239516,
+   "author": 145762,
+   "created": "2017-01-05 22:53:55",
+   "text": "\"[~<USER>: Ok, I think I'm ready for the python portion to be reviewed. It turns out I didn't need to actually add anything to the C++ code, so the review of the refactor you did before stands as is. You can look at the C++ code if you like, but the only things different from before (modulo rebasing) are in python.\""
+  },
+  {
+   "tawos_id": 629406,
+   "issue": 239516,
+   "author": 145762,
+   "created": "2017-01-06 12:15:28",
+   "text": "\"FWIW, these are the commits with changes to python code:    https://github.com/lsst/jointcal/pull/23/commits/e340747119227a4e7488003eecf98c9405274def  https://github.com/lsst/jointcal/pull/23/commits/8c73e680a00e159b49b1609bbabf6d596bad0f18\""
+  },
+  {
+   "tawos_id": 629407,
+   "issue": 239516,
+   "author": 145748,
+   "created": "2017-01-06 15:17:56",
+   "text": "\"Overall the cleanups are much appreciated.    I put some suggestions and questions on github, including a few that I think should be addressed before merging, including:  - Please explain how to use JointcalStatistics, and, perhaps, having it compute the statistics at construction.  - Please log messages instead of printing them in the task.\""
+  },
+  {
+   "tawos_id": 629408,
+   "issue": 239516,
+   "author": 145762,
+   "created": "2017-01-06 17:47:52",
+   "text": "\"I've responded to your points, with one open question about how to architect this whole thing.    I filed a ticket to redo things with lsst.log some time ago: DM-8547\""
+  },
+  {
+   "tawos_id": 629445,
+   "issue": 239529,
+   "author": 145926,
+   "created": "2017-01-09 16:31:35",
+   "text": "\"[~<USER>, this PR will work for single hosts or multiple hosts in a Swarm.  There is an issue I know with the producer service - since it is a single action it will continuously be rebooted in a Swarm (keep running the same single command and emit more alerts).  I will fix this in DM-7455 so don't worry about that.  Thanks.\""
+  },
+  {
+   "tawos_id": 629409,
+   "issue": 239516,
+   "author": 145762,
+   "created": "2017-01-10 15:01:07",
+   "text": "\"I responded to all the points in the review, and [~<USER> and I talked about the overall design some. Summary: we'll keep it as-is for now, and wait for a better n-way matcher and/or VisitExposure design to rework it.    Rebase-flattened the post-review comments, and merged. Now on to reworking the tests to check photometry!\""
+  },
+  {
+   "tawos_id": 629397,
+   "issue": 239515,
+   "author": 145762,
+   "created": "2017-01-10 15:07:57",
+   "text": "\"Now that the photometric step is running, and I have a basic metric, write some tests!\""
+  },
+  {
+   "tawos_id": 629446,
+   "issue": 239529,
+   "author": 145724,
+   "created": "2017-01-12 12:35:17",
+   "text": "\"Looks good, a few thoughts on the pull request. I assume that the distinction between \"\"single node\"\" and multi-node will fade away as the swarm mode operation gets more robust?\""
+  },
+  {
+   "tawos_id": 629447,
+   "issue": 239529,
+   "author": 145926,
+   "created": "2017-01-12 12:57:19",
+   "text": "\"Thanks.  Yeah, good point.  I make the distinction here since I was thinking about Swarm as a separate tool vs other alternatives.\""
+  },
+  {
+   "tawos_id": 635191,
+   "issue": 241231,
+   "author": 145762,
+   "created": "2017-01-12 16:47:57",
+   "text": "\"Please rebase squash/flatten before merging, and link the community posting you made about this topic to this ticket (and/or vice-versa).\""
+  },
+  {
+   "tawos_id": 629078,
+   "issue": 239422,
+   "author": 145762,
+   "created": "2017-01-12 16:48:58",
+   "text": "\"Thanks for the new ticket for sorting out badFlags. There are a couple remaining things that I responded to on the PR. Please rebase squash/flatten (and rebase to master) before merging.\""
+  },
+  {
+   "tawos_id": 629727,
+   "issue": 239646,
+   "author": 145736,
+   "created": "2017-01-12 17:16:18",
+   "text": "\"[~<USER>, would you be willing to review the changes to {{daf_base}}? Some insight from a pybind11 insider would be helpful, particularly regarding {{Citizen::census}}.    [~<USER>, would you be willing to review the changes to {{meas_base}} and {{afw}}?\""
+  },
+  {
+   "tawos_id": 629398,
+   "issue": 239515,
+   "author": 145762,
+   "created": "2017-01-12 22:01:24",
+   "text": "\"Small review, please (4 files, +84 -70). Though the ticket was to add a jointcal photometry test to lsstSim (which I did), I ended up finding some bugs in some of the calculations. They didn't affect the test code, but they jointcalStatistics gave different results when run from a unittest vs. plot_jointcal_results.py.\""
+  },
+  {
+   "tawos_id": 629399,
+   "issue": 239515,
+   "author": 145772,
+   "created": "2017-01-13 12:12:25",
+   "text": "\"The code changes look fine. Most of my comments are requests to add documentation or improve clarity.\""
+  },
+  {
+   "tawos_id": 629400,
+   "issue": 239515,
+   "author": 145762,
+   "created": "2017-01-13 15:40:46",
+   "text": "\"Thanks for the quick review! I added quite a few docstrings (and discovered the SublimeText plugin \"\"AutoDocstring\"\" which made it really easy) and cleaned up a few other things.    Merged and done.\""
+  },
+  {
+   "tawos_id": 635192,
+   "issue": 241231,
+   "author": 145792,
+   "created": "2017-01-13 16:45:41",
+   "text": "\"Added ticket branch to pipe_tasks regarding compliance with the new sourceSelectors. Pull request can be found here: https://github.com/lsst/pipe_tasks/pull/92    All tickets currently pass Jenkins py2, waiting on py3 and ci_hsc.\""
+  },
+  {
+   "tawos_id": 629728,
+   "issue": 239646,
+   "author": 145748,
+   "created": "2017-01-13 19:09:19",
+   "text": "\"This looks great. I did leave some comments on github (hardly surprising given the number of changes).\""
+  },
+  {
+   "tawos_id": 629729,
+   "issue": 239646,
+   "author": 145928,
+   "created": "2017-01-14 09:53:38",
+   "text": "\"I concur, it does look great indeed!\""
+  },
+  {
+   "tawos_id": 629730,
+   "issue": 239646,
+   "author": 145736,
+   "created": "2017-01-17 17:02:35",
+   "text": "\"Merged with changes.\""
+  },
+  {
+   "tawos_id": 635193,
+   "issue": 241231,
+   "author": 145792,
+   "created": "2017-01-18 12:38:04",
+   "text": "\"Added compliance with the new sourceSelector used in matchOptimisticB to obs_subaru. The pull request can be found here: https://github.com/lsst/obs_subaru/pull/50\""
+  },
+  {
+   "tawos_id": 629611,
+   "issue": 239607,
+   "author": 145748,
+   "created": "2017-01-18 15:57:24",
+   "text": "\"I had to wrap {{LinearTransform.operator()}} in afw.  Otherwise it was straightforward.    However, I am not very happy with {{astrometry_net.cc}}. It has a lot of C++ code mixed in with the usual pybind11 wrapper. The extra code is there as a shim to astrometry_net's C code, so it's reasonable to have there, but the file feels cluttered to me. Suggestions for cleanup welcome.    Note that we will be moving our wrapper of astrometry_net into a new package at some point (soon after we switch to pybind11, I hope, but so far other things have always taken priority). So if a very invasive sort of cleanup is wanted, it might be best to defer that until the split.\""
+  },
+  {
+   "tawos_id": 629079,
+   "issue": 239422,
+   "author": 145792,
+   "created": "2017-01-18 16:33:02",
+   "text": "\"Successfully implemented new matcherSourceSelector and pushed to master. Future work in evaluating what selection further selection criteria to use for this sourceSelector will be taken up in https://jira.lsstcorp.org/browse/DM-8987\""
+  },
+  {
+   "tawos_id": 635194,
+   "issue": 241231,
+   "author": 145792,
+   "created": "2017-01-18 16:37:19",
+   "text": "\"Instead of using astrometrySourceSelector a new sourceSelector, matcherSourceSelector to replace the isUsable criteria in the old SourceInfo class. astrometrySourceSelector can not be used in matchOptimisticB currently as the source selector can not be applied to the catalog like object, matchList in the code. A discussion on what is needed to change in the sourceSelector class can be found here https://community.lsst.org/t/should-sourceselectors-work-for-arbitrary-collections-of-record-objects/1549\""
+  },
+  {
+   "tawos_id": 629612,
+   "issue": 239607,
+   "author": 145928,
+   "created": "2017-01-19 09:41:44",
+   "text": "\"Looks good.    I would however prefer to split the C++ shim from the wrapper code.  Feel free to disagree, or choose between a single `astronomy_net.h + .cc` combo (in the standard `include` / `src` locations) or having separate `MultiIndex.h` + `Solver.h` (+ `.cc`) files.\""
+  },
+  {
+   "tawos_id": 629613,
+   "issue": 239607,
+   "author": 145748,
+   "created": "2017-01-19 14:04:08",
+   "text": "\"I split the file as you suggested and added {{MultiIndex.\\_\\_iter\\_\\_}} in Python. Note that I left the logging functions in the pybind11 wrapper because I think they would need more work to be made visible to C++ code (more than I think is justified at this time).    Please have another look. \""
+  },
+  {
+   "tawos_id": 629614,
+   "issue": 239607,
+   "author": 145928,
+   "created": "2017-01-19 15:45:46",
+   "text": "\"Looks good.\""
+  },
+  {
+   "tawos_id": 628912,
+   "issue": 239359,
+   "author": 145723,
+   "created": "2017-01-26 11:44:38",
+   "text": "\"I believe this is all done.  I think the directories can be locked down.\""
+  },
+  {
+   "tawos_id": 638216,
+   "issue": 242327,
+   "author": 145772,
+   "created": "2017-02-28 15:07:10",
+   "text": "\"Completed as part of writing DM-7446.\""
+  }
+ ]
+}

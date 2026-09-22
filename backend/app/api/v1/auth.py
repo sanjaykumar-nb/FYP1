@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.api.deps import get_db, get_current_user, get_current_user_id
 from app.core.security import (
-    verify_password,
-    get_password_hash,
+    verify_password_async,
+    get_password_hash_async,
     create_access_token,
     create_refresh_token,
     decode_token,
@@ -70,7 +70,7 @@ async def register(
     user = User(
         organization_id=org.id,
         email=user_data.email,
-        password_hash=get_password_hash(user_data.password),
+        password_hash=await get_password_hash_async(user_data.password),
         full_name=user_data.full_name,
     )
     db.add(user)
@@ -107,7 +107,7 @@ async def login(
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
 
-    if not user or not verify_password(password, user.password_hash):
+    if not user or not await verify_password_async(password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",

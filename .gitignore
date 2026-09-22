@@ -44,6 +44,8 @@ coverage/
 # Database
 *.sqlite
 *.db
+*.db-wal
+*.db-shm
 
 # Docker
 .docker/
@@ -59,3 +61,5 @@ coverage/
 # Downloaded evaluation datasets (large, third-party — see eval/datasets/README)
 ai-service/eval/datasets/raw/
 ai-service/eval/datasets/*.db
+# The user study key names the session accounts; generated per session day.
+docs/user-study/ANSWER_KEY.md

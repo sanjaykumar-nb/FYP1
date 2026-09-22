@@ -1,4 +1,4 @@
-from sqlalchemy import String, Text, Date, DateTime, ForeignKey, Numeric, UniqueConstraint
+from sqlalchemy import String, Text, Date, DateTime, ForeignKey, Integer, Numeric, UniqueConstraint
 from sqlalchemy import Uuid as UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import date, datetime
@@ -29,6 +29,9 @@ class Project(BaseModel):
     actual_end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     health_score: Mapped[float | None] = mapped_column(Numeric(3, 2), nullable=True)
     risk_score: Mapped[float | None] = mapped_column(Numeric(3, 2), nullable=True)
+    # Story points the team can finish in one sprint. Unset, the AI service's planning
+    # agent uses the average its last few sprints actually completed.
+    sprint_capacity_points: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Relationships
     organization: Mapped["Organization"] = relationship("Organization", back_populates="projects")

@@ -7,6 +7,7 @@ model's shape. Field names must stay in sync with ProjectSnapshot; there is
 no shared package between the two services to enforce that at import time.
 """
 
+from datetime import date
 from uuid import UUID
 
 from sqlalchemy import select
@@ -36,6 +37,7 @@ async def build_project_snapshot(db: AsyncSession, project: Project) -> dict:
     milestones_result = await db.execute(
         select(Milestone).where(Milestone.project_id == project.id)
     )
+    milestone_rows = milestones_result.scalars().all()
     milestones = [
         {
             "id": str(m.id),
@@ -44,7 +46,7 @@ async def build_project_snapshot(db: AsyncSession, project: Project) -> dict:
             "target_date": m.target_date.isoformat() if m.target_date else None,
             "status": m.status,
         }
-        for m in milestones_result.scalars().all()
+        for m in milestone_rows
     ]
 
     tasks_result = await db.execute(select(Task).where(Task.project_id == project.id))
@@ -107,6 +109,20 @@ async def build_project_snapshot(db: AsyncSession, project: Project) -> dict:
         "tasks": tasks,
         "dependencies": dependencies,
         "comments": comments,
-        "team_capacity_points": None,
-        "velocity_history": [],
+        "team_capacity_points": project.sprint_capacity_points,
+        "velocity_history": velocity_history(milestone_rows, task_rows),
     }
+
+
+def velocity_history(milestone_rows, task_rows, today: date | None = None) -> list[float]:
+    """Story points each finished sprint completed, oldest first — the team's velocity,
+    from which the AI service estimates capacity when the project sets none."""
+    today = today or date.today()
+    finished = sorted(
+        (m for m in milestone_rows if m.status == "completed" or m.target_date < today),
+        key=lambda m: (m.target_date, str(m.id)),
+    )
+    return [
+        float(sum(t.story_points or 0 for t in task_rows if t.milestone_id == m.id and t.status == "done"))
+        for m in finished
+    ]
