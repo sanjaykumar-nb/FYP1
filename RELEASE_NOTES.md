@@ -96,6 +96,24 @@ Every push runs, on GitHub Actions:
 
 ---
 
+## Since v1.0-mvp — found by the Phase 1 validation
+
+The [validation report](VALIDATION_REPORT.md) ran every agent on all 987 real sprints and tried every
+protected endpoint as every role. It found defects in endpoints the web app does not use but the API
+still serves, all now fixed with regression tests:
+
+- **Security:** the admin deactivation endpoint had no role check (a viewer could deactivate the
+  owner); member removal and deactivation had no rank check (an admin could remove the owner);
+  meeting and organizational-memory endpoints had no role check; a disabled account kept its access
+  until its token expired.
+- **Crashes:** member removal and the admin statistics endpoint always failed.
+- **Evaluation:** the synthetic evaluation used the wall clock and had silently dropped from F1 1.00
+  to 0.92; it is now pinned and run in CI.
+
+Tests after these fixes: backend 79, AI service 75, frontend 53.
+
+---
+
 ## Changed for this release
 
 - **PostgreSQL verified.** The backend had only ever run on SQLite; the full suite and the demo

@@ -128,7 +128,7 @@ Both differences: exact McNemar *p* < 0.001.
 
 ### 12 · Engineering
 
-- Three services, 65 + 73 + 53 automated tests, all run in CI on every push (the backend's on both
+- Three services, 79 + 75 + 53 automated tests, all run in CI on every push (the backend's on both
   SQLite and PostgreSQL) — plus a replay of
   the real sprint that fails the build if the demo stops showing what this deck says it shows.
 - Works with no API key; the model is optional.

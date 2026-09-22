@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
-from app.api.deps import get_db, get_current_user_id, get_current_org_id, get_pagination_params
+from app.api.deps import get_db, get_current_user_id, get_current_org_id, get_pagination_params, require_permission
 from app.models.project import Project
 from app.models.meeting import Meeting, MeetingParticipant, MeetingActionItem, MeetingDecision
 from app.models.user import User
@@ -62,7 +62,7 @@ async def list_meetings(
     )
 
 
-@router.post("", response_model=MeetingResponse)
+@router.post("", response_model=MeetingResponse, dependencies=[Depends(require_permission("meeting:create"))])
 async def create_meeting(
     project_id: UUID,
     meeting_data: MeetingCreate,
@@ -128,7 +128,7 @@ async def get_meeting(
     return MeetingWithDetails.model_validate(meeting)
 
 
-@router.patch("/{meeting_id}", response_model=MeetingResponse)
+@router.patch("/{meeting_id}", response_model=MeetingResponse, dependencies=[Depends(require_permission("meeting:update"))])
 async def update_meeting(
     meeting_id: UUID,
     meeting_data: MeetingUpdate,
@@ -157,7 +157,7 @@ async def update_meeting(
     return MeetingResponse.model_validate(meeting)
 
 
-@router.post("/{meeting_id}/transcript")
+@router.post("/{meeting_id}/transcript", dependencies=[Depends(require_permission("meeting:update"))])
 async def upload_transcript(
     meeting_id: UUID,
     transcript: str,
@@ -184,7 +184,7 @@ async def upload_transcript(
     return {"message": "Transcript uploaded"}
 
 
-@router.post("/{meeting_id}/analyze")
+@router.post("/{meeting_id}/analyze", dependencies=[Depends(require_permission("meeting:update"))])
 async def analyze_meeting(
     meeting_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -226,7 +226,8 @@ async def list_action_items(
     return [MeetingActionItemResponse.model_validate(item) for item in items]
 
 
-@router.patch("/action-items/{item_id}", response_model=MeetingActionItemResponse)
+@router.patch("/action-items/{item_id}", response_model=MeetingActionItemResponse,
+              dependencies=[Depends(require_permission("meeting:update"))])
 async def update_action_item(
     item_id: UUID,
     item_data: MeetingActionItemUpdate,

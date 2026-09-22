@@ -106,6 +106,12 @@ async def get_current_role(
     user_id: UUID = Depends(get_current_user_id),
     org_id: UUID = Depends(get_current_org_id),
 ) -> CurrentRole:
+    # Tokens are only checked against the database at sign-in and refresh. Every
+    # permission check comes through here, so a deactivated account loses the
+    # ability to change anything at once rather than when its token expires.
+    active = (await db.execute(select(User.is_active).where(User.id == user_id))).scalar_one_or_none()
+    if not active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User account is disabled")
     result = await db.execute(
         select(Role)
         .join(UserRole, UserRole.role_id == Role.id)
@@ -120,6 +126,29 @@ async def get_current_role(
         return CurrentRole(DEFAULT_ROLE, permissions_for(DEFAULT_ROLE))
     role = max(roles, key=lambda r: ROLE_RANK.get(r.name, -1))
     return CurrentRole(role.name, permissions_for(role.name, role.permissions))
+
+
+async def ensure_can_manage(
+    db: AsyncSession, actor: CurrentRole, actor_id: UUID, org_id: UUID, user_id: UUID, action: str
+) -> None:
+    """403 unless the actor may take `action` (remove, deactivate) on this member.
+
+    The rule role changes already follow: nobody acts on someone holding a role
+    above their own — so an admin cannot remove or lock out the owner — and
+    nobody does it to themselves, which would leave them locked out.
+    """
+    if user_id == actor_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"You cannot {action} yourself")
+    held = await db.execute(
+        select(Role.name)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .where(UserRole.user_id == user_id, UserRole.organization_id == org_id)
+    )
+    if any(ROLE_RANK.get(name, ROLE_RANK["owner"]) > ROLE_RANK.get(actor.name, -1) for name in held.scalars().all()):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"You cannot {action} someone whose role is above your own",
+        )
 
 
 def require_permission(permission: str):

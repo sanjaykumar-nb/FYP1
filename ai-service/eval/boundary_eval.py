@@ -16,6 +16,7 @@ team sizes meaning the exact threshold ratio is sometimes unreachable.
 from __future__ import annotations
 
 from app.graph import GraphBuilder, GraphMetrics
+from app.tests.factories import NOW as SCENARIO_NOW
 from app.graph.metrics import OVERDUE_RATIO_MEDIUM, SILENT_RATIO_MEDIUM, WORKLOAD_SKEW_MEDIUM
 from app.tests.factories import comment, member, snapshot, task
 
@@ -37,7 +38,10 @@ def sweep_overdue_ratio(team_size: int = 5, n_tasks: int = 100, step: int = 2):
             for i in range(n_tasks)
         ]
         graph = GraphBuilder().build(snapshot(members=members, tasks=tasks))
-        analysis = GraphMetrics().compute(graph)
+        # Scenarios are built around app.tests.factories.NOW (a fixed date), so they must be
+        # judged at that moment too. Judged against the wall clock, a healthy scenario's
+        # due dates drift into the past as the calendar moves on and read as overdue.
+        analysis = GraphMetrics(now=SCENARIO_NOW).compute(graph)
         ratio = n_overdue / n_tasks
         severity = _severity_at("overdue_ratio", analysis.findings)
         rows.append({"ratio": round(ratio, 3), "severity": severity})
@@ -56,7 +60,7 @@ def sweep_workload_skew(team_size: int = 5, base_points: int = 2, base_tasks_per
         if extra:
             tasks.append(task("heavy", assignee="d0", points=extra, status="in_progress"))
         graph = GraphBuilder().build(snapshot(members=members, tasks=tasks))
-        analysis = GraphMetrics().compute(graph)
+        analysis = GraphMetrics(now=SCENARIO_NOW).compute(graph)
         skew_finding = next((f for f in analysis.findings if f.metric == "workload_skew"), None)
         rows.append({
             "extra_points_on_d0": extra,
@@ -78,7 +82,7 @@ def sweep_silent_ratio(team_size: int = 10, n_tasks_per_person: int = 3):
                 if i >= n_silent:  # first n_silent people never comment
                     comments.append(comment(f"t{i}_{j}", f"d{i}"))
         graph = GraphBuilder().build(snapshot(members=members, tasks=tasks, comments=comments))
-        analysis = GraphMetrics().compute(graph)
+        analysis = GraphMetrics(now=SCENARIO_NOW).compute(graph)
         ratio = n_silent / team_size
         severity = _severity_at("silent_ratio", analysis.findings)
         rows.append({"n_silent": n_silent, "team_size": team_size, "ratio": round(ratio, 3), "severity": severity})

@@ -1,0 +1,340 @@
+{
+  "method": "Validate every Phase 1 agent through the deployed analysis endpoint, on real sprints.",
+  "dataset": {
+    "sprints": 987,
+    "runs": 2961,
+    "tasks_per_sprint": {
+      "median": 23.0,
+      "max": 119
+    },
+    "holdout_projects": 22
+  },
+  "llm": {
+    "key_configured": false,
+    "calls_attempted": 8883,
+    "refused_before_network": 8883
+  },
+  "checks": {
+    "coordinator.all_specialists": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "coordinator.completed": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "coordinator.deterministic": {
+      "ok": 987,
+      "total": 987,
+      "rate": 1.0
+    },
+    "evidence.references_resolve": {
+      "ok": 7102,
+      "total": 7102,
+      "rate": 1.0
+    },
+    "planning.figures_match": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "planning.no_error": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "planning.schema_valid": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "progress.completion_matches": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "progress.no_error": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "progress.schema_valid": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "progress.stalled_matches": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "rebalance.before_matches_board": {
+      "ok": 1524,
+      "total": 1524,
+      "rate": 1.0
+    },
+    "rebalance.effect_stated": {
+      "ok": 1524,
+      "total": 1524,
+      "rate": 1.0
+    },
+    "rebalance.moves_are_valid": {
+      "ok": 1524,
+      "total": 1524,
+      "rate": 1.0
+    },
+    "rebalance.no_move_raises_peak": {
+      "ok": 1524,
+      "total": 1524,
+      "rate": 1.0
+    },
+    "rebalance.predicted_peak_holds": {
+      "ok": 1524,
+      "total": 1524,
+      "rate": 1.0
+    },
+    "rebalance.predicted_severity_holds": {
+      "ok": 1524,
+      "total": 1524,
+      "rate": 1.0
+    },
+    "recommendation.covers_medium_plus_risks": {
+      "ok": 4363,
+      "total": 4363,
+      "rate": 1.0
+    },
+    "recommendation.grounded_in_finding": {
+      "ok": 4363,
+      "total": 4363,
+      "rate": 1.0
+    },
+    "recommendation.no_error": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "recommendation.schema_valid": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "risk.citations_resolve": {
+      "ok": 40001,
+      "total": 40001,
+      "rate": 1.0
+    },
+    "risk.findings_cite_evidence": {
+      "ok": 7102,
+      "total": 7102,
+      "rate": 1.0
+    },
+    "risk.matches_direct_computation": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "risk.no_error": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "risk.schema_valid": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "workload.figures_match": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "workload.no_error": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    },
+    "workload.schema_valid": {
+      "ok": 1974,
+      "total": 1974,
+      "rate": 1.0
+    }
+  },
+  "delay_prediction": {
+    "end.all": {
+      "n": 987,
+      "tp": 580,
+      "fp": 341,
+      "fn": 0,
+      "tn": 66,
+      "precision": 0.6298,
+      "recall": 1.0,
+      "f1": 0.7728,
+      "accuracy": 0.6545
+    },
+    "end.holdout": {
+      "n": 270,
+      "tp": 132,
+      "fp": 107,
+      "fn": 0,
+      "tn": 31,
+      "precision": 0.5523,
+      "recall": 1.0,
+      "f1": 0.7116,
+      "accuracy": 0.6037
+    },
+    "end.tuning": {
+      "n": 717,
+      "tp": 448,
+      "fp": 234,
+      "fn": 0,
+      "tn": 35,
+      "precision": 0.6569,
+      "recall": 1.0,
+      "f1": 0.7929,
+      "accuracy": 0.6736
+    },
+    "mid.all": {
+      "n": 987,
+      "tp": 555,
+      "fp": 267,
+      "fn": 25,
+      "tn": 140,
+      "precision": 0.6752,
+      "recall": 0.9569,
+      "f1": 0.7917,
+      "accuracy": 0.7042
+    },
+    "mid.holdout": {
+      "n": 270,
+      "tp": 119,
+      "fp": 86,
+      "fn": 13,
+      "tn": 52,
+      "precision": 0.5805,
+      "recall": 0.9015,
+      "f1": 0.7062,
+      "accuracy": 0.6333
+    },
+    "mid.tuning": {
+      "n": 717,
+      "tp": 436,
+      "fp": 181,
+      "fn": 12,
+      "tn": 88,
+      "precision": 0.7066,
+      "recall": 0.9732,
+      "f1": 0.8188,
+      "accuracy": 0.7308
+    }
+  },
+  "cross_check_with_published": {
+    "end_of_sprint_all_987": {
+      "published": {
+        "tp": 580,
+        "fp": 341,
+        "fn": 0,
+        "tn": 66
+      },
+      "via_api": {
+        "tp": 580,
+        "fp": 341,
+        "fn": 0,
+        "tn": 66
+      },
+      "identical": true
+    },
+    "midsprint_50pct_all": {
+      "published": {
+        "tp": 555,
+        "fp": 267,
+        "fn": 25,
+        "tn": 140
+      },
+      "via_api": {
+        "tp": 555,
+        "fp": 267,
+        "fn": 25,
+        "tn": 140
+      },
+      "identical": true
+    }
+  },
+  "recommendation_coverage_by_risk": {
+    "delay": {
+      "ok": 1743,
+      "total": 1743,
+      "rate": 1.0
+    },
+    "dependency": {
+      "ok": 33,
+      "total": 33,
+      "rate": 1.0
+    },
+    "silent_member": {
+      "ok": 779,
+      "total": 779,
+      "rate": 1.0
+    },
+    "workload": {
+      "ok": 1808,
+      "total": 1808,
+      "rate": 1.0
+    }
+  },
+  "rebalance": {
+    "workload_recommendations": 1808,
+    "with_moves": 1524,
+    "without_moves": 284,
+    "severity_improved": {
+      "ok": 943,
+      "total": 1524,
+      "rate": 0.6188
+    },
+    "peak_drop_points": {
+      "mean": 9.49,
+      "median": 6.0
+    },
+    "transitions": {
+      "critical->critical": 519,
+      "critical->high": 390,
+      "critical->low": 45,
+      "critical->medium": 153,
+      "high->high": 52,
+      "high->low": 128,
+      "high->medium": 155,
+      "medium->low": 72,
+      "medium->medium": 10
+    }
+  },
+  "latency_in_process": {
+    "all": {
+      "n": 1974,
+      "p50_ms": 48.1,
+      "p95_ms": 70.4,
+      "max_ms": 715.1
+    },
+    "<25 tasks": {
+      "n": 1129,
+      "p50_ms": 45.4,
+      "p95_ms": 63.2
+    },
+    "25-49": {
+      "n": 726,
+      "p50_ms": 50.8,
+      "p95_ms": 72.5
+    },
+    "50-99": {
+      "n": 115,
+      "p50_ms": 61.6,
+      "p95_ms": 83.6
+    },
+    "100+": {
+      "n": 4,
+      "p50_ms": 80.7,
+      "p95_ms": 89.0
+    }
+  },
+  "failures_sample": []
+}

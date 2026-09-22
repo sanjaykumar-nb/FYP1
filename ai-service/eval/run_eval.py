@@ -28,6 +28,7 @@ import time
 from dataclasses import asdict, dataclass
 
 from app.graph import GraphBuilder, GraphMetrics, SubgraphSelector
+from app.tests.factories import NOW as SCENARIO_NOW
 from app.graph.grounding import drop_ungrounded
 from eval.scenarios import generate_scenarios
 
@@ -61,7 +62,10 @@ class ConfusionCounts:
 def run_detection_eval(seed: int = 42, per_type: int = 30) -> dict:
     scenarios = generate_scenarios(seed=seed, per_type=per_type)
     builder = GraphBuilder()
-    metrics = GraphMetrics()
+    # Scenarios are built around app.tests.factories.NOW (a fixed date), so they must be
+    # judged at that moment too. Judged against the wall clock, a healthy scenario's
+    # due dates drift into the past as the calendar moves on and read as overdue.
+    metrics = GraphMetrics(now=SCENARIO_NOW)
 
     per_risk_type: dict[str, ConfusionCounts] = {}
     overall = ConfusionCounts()
@@ -117,7 +121,7 @@ def run_token_eval() -> dict:
     for n in sizes:
         sc = workload_scenario(rng, positive=True, size=n)
         graph = GraphBuilder().build(sc.snapshot)
-        analysis = GraphMetrics().compute(graph)
+        analysis = GraphMetrics(now=SCENARIO_NOW).compute(graph)
         witness = SubgraphSelector().select(graph, analysis.findings_for("workload", "delay", "dependency"))
         rendered = witness.render()
         rows.append({
@@ -160,7 +164,7 @@ def run_latency_eval(n_runs: int = 50) -> dict:
         sc = workload_scenario(rng, positive=True, size=200)
         start = time.perf_counter()
         graph = GraphBuilder().build(sc.snapshot)
-        analysis = GraphMetrics().compute(graph)
+        analysis = GraphMetrics(now=SCENARIO_NOW).compute(graph)
         SubgraphSelector().select(graph, analysis.findings_for("workload", "delay", "dependency", "knowledge"))
         durations_ms.append((time.perf_counter() - start) * 1000)
 

@@ -3,14 +3,18 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
-from app.api.deps import get_db, get_current_org_id, get_pagination_params, get_current_user_id
+from app.api.deps import (CurrentRole, ensure_can_manage, get_current_org_id, get_current_role,
+                          get_current_user_id, get_db, get_pagination_params, require_permission)
 from app.models.organization import Organization
 from app.models.user import User
 from app.models.memory import AuditLog, Notification
+from app.models.project import Project
+from app.models.task import Task
 from app.schemas.analytics import AuditLogResponse, NotificationResponse
 from app.schemas.auth import PaginatedResponse, UserResponse
 
-router = APIRouter()
+# The admin area (organization stats, the user list, audit logs) is for admins and owners.
+router = APIRouter(dependencies=[Depends(require_permission("settings:read"))])
 
 
 @router.get("/stats")
@@ -21,10 +25,6 @@ async def get_org_stats(
     # Get counts
     users_count = await db.execute(select(func.count(User.id)).where(User.organization_id == org_id))
     projects_count = await db.execute(select(func.count(Project.id)).where(Project.organization_id == org_id))
-    
-    from app.models.project import Project
-    from app.models.task import Task
-    
     tasks_count = await db.execute(
         select(func.count(Task.id))
         .join(Project, Project.id == Task.project_id)
@@ -109,13 +109,17 @@ async def list_all_users(
     )
 
 
-@router.patch("/users/{user_id}")
+# Deactivating an account removes someone's access, so it needs the right to remove members.
+@router.patch("/users/{user_id}", dependencies=[Depends(require_permission("member:remove"))])
 async def update_user(
     user_id: UUID,
     is_active: bool,
     db: AsyncSession = Depends(get_db),
     org_id: UUID = Depends(get_current_org_id),
+    actor: CurrentRole = Depends(get_current_role),
+    actor_id: UUID = Depends(get_current_user_id),
 ):
+    await ensure_can_manage(db, actor, actor_id, org_id, user_id, "deactivate" if not is_active else "reactivate")
     result = await db.execute(
         select(User).where(User.id == user_id, User.organization_id == org_id)
     )

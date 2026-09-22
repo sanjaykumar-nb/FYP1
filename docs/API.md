@@ -15,7 +15,7 @@ checked against the caller's role.
 
 ## Backend — http://localhost:8000
 
-69 operations; 36 used by the app or covered by tests.
+69 operations; 41 used by the app or covered by tests.
 
 ### admin
 
@@ -24,7 +24,7 @@ checked against the caller's role.
 | `GET` | `/api/v1/admin/audit-logs` | List Audit Logs | — | — |
 | `GET` | `/api/v1/admin/stats` | Get Org Stats | — | — |
 | `GET` | `/api/v1/admin/users` | List All Users | — | — |
-| `PATCH` | `/api/v1/admin/users/{user_id}` | Update User | — | — |
+| `PATCH` | `/api/v1/admin/users/{user_id}` | Update User | — | yes |
 
 ### analytics
 
@@ -70,14 +70,14 @@ checked against the caller's role.
 
 | Method | Path | What it does | App | Tested |
 |---|---|---|---|---|
-| `GET` | `/api/v1/organizations` | List Organizations | — | — |
-| `POST` | `/api/v1/organizations` | Create Organization | — | — |
+| `GET` | `/api/v1/organizations` | List Organizations | — | yes |
+| `POST` | `/api/v1/organizations` | Create Organization | — | yes |
 | `GET` | `/api/v1/organizations/{org_id}` | Get Organization | — | — |
 | `PATCH` | `/api/v1/organizations/{org_id}` | Update Organization | — | — |
 | `GET` | `/api/v1/organizations/{org_id}/members` | List Members | yes | yes |
 | `POST` | `/api/v1/organizations/{org_id}/members` | Add Member | yes | yes |
-| `DELETE` | `/api/v1/organizations/{org_id}/members/{user_id}` | Remove Member | — | — |
-| `PATCH` | `/api/v1/organizations/{org_id}/members/{user_id}` | Update Member Role | — | — |
+| `DELETE` | `/api/v1/organizations/{org_id}/members/{user_id}` | Remove Member | — | yes |
+| `PATCH` | `/api/v1/organizations/{org_id}/members/{user_id}` | Update Member Role | — | yes |
 | `GET` | `/api/v1/organizations/{org_id}/roles` | List Roles | — | — |
 | `POST` | `/api/v1/organizations/{org_id}/roles` | Create Role | — | — |
 | `GET` | `/api/v1/organizations/{org_id}/teams` | List Teams | — | — |

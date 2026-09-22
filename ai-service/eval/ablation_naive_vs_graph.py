@@ -47,6 +47,7 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 
 from app.graph import GraphBuilder, GraphMetrics
+from app.tests.factories import NOW as SCENARIO_NOW
 from app.config import get_settings
 from app.llm.client import GroqClient
 from eval.scenarios import generate_scenarios
@@ -250,7 +251,10 @@ async def main() -> None:
     for i, sc in enumerate(scenarios):
         # --- graph path: deterministic, no LLM, no rate limit ---
         graph = GraphBuilder().build(sc.snapshot)
-        analysis = GraphMetrics().compute(graph)
+        # Scenarios are built around app.tests.factories.NOW (a fixed date), so they must be
+        # judged at that moment too. Judged against the wall clock, a healthy scenario's
+        # due dates drift into the past as the calendar moves on and read as overdue.
+        analysis = GraphMetrics(now=SCENARIO_NOW).compute(graph)
         graph_pred = any(f.metric == sc.metric and f.severity != "low" for f in analysis.findings)
 
         from app.graph import SubgraphSelector

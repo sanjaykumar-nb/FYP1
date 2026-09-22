@@ -2,14 +2,15 @@ from typing import Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import delete, select, func
 from sqlalchemy.orm import selectinload
 from app.api.deps import get_db, get_current_user, get_current_user_id, get_current_org_id, get_pagination_params
 from app.core.security import get_password_hash
 from app.models.organization import Organization
 from app.models.user import User
+from app.models.project import Project, ProjectMember
 from app.models.role import Role, UserRole
-from app.api.deps import CurrentRole, get_current_role, require_permission
+from app.api.deps import CurrentRole, ensure_can_manage, get_current_role, require_permission
 from app.core.permissions import can_grant, default_roles
 from app.models.team import Team, TeamMember
 from app.schemas.auth import (
@@ -320,27 +321,34 @@ async def remove_member(
     user_id: UUID,
     db: AsyncSession = Depends(get_db),
     current_org_id: UUID = Depends(get_current_org_id),
+    actor: CurrentRole = Depends(get_current_role),
+    actor_id: UUID = Depends(get_current_user_id),
 ):
     if org_id != current_org_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied",
         )
-    
-    # Remove user roles
+    await ensure_can_manage(db, actor, actor_id, org_id, user_id, "remove")
+
+    user = (
+        await db.execute(select(User).where(User.id == user_id, User.organization_id == org_id))
+    ).scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Member not found")
+
+    # A person belongs to exactly one organization (users.organization_id is required),
+    # so removal revokes access rather than detaching them: their roles and project
+    # memberships go, and the account is disabled.
+    await db.execute(delete(UserRole).where(UserRole.user_id == user_id, UserRole.organization_id == org_id))
     await db.execute(
-        select(UserRole).where(
-            UserRole.user_id == user_id,
-            UserRole.organization_id == org_id,
+        delete(ProjectMember).where(
+            ProjectMember.user_id == user_id,
+            ProjectMember.project_id.in_(select(Project.id).where(Project.organization_id == org_id)),
         )
     )
-    
-    # Remove from organization
-    user_result = await db.execute(select(User).where(User.id == user_id, User.organization_id == org_id))
-    user = user_result.scalar_one_or_none()
-    if user:
-        user.organization_id = None
-    
+    user.is_active = False
+
     await db.commit()
     
     return {"message": "Member removed"}

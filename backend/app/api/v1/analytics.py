@@ -441,7 +441,10 @@ async def search_memory(
     return [OrganizationMemoryResponse.model_validate(m) for m in memories]
 
 
-@router.post("/organizations/{org_id}/memory", response_model=OrganizationMemoryResponse)
+# Organizational memory is shared by the whole organization; writing to it is an
+# organization-level change.
+@router.post("/organizations/{org_id}/memory", response_model=OrganizationMemoryResponse,
+             dependencies=[Depends(require_permission("organization:update"))])
 async def add_memory(
     org_id: UUID,
     memory_data: OrganizationMemoryResponse,

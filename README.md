@@ -20,7 +20,7 @@ references caught and stripped). A held-out real-world evaluation shows the zero
 rule **beating a tuned machine-learning model** on unseen projects.
 
 [**Read the full research write-up →**](IEEE_PAPER_REPORT.md) · [PDF version](IEEE_PAPER_REPORT.pdf) ·
-[**MVP release notes**](RELEASE_NOTES.md) · [API reference](docs/API.md)
+[**MVP release notes**](RELEASE_NOTES.md) · [**Validation report**](VALIDATION_REPORT.md) · [API reference](docs/API.md)
 
 ---
 
@@ -256,8 +256,8 @@ full walkthrough, including what is real and what the replay derives, is in [DEM
 
 ```bash
 make test               # everything
-make test-backend       # backend: 65 tests
-make test-ai            # AI service: 73 tests
+make test-backend       # backend: 79 tests
+make test-ai            # AI service: 75 tests
 make test-frontend      # frontend: 53 tests (vitest)
 ```
 
@@ -313,6 +313,7 @@ python -m eval.make_figures                  # regenerate every figure in docs/i
 | [MVP_OVERVIEW.md](MVP_OVERVIEW.md) | Plain-language walkthrough of the MVP for a non-technical reader |
 | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | Six-minute demo recording script — setup, shot list, expected numbers |
 | [docs/SLIDES.md](docs/SLIDES.md) | Presentation outline — 14 slides with the numbers to quote and the claims to avoid |
+| [VALIDATION_REPORT.md](VALIDATION_REPORT.md) | Phase 1 validation — every agent on all 987 real sprints, role matrix, response times, defects found and fixed |
 | [RELEASE_NOTES.md](RELEASE_NOTES.md) | v1.0-mvp — what the bundle contains, how to run it, how it was verified |
 | [docs/API.md](docs/API.md) | Every endpoint of both services, marked by whether the app uses it and a test covers it; OpenAPI specs in `docs/api/` |
 | `ai-service/eval/figures/README.md` | Figure sourcing, palette/accessibility rationale, LaTeX captions |
