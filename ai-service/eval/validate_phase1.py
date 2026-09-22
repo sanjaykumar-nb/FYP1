@@ -190,6 +190,7 @@ class Tally:
         self.c: Counter = Counter()
         self.latency: list[tuple[int, float]] = []
         self.delay_pairs: dict[str, list[tuple[bool, bool]]] = defaultdict(list)
+        self.specialist_pairs: dict[str, list[tuple[bool, bool]]] = defaultdict(list)
         self.rec_by_type: Counter = Counter()
         self.rec_needed_by_type: Counter = Counter()
         self.peak_drops: list[int] = []
@@ -262,6 +263,12 @@ def validate_run(t: Tally, case, mode: str, body: dict, eval_time: datetime, hol
     split = "holdout" if case.project_key in holdout else "tuning"
     t.delay_pairs[f"{mode}.all"].append((case.label_delayed, predicted))
     t.delay_pairs[f"{mode}.{split}"].append((case.label_delayed, predicted))
+    # The specialists' own verdicts do not feed the product's risk score, but they are
+    # shown to users, so they are scored against the same outcome too.
+    for name in ("planning", "progress", "workload"):
+        flagged = (outputs.get(name) or {}).get("risk_level", "low") != "low"
+        t.specialist_pairs[f"{name}.{mode}.{split}"].append((case.label_delayed, flagged))
+        t.specialist_pairs[f"{name}.{mode}.all"].append((case.label_delayed, flagged))
 
     # -- recommendation: one per medium+ risk type, each grounded in a finding
     recs = result.get("merged_recommendations") or []
@@ -382,6 +389,7 @@ async def main() -> None:
                 "refused_before_network": llm.refused},
         "checks": {k: t.get(k) for k in keys},
         "delay_prediction": {k: confusion(v) for k, v in sorted(t.delay_pairs.items())},
+        "specialist_verdicts_vs_outcome": {k: confusion(v) for k, v in sorted(t.specialist_pairs.items())},
         "cross_check_with_published": {
             "end_of_sprint_all_987": {"published": {k: published_end[k] for k in ("tp", "fp", "fn", "tn")},
                                       "via_api": {k: ours_end[k] for k in ("tp", "fp", "fn", "tn")},

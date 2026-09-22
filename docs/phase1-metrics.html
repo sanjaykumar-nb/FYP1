@@ -1,0 +1,2240 @@
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TeamSync Phase 1 Metrics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f5f6f3;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #7d7b75;
+  --grid: #e3e2db;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.10);
+  --s1: #2a78d6;
+  --s1-wash: rgba(42, 120, 214, 0.12);
+  --s2: #eb6834;
+  --base: #aeaca3;
+  --good: #0ca30c;
+  --good-ink: #006300;
+  --good-wash: rgba(12, 163, 12, 0.10);
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --tip-bg: #ffffff;
+  --shadow: 0 6px 24px rgba(11, 11, 11, 0.10);
+  --err-wash: rgba(208, 59, 59, 0.10);
+  --part-ink: #8a5a00;
+  --part-wash: rgba(250, 178, 25, 0.18);
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0f0f0e;
+    --surface: #1a1a19;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #8f8d86;
+    --grid: #2c2c2a;
+    --axis: #45443f;
+    --border: rgba(255, 255, 255, 0.10);
+    --s1: #3987e5;
+    --s1-wash: rgba(57, 135, 229, 0.16);
+    --s2: #d95926;
+    --base: #6a6964;
+    --good-ink: #0ca30c;
+    --good-wash: rgba(12, 163, 12, 0.14);
+    --tip-bg: #242423;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    --err-wash: rgba(230, 103, 103, 0.16);
+    --part-ink: #fab219;
+    --part-wash: rgba(250, 178, 25, 0.14);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0f0f0e;
+  --surface: #1a1a19;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --muted: #8f8d86;
+  --grid: #2c2c2a;
+  --axis: #45443f;
+  --border: rgba(255, 255, 255, 0.10);
+  --s1: #3987e5;
+  --s1-wash: rgba(57, 135, 229, 0.16);
+  --s2: #d95926;
+  --base: #6a6964;
+  --good-ink: #0ca30c;
+  --good-wash: rgba(12, 163, 12, 0.14);
+  --tip-bg: #242423;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  --err-wash: rgba(230, 103, 103, 0.16);
+  --part-ink: #fab219;
+  --part-wash: rgba(250, 178, 25, 0.14);
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  padding: 0 16px;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 40px 72px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(28px, 4vw, 38px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+h2 { font-size: 24px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; }
+h3 { font-size: 15px; font-weight: 600; }
+p { margin: 0; }
+code, .mono { font-family: var(--mono); font-size: 0.92em; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.lede { color: var(--ink-2); max-width: 68ch; font-size: 16px; }
+
+/* header */
+header.top { display: grid; gap: 14px; margin-bottom: 28px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 8px 0 8px; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; display: grid; gap: 4px; }
+.tile .label { font-size: 13px; color: var(--ink-2); }
+.tile .value { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.tile .note { font-size: 12.5px; color: var(--muted); }
+
+nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 8px; }
+nav.toc a { font-size: 13px; color: var(--ink-2); text-decoration: none; border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px; background: var(--surface); }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--ink); border-color: var(--s1); outline: none; }
+
+/* sections */
+section.q { margin-top: 56px; display: grid; gap: 18px; scroll-margin-top: 16px; }
+section.q > .head { display: grid; gap: 8px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 16px; align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 18px 14px; display: grid; gap: 10px; min-width: 0; }
+.card .sub { font-size: 13px; color: var(--ink-2); }
+.chart { width: 100%; min-width: 0; position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.key { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.key.line { height: 2px; width: 16px; border-radius: 1px; }
+
+details.data { font-size: 13px; }
+details.data summary { cursor: pointer; color: var(--ink-2); width: max-content; }
+details.data summary:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; border-radius: 3px; }
+.tablewrap { overflow-x: auto; margin-top: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th { color: var(--muted); font-weight: 500; font-size: 12px; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* inference */
+.infer { border-top: 1px solid var(--border); display: grid; gap: 0; }
+.infer div { display: grid; grid-template-columns: 170px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.infer dt, .infer .k { font-size: 12px; font-family: var(--mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.infer .v { max-width: 72ch; }
+.infer .v strong { font-weight: 600; }
+.k.claim { color: var(--good-ink); }
+.k.not { color: var(--critical); }
+@media (max-width: 640px) { .infer div { grid-template-columns: 1fr; gap: 4px; } }
+
+/* check ledger */
+.ledger { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.ledger .group { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+.ledger .row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; border-bottom: 1px solid var(--grid); padding: 5px 0; }
+.ledger .row:last-child { border-bottom: 0; }
+.ledger .n { font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; color: var(--good-ink); background: var(--good-wash); border-radius: 999px; padding: 1px 8px; }
+.pill svg { width: 10px; height: 10px; }
+
+/* confusion matrices */
+.cms { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 14px; }
+.cm h4 { margin: 0 0 6px; font-size: 13px; font-weight: 600; }
+.cm .grid { display: grid; grid-template-columns: auto 1fr 1fr; gap: 3px; font-size: 12px; }
+.cm .hd { color: var(--muted); font-size: 11px; padding: 2px 4px; align-self: end; }
+.cm .rh { color: var(--muted); font-size: 11px; padding: 0 6px 0 0; align-self: center; text-align: right; }
+.cm .cell { border-radius: 6px; padding: 8px 8px 6px; display: grid; gap: 1px; }
+.cm .cell b { font-size: 18px; font-weight: 600; line-height: 1.1; }
+.cm .cell span { font-size: 11px; color: var(--ink-2); }
+.cm .ok { background: var(--s1-wash); }
+.cm .err { background: var(--err-wash); }
+.cm .foot { font-size: 11.5px; color: var(--ink-2); margin-top: 6px; }
+
+/* completeness matrix */
+.mwrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 6px 14px 10px; }
+table.matrix th { white-space: normal; vertical-align: bottom; min-width: 90px; }
+table.matrix td:first-child, table.matrix th:first-child { min-width: 170px; white-space: normal; }
+table.matrix td { vertical-align: middle; white-space: normal; }
+.st { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.st.yes { color: var(--good-ink); background: var(--good-wash); }
+.st.part { color: var(--part-ink); background: var(--part-wash); }
+.st.no { color: var(--critical); background: var(--err-wash); }
+.st.na { color: var(--muted); }
+.gaps { display: grid; border-top: 1px solid var(--border); }
+.gaps div { display: grid; grid-template-columns: minmax(0, 1fr) 170px; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.gaps .effort { font-size: 12.5px; color: var(--ink-2); }
+@media (max-width: 640px) { .gaps div { grid-template-columns: 1fr; gap: 2px; } }
+
+.limits { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+
+@media print {
+  body { background: #ffffff; font-size: 12.5px; }
+  .wrap { padding-block: 0; max-width: none; }
+  nav.toc, #tip, details.data > summary { display: none; }
+  .card, .tile, .ledger .group, .infer div, .cm, .gaps div, .limits, tr { break-inside: avoid; }
+  section.q { margin-top: 26px; }
+  section.q > .head, h2, h3 { break-after: avoid; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .mwrap, .tablewrap { overflow: visible; }
+  table.matrix { table-layout: fixed; width: 100%; }
+  table.matrix th, table.matrix td { min-width: 0 !important; padding: 5px 4px 5px 0; font-size: 10.5px; }
+  table.matrix th:first-child, table.matrix td:first-child { width: 20%; }
+  .st { white-space: normal; font-size: 10px; padding: 1px 5px; line-height: 1.3; }
+  @page { size: A4; margin: 14mm 12mm; }
+}
+.limits ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 6px; color: var(--ink-2); }
+footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
+
+/* tooltip */
+#tip { position: fixed; z-index: 10; pointer-events: none; background: var(--tip-bg); color: var(--ink); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow); padding: 8px 10px; font-size: 12.5px; min-width: 140px; max-width: 280px; }
+#tip .t { color: var(--ink-2); margin-bottom: 4px; }
+#tip .r { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+#tip .r b { font-weight: 600; font-variant-numeric: tabular-nums; }
+#tip .r span { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
+.chart text { font-variant-numeric: tabular-nums; }
+.hit { cursor: default; }
+.hit:focus { outline: none; }
+.hit:focus-visible .mark, .hit:hover .mark { filter: brightness(1.12); }
+.hit:focus-visible { outline: 2px solid var(--s1); }
+@media (prefers-reduced-motion: no-preference) { .mark { transition: filter 120ms ease; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">TeamSync AI · v1.0.1-mvp · Phase 1</span>
+    <h1>How well the agents perform, measured</h1>
+    <p class="lede">Every agent run through the live analysis endpoint on all <span id="nSprints"></span> real sprints from the TAWOS dataset, plus the published evaluations re-run and every main feature timed. No language-model key was used, which is how the product ships. Each chart says what it shows, what it lets you claim, and what it does not.</p>
+    <div class="meta"><span>Data: 31 open-source projects, 22 of them held out and never used for tuning</span><span>Measured 21–22 September 2026</span><span>Source: <code>VALIDATION_REPORT.md</code></span></div>
+    <div class="tiles" id="tiles"></div>
+    <nav class="toc" aria-label="Sections">
+      <a href="#correct">Correctness</a><a href="#predict">Prediction</a><a href="#agents">Each agent's verdict</a><a href="#fixes">Suggested fixes</a><a href="#cost">Cost and speed</a><a href="#llm">Language model</a><a href="#quality">Engineering quality</a><a href="#complete">Is it complete?</a>
+    </nav>
+  </header>
+
+  <!-- 1. Correctness -->
+  <section class="q" id="correct">
+    <div class="head">
+      <span class="eyebrow">1 · Correctness</span>
+      <h2>Does each agent compute exactly what it claims?</h2>
+      <p class="lede">Every check below ran on every real-sprint analysis. The Planning, Progress and Workload figures were compared with an independent recount from the raw sprint, not with the agents' own code.</p>
+    </div>
+    <div class="ledger" id="ledger"></div>
+    <div class="card">
+      <div>
+        <h3>Each detector changes its verdict exactly at its documented threshold</h3>
+        <p class="sub">Severity as the measured signal is swept across its range on generated projects. The vertical rule marks the threshold the documentation states.</p>
+      </div>
+      <div class="grid2" id="thresholds" style="gap:10px"></div>
+      <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="thresholdsTable"></div></details>
+    </div>
+    <dl class="infer">
+      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0">Across <strong>2,961 analyses</strong> nothing failed: every agent completed, every output matched its schema, the same sprint always produced the same answer, and all <strong>40,001</strong> tasks and people cited as evidence exist in that sprint's graph. On 180 generated projects with a planted problem, detection is exact for all six risk types (F1 1.00), and each detector switches at its documented value.</dd></div>
+      <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">The agents are <strong>correct and deterministic</strong>: they report the true figures for the data they are given, their evidence is never invented, and their thresholds behave as documented.</dd></div>
+      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">That this makes the verdicts <em>useful</em>. Correct computation of a signal is not the same as that signal predicting anything — section 2 measures that separately.</dd></div>
+    </dl>
+  </section>
+
+  <!-- 2. Prediction -->
+  <section class="q" id="predict">
+    <div class="head">
+      <span class="eyebrow">2 · Prediction on unseen projects</span>
+      <h2>Does it warn about sprints that really finish late?</h2>
+      <p class="lede">270 sprints from 22 projects the system never saw. A sprint counts as late when 30% or more of its issues were still open at its end. Every predictor is scored against the same sprints.</p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div><h3>F1 score by when the verdict is made</h3><p class="sub">Held-out sprints. Higher is better; 1.0 is perfect.</p></div>
+        <div class="legend"><span><i class="key" style="background:var(--s1)"></i>TeamSync risk agent</span><span><i class="key" style="background:var(--s2)"></i>Tuned logistic model</span><span><i class="key" style="background:var(--base)"></i>Flag every sprint</span></div>
+        <div class="chart" id="f1chart"></div>
+        <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="f1table"></div></details>
+      </div>
+      <div class="card">
+        <div><h3>Is the difference real? Paired F1 gain with 95% interval</h3><p class="sub">Same sprints, resampled by project 2,000 times. An interval that crosses zero is not a real difference.</p></div>
+        <div class="legend"><span><i class="key" style="background:var(--s1)"></i>Real difference</span><span><i class="key" style="background:var(--base)"></i>Cannot be separated</span></div>
+        <div class="chart" id="forest"></div>
+        <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="forestTable"></div></details>
+      </div>
+      <div class="card">
+        <div><h3>Ranking quality (AUC) mid-sprint</h3><p class="sub">How well each signal orders late sprints above on-time ones. 0.5 is chance.</p></div>
+        <div class="legend"><span><i class="key" style="background:var(--s1)"></i>Projected unfinished share (TeamSync)</span><span><i class="key" style="background:var(--base)"></i>Share of work still open (simple count)</span></div>
+        <div class="chart" id="auc"></div>
+        <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="aucTable"></div></details>
+      </div>
+      <div class="card">
+        <div><h3>What happens across the project boundary</h3><p class="sub">F1 at sprint end, on the 9 tuning projects and on the 22 unseen ones.</p></div>
+        <div class="legend"><span><i class="key line" style="background:var(--s1)"></i>TeamSync risk agent (0 parameters)</span><span><i class="key line" style="background:var(--s2)"></i>Tuned logistic model (4 features)</span></div>
+        <div class="chart" id="slope"></div>
+        <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="slopeTable"></div></details>
+      </div>
+    </div>
+    <div class="card">
+      <div><h3>Where the errors fall — confusion matrices on held-out sprints</h3><p class="sub">Each grid counts the 270 held-out sprints: rows are what really happened, columns what was predicted. Tinted blue = right, red = wrong.</p></div>
+      <div class="cms" id="cms"></div>
+      <p class="sub" id="calib"></p>
+      <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="cmTable"></div></details>
+    </div>
+    <dl class="infer">
+      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0">Halfway through a sprint the risk agent reaches <strong>F1 0.706</strong>, rising to <strong>0.756</strong> at three-quarters (0.803 counting only high-or-worse warnings). Against flagging every sprint the gains are <strong>+0.050</strong> and <strong>+0.099</strong>, and both intervals stay clear of zero (<em>p</em> &lt; 0.001). It ranks late sprints well — AUC <strong>0.792</strong> and <strong>0.874</strong> — but no better than simply counting open work. The tuned model scores 0.816 on the projects it was tuned on and falls to 0.593 on unseen ones.</dd></div>
+      <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">The system <strong>warns about late sprints while they are still running</strong>, significantly better than flagging everything, on projects it has never seen. Added model complexity <strong>did not survive the project boundary</strong>: the tuned model's advantage disappeared.</dd></div>
+      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">That the system <em>beats</em> the tuned model — at sprint end the two cannot be separated (<em>p</em> = 0.78, the interval crosses zero). That its projection ranks <em>better</em> than counting open work — it does not. That sprint-end recall of 1.00 is skill — after the deadline, the label and the rule test the same condition.</dd></div>
+    </dl>
+  </section>
+
+  <!-- 2b. Each agent's verdict -->
+  <section class="q" id="agents">
+    <div class="head">
+      <span class="eyebrow">2b · Every agent's own verdict</span>
+      <h2>Do the specialist agents' warnings mean anything on their own?</h2>
+      <p class="lede">Planning, Progress and Workload each give a risk level of their own, shown to users beside the Risk agent's. They do not feed the product's risk score, but they are scored here against the same outcome: did the sprint finish late?</p>
+    </div>
+    <div class="card">
+      <div><h3>F1 of each agent's warning, held-out sprints</h3><p class="sub">A warning is any risk level above low. 270 sprints from 22 unseen projects.</p></div>
+      <div class="legend"><span><i class="key" style="background:var(--s1)"></i>Risk agent — the product's verdict</span><span><i class="key" style="background:var(--base)"></i>Specialist agents</span></div>
+      <div class="chart" id="agentsChart"></div>
+      <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="agentsTable"></div></details>
+    </div>
+    <dl class="infer">
+      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0">The <strong>Planning</strong> agent never warns — <strong>0 of 270</strong> sprints — because its only warning is planned work exceeding team capacity, and no capacity is ever supplied. The <strong>Progress</strong> agent's simple completion rule matches the Risk agent halfway through (F1 0.712 vs 0.706); at sprint end its perfect precision is built in, since a sprint under half done is late by definition. The <strong>Workload</strong> agent is a weak lateness signal (F1 0.58) — it measures uneven load, not delay.</dd></div>
+      <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">The product's verdict rests on the Risk agent, which is the one validated here; the specialists supply <strong>descriptive context</strong> whose figures are exactly right (section 1).</dd></div>
+      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">That the Planning agent's risk level carries information — as shipped it is always low. Supplying team capacity is a Phase 2 fix. Nor that the pace projection beats a plain completion-rate rule halfway through: they perform the same.</dd></div>
+    </dl>
+  </section>
+
+  <!-- 3. Suggested fixes -->
+  <section class="q" id="fixes">
+    <div class="head">
+      <span class="eyebrow">3 · Suggested fixes</span>
+      <h2>Do the reassignments it suggests actually work?</h2>
+      <p class="lede">For every real sprint with a workload recommendation, each suggested move was applied to the sprint and the risk recomputed, then compared with what the recommendation predicted before anyone acted.</p>
+    </div>
+    <div class="tiles" id="fixTiles"></div>
+    <div class="grid2">
+      <div class="card">
+        <div><h3>Where workload risk ended after the suggested moves</h3><p class="sub">1,524 sprints, grouped by the severity they started at. The planner makes at most three moves.</p></div>
+        <div class="legend" id="transLegend"></div>
+        <div class="chart" id="trans"></div>
+        <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="transTable"></div></details>
+      </div>
+      <div class="card">
+        <div><h3>Recommendations made, by risk type</h3><p class="sub">Every medium-or-worse risk across the 1,974 real-sprint analyses got one: 4,363 of 4,363.</p></div>
+        <div class="chart" id="coverage"></div>
+        <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="coverageTable"></div></details>
+      </div>
+    </div>
+    <dl class="infer">
+      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0">The predicted outcome held in <strong>every one of 1,524 cases</strong> — both the new heaviest load and the new severity. Severity dropped at least one level in <strong>62%</strong>; the heaviest load fell by a median of <strong>6 story points</strong>. Most of the rest started <em>critical</em>: 519 teams were too uneven for three moves to lift. In 284 sprints no move could help, and the recommendation says so rather than suggesting one.</dd></div>
+      <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">The fixes are <strong>actionable and honest</strong>: each one names concrete moves, and its predicted effect is exactly what applying them produces.</dd></div>
+      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">That the fixes improve real projects — this is measured inside the model, not with teams who followed them. And knowledge and coordination risk never reached <em>medium</em> on a real sprint, so their recommendations are exercised on generated data only.</dd></div>
+    </dl>
+  </section>
+
+  <!-- 4. Cost and speed -->
+  <section class="q" id="cost">
+    <div class="head">
+      <span class="eyebrow">4 · Cost and speed</span>
+      <h2>Is it cheap and fast enough to run on every change?</h2>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div><h3>Prompt size as the project grows</h3><p class="sub">Tokens a language model would be sent. Both axes are logarithmic.</p></div>
+        <div class="legend"><span><i class="key line" style="background:var(--base)"></i>Whole project in the prompt</span><span><i class="key line" style="background:var(--s1)"></i>TeamSync: one finding and its evidence</span></div>
+        <div class="chart" id="tokens"></div>
+        <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="tokensTable"></div></details>
+      </div>
+      <div class="card">
+        <div><h3>Response time of each feature, end to end</h3><p class="sub">Real Mesos sprint (30 tasks, 13 people) over HTTP. Dot = median, line = up to the 95th percentile. Logarithmic axis.</p></div>
+        <div class="chart" id="api"></div>
+        <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="apiTable"></div></details>
+      </div>
+      <div class="card">
+        <div><h3>Analysis time by sprint size</h3><p class="sub">The agent pipeline alone, in process, across 1,974 real-sprint analyses.</p></div>
+        <div class="chart" id="pipeline"></div>
+        <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="pipelineTable"></div></details>
+      </div>
+    </div>
+    <dl class="infer">
+      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0">As the project grows from 13 to 2,003 tasks, the prompt grows only from 266 to <strong>390 tokens (1.47×)</strong>, while sending the whole project grows to 189,834 — <strong>487× larger</strong> (515× re-measured today, as tasks gained two fields). Every page and edit answers in <strong>8–42 ms</strong>; a full analysis, backend and AI service together, takes <strong>715 ms</strong>, of which the agent pipeline is about 50 ms. Sign-in's 390 ms is deliberate: password hashing is made slow to resist guessing.</dd></div>
+      <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">Prompt cost <strong>tracks the number of problems, not project size</strong>, and the product is fast enough to re-analyse on every change: everything but a full analysis responds well inside the 100 ms that feels instant.</dd></div>
+      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">Production-scale performance. These times are from one laptop on SQLite with a 30-task project. Token counts are estimates from character length, not a tokenizer.</dd></div>
+    </dl>
+  </section>
+
+  <!-- 5. LLM -->
+  <section class="q" id="llm">
+    <div class="head">
+      <span class="eyebrow">5 · The optional language model</span>
+      <h2>Is the language model safe to put in front of users?</h2>
+      <p class="lede">The model is optional and only puts findings into words. These results come from the published runs on a rate-limited free key; re-measuring them needs a paid key.</p>
+    </div>
+    <div class="tiles" id="llmTiles"></div>
+    <div class="card">
+      <div><h3>How often the model's output was valid</h3><p class="sub">Only the end-to-end rate is measured. The model's own rate is bounded, because only 24 of 50 failures were diagnosed individually.</p></div>
+      <div class="legend"><span><i class="key" style="background:var(--s2)"></i>Measured end to end (rate limits included)</span><span><i class="key" style="background:var(--s1-wash);border:1px solid var(--s1)"></i>Model's own validity: possible range</span></div>
+      <div class="chart" id="validity"></div>
+      <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="kappaTable"></div></details>
+    </div>
+    <dl class="infer">
+      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0">Every fabricated citation injected in testing — <strong>200 of 200</strong> — was removed before reaching the user. The model's verdict agrees with the deterministic one almost perfectly (<strong>κ 0.95</strong>). Only <strong>41.1%</strong> of calls produced valid output end to end, mostly because of free-tier rate limits. Without a key the model is never called: <strong>0 of 8,883</strong> attempts reached the network.</dd></div>
+      <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">The model <strong>narrates, it does not re-decide</strong>, and it cannot put invented evidence in front of a user. The product loses nothing without it.</dd></div>
+      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">A validity rate for the model itself — it is a range, 54–95%. The κ of 0.95 rests on 37 comparisons, with three risk types at a single one; treat it as a first signal, not a settled number.</dd></div>
+    </dl>
+  </section>
+
+  <!-- 6. Engineering quality -->
+  <section class="q" id="quality">
+    <div class="head">
+      <span class="eyebrow">6 · Engineering quality</span>
+      <h2>Is the software itself tested and safe?</h2>
+    </div>
+    <div class="tiles" id="qualityTiles"></div>
+    <div class="card">
+      <div><h3>Code covered by the automated tests, by area</h3><p class="sub">Share of statements the test suites execute. Frontend coverage is not measured.</p></div>
+      <div class="legend"><span><i class="key" style="background:var(--s1)"></i>Part of the MVP</span><span><i class="key" style="background:var(--base)"></i>Outside the MVP (unused by the app)</span></div>
+      <div class="chart" id="codecov"></div>
+      <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="codecovTable"></div></details>
+    </div>
+    <dl class="infer">
+      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0"><strong>207 automated tests</strong> pass, the backend's on both SQLite and PostgreSQL, and a role matrix read off the code checks every protected endpoint against every role: <strong>170 of 170</strong>. Tests cover <strong>74%</strong> of the backend code the MVP uses and <strong>81%</strong> of the AI service, <strong>93%</strong> of the knowledge graph. The validation found and fixed seven defects, five of them security holes or crashes in endpoints the app does not use.</dd></div>
+      <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">The MVP is <strong>well tested where it matters</strong>, its access control is verified exhaustively rather than by example, and every push re-runs all of it.</dd></div>
+      <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">High coverage overall: code outside the MVP is only 18% covered, and frontend coverage is unmeasured. No load test has been run, so behaviour under many simultaneous users is unknown.</dd></div>
+    </dl>
+  </section>
+
+  <!-- 7. Completeness -->
+  <section class="q" id="complete">
+    <div class="head">
+      <span class="eyebrow">7 · Is this evaluation complete?</span>
+      <h2>What is measured for each agent and feature — and what is not</h2>
+      <p class="lede">A complete evaluation asks seven questions of every part. This matrix shows which are answered.</p>
+    </div>
+    <div class="mwrap"><table class="matrix" id="matrix"></table></div>
+    <div class="card">
+      <h3>Missing, in order of importance</h3>
+      <div class="gaps" id="gaps"></div>
+    </div>
+    <div class="limits">
+      <h2>Limits of the data behind these numbers</h2>
+      <ul>
+        <li><strong>The delay label is a proxy.</strong> TAWOS has no due dates, so "late" means 30% or more of a sprint's issues unresolved at its end.</li>
+        <li><strong>The first quarter of a sprint.</strong> The pace warning is off by design until a quarter of the schedule has passed.</li>
+        <li><strong>One machine.</strong> Response times come from one laptop, on SQLite, with a 30-task project.</li>
+        <li><strong>The language-model results are from earlier runs</strong> on a rate-limited free key; they were not re-measured.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>Every figure on this page is read from committed result files: <code>ai-service/eval/phase1_validation_result.json</code>, <code>phase1_api_latency_result.json</code>, <code>datasets/tawos_midsprint_result.json</code>, <code>datasets/tawos_holdout_result.json</code>, <code>figure_token_sweep.json</code>, <code>live_llm_result_v3.json</code>.</span>
+    <span>Reproduce: <code>python -m eval.validate_phase1</code> (from <code>ai-service/</code>) and <code>python -m app.scripts.measure_latency</code> (from <code>backend/</code>).</span>
+  </footer>
+</div>
+<div id="tip" hidden></div>
+
+<script type="application/json" id="data">{
+ "checks": [
+  {
+   "id": "coordinator.all_specialists",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "coordinator.completed",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "coordinator.deterministic",
+   "ok": 987,
+   "total": 987
+  },
+  {
+   "id": "evidence.references_resolve",
+   "ok": 7102,
+   "total": 7102
+  },
+  {
+   "id": "planning.figures_match",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "planning.no_error",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "planning.schema_valid",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "progress.completion_matches",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "progress.no_error",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "progress.schema_valid",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "progress.stalled_matches",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "rebalance.before_matches_board",
+   "ok": 1524,
+   "total": 1524
+  },
+  {
+   "id": "rebalance.effect_stated",
+   "ok": 1524,
+   "total": 1524
+  },
+  {
+   "id": "rebalance.moves_are_valid",
+   "ok": 1524,
+   "total": 1524
+  },
+  {
+   "id": "rebalance.no_move_raises_peak",
+   "ok": 1524,
+   "total": 1524
+  },
+  {
+   "id": "rebalance.predicted_peak_holds",
+   "ok": 1524,
+   "total": 1524
+  },
+  {
+   "id": "rebalance.predicted_severity_holds",
+   "ok": 1524,
+   "total": 1524
+  },
+  {
+   "id": "recommendation.covers_medium_plus_risks",
+   "ok": 4363,
+   "total": 4363
+  },
+  {
+   "id": "recommendation.grounded_in_finding",
+   "ok": 4363,
+   "total": 4363
+  },
+  {
+   "id": "recommendation.no_error",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "recommendation.schema_valid",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "risk.citations_resolve",
+   "ok": 40001,
+   "total": 40001
+  },
+  {
+   "id": "risk.findings_cite_evidence",
+   "ok": 7102,
+   "total": 7102
+  },
+  {
+   "id": "risk.matches_direct_computation",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "risk.no_error",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "risk.schema_valid",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "workload.figures_match",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "workload.no_error",
+   "ok": 1974,
+   "total": 1974
+  },
+  {
+   "id": "workload.schema_valid",
+   "ok": 1974,
+   "total": 1974
+  }
+ ],
+ "dataset": {
+  "sprints": 987,
+  "runs": 2961,
+  "tasks_per_sprint": {
+   "median": 23.0,
+   "max": 119
+  },
+  "holdout_projects": 22
+ },
+ "llm_guard": {
+  "key_configured": false,
+  "calls_attempted": 8883,
+  "refused_before_network": 8883
+ },
+ "synthetic": {
+  "overall": {
+   "tp": 90,
+   "fp": 0,
+   "fn": 0,
+   "tn": 90,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "per_type": {
+   "coordination": 1.0,
+   "delay": 1.0,
+   "dependency": 1.0,
+   "knowledge": 1.0,
+   "silent_member": 1.0,
+   "workload": 1.0
+  },
+  "n": 180
+ },
+ "thresholds": {
+  "overdue": {
+   "documented": 0.1,
+   "rows": [
+    {
+     "x": 0.0,
+     "level": 0
+    },
+    {
+     "x": 0.02,
+     "level": 1
+    },
+    {
+     "x": 0.04,
+     "level": 1
+    },
+    {
+     "x": 0.06,
+     "level": 1
+    },
+    {
+     "x": 0.08,
+     "level": 1
+    },
+    {
+     "x": 0.1,
+     "level": 2
+    },
+    {
+     "x": 0.12,
+     "level": 2
+    },
+    {
+     "x": 0.14,
+     "level": 2
+    },
+    {
+     "x": 0.16,
+     "level": 2
+    },
+    {
+     "x": 0.18,
+     "level": 2
+    },
+    {
+     "x": 0.2,
+     "level": 2
+    },
+    {
+     "x": 0.22,
+     "level": 2
+    },
+    {
+     "x": 0.24,
+     "level": 2
+    },
+    {
+     "x": 0.26,
+     "level": 3
+    },
+    {
+     "x": 0.28,
+     "level": 3
+    },
+    {
+     "x": 0.3,
+     "level": 3
+    },
+    {
+     "x": 0.32,
+     "level": 3
+    },
+    {
+     "x": 0.34,
+     "level": 3
+    },
+    {
+     "x": 0.36,
+     "level": 3
+    },
+    {
+     "x": 0.38,
+     "level": 3
+    },
+    {
+     "x": 0.4,
+     "level": 4
+    },
+    {
+     "x": 0.42,
+     "level": 4
+    },
+    {
+     "x": 0.44,
+     "level": 4
+    },
+    {
+     "x": 0.46,
+     "level": 4
+    },
+    {
+     "x": 0.48,
+     "level": 4
+    },
+    {
+     "x": 0.5,
+     "level": 4
+    },
+    {
+     "x": 0.52,
+     "level": 4
+    },
+    {
+     "x": 0.54,
+     "level": 4
+    },
+    {
+     "x": 0.56,
+     "level": 4
+    },
+    {
+     "x": 0.58,
+     "level": 4
+    },
+    {
+     "x": 0.6,
+     "level": 4
+    },
+    {
+     "x": 0.62,
+     "level": 4
+    },
+    {
+     "x": 0.64,
+     "level": 4
+    },
+    {
+     "x": 0.66,
+     "level": 4
+    },
+    {
+     "x": 0.68,
+     "level": 4
+    },
+    {
+     "x": 0.7,
+     "level": 4
+    },
+    {
+     "x": 0.72,
+     "level": 4
+    },
+    {
+     "x": 0.74,
+     "level": 4
+    },
+    {
+     "x": 0.76,
+     "level": 4
+    },
+    {
+     "x": 0.78,
+     "level": 4
+    },
+    {
+     "x": 0.8,
+     "level": 4
+    },
+    {
+     "x": 0.82,
+     "level": 4
+    },
+    {
+     "x": 0.84,
+     "level": 4
+    },
+    {
+     "x": 0.86,
+     "level": 4
+    },
+    {
+     "x": 0.88,
+     "level": 4
+    },
+    {
+     "x": 0.9,
+     "level": 4
+    },
+    {
+     "x": 0.92,
+     "level": 4
+    },
+    {
+     "x": 0.94,
+     "level": 4
+    },
+    {
+     "x": 0.96,
+     "level": 4
+    },
+    {
+     "x": 0.98,
+     "level": 4
+    },
+    {
+     "x": 1.0,
+     "level": 4
+    }
+   ]
+  },
+  "silent": {
+   "documented": 0.3,
+   "rows": [
+    {
+     "x": 0.0,
+     "level": 0
+    },
+    {
+     "x": 0.1,
+     "level": 1
+    },
+    {
+     "x": 0.2,
+     "level": 1
+    },
+    {
+     "x": 0.3,
+     "level": 2
+    },
+    {
+     "x": 0.4,
+     "level": 2
+    },
+    {
+     "x": 0.5,
+     "level": 3
+    },
+    {
+     "x": 0.6,
+     "level": 3
+    },
+    {
+     "x": 0.7,
+     "level": 3
+    },
+    {
+     "x": 0.8,
+     "level": 3
+    },
+    {
+     "x": 0.9,
+     "level": 3
+    },
+    {
+     "x": 1.0,
+     "level": 3
+    }
+   ]
+  },
+  "workload": {
+   "documented": 1.5,
+   "rows": [
+    {
+     "x": 1.0,
+     "level": 1
+    },
+    {
+     "x": 1.117,
+     "level": 1
+    },
+    {
+     "x": 1.226,
+     "level": 1
+    },
+    {
+     "x": 1.33,
+     "level": 1
+    },
+    {
+     "x": 1.429,
+     "level": 1
+    },
+    {
+     "x": 1.522,
+     "level": 2
+    },
+    {
+     "x": 1.61,
+     "level": 2
+    },
+    {
+     "x": 1.694,
+     "level": 2
+    },
+    {
+     "x": 1.774,
+     "level": 2
+    },
+    {
+     "x": 1.85,
+     "level": 2
+    },
+    {
+     "x": 1.923,
+     "level": 2
+    },
+    {
+     "x": 1.992,
+     "level": 2
+    },
+    {
+     "x": 2.059,
+     "level": 3
+    },
+    {
+     "x": 2.122,
+     "level": 3
+    },
+    {
+     "x": 2.183,
+     "level": 3
+    },
+    {
+     "x": 2.241,
+     "level": 3
+    },
+    {
+     "x": 2.297,
+     "level": 3
+    },
+    {
+     "x": 2.351,
+     "level": 3
+    },
+    {
+     "x": 2.403,
+     "level": 3
+    },
+    {
+     "x": 2.452,
+     "level": 3
+    },
+    {
+     "x": 2.5,
+     "level": 3
+    }
+   ]
+  }
+ },
+ "heldout_f1": [
+  {
+   "moment": "Halfway",
+   "predictor": "Delay risk not low",
+   "f1": 0.7062
+  },
+  {
+   "moment": "Halfway",
+   "predictor": "Flag every sprint",
+   "f1": 0.6567
+  },
+  {
+   "moment": "Three-quarters",
+   "predictor": "Delay risk not low",
+   "f1": 0.756
+  },
+  {
+   "moment": "Three-quarters",
+   "predictor": "Delay risk high or worse",
+   "f1": 0.8027
+  },
+  {
+   "moment": "Three-quarters",
+   "predictor": "Flag every sprint",
+   "f1": 0.6567
+  },
+  {
+   "moment": "Sprint end",
+   "predictor": "Delay risk not low",
+   "f1": 0.7116
+  },
+  {
+   "moment": "Sprint end",
+   "predictor": "Tuned logistic model",
+   "f1": 0.5929
+  },
+  {
+   "moment": "Sprint end",
+   "predictor": "Flag every sprint",
+   "f1": 0.6567
+  }
+ ],
+ "pr": {
+  "Halfway": {
+   "n": 270,
+   "tp": 119,
+   "fp": 86,
+   "fn": 13,
+   "tn": 52,
+   "precision": 0.5805,
+   "recall": 0.9015,
+   "f1": 0.7062,
+   "accuracy": 0.6333,
+   "specificity": 0.3768,
+   "flag_rate": 0.7593
+  },
+  "Three-quarters": {
+   "n": 270,
+   "tp": 127,
+   "fp": 77,
+   "fn": 5,
+   "tn": 61,
+   "precision": 0.6225,
+   "recall": 0.9621,
+   "f1": 0.756,
+   "accuracy": 0.6963,
+   "specificity": 0.442,
+   "flag_rate": 0.7556
+  },
+  "Sprint end": {
+   "n": 270,
+   "tp": 132,
+   "fp": 107,
+   "fn": 0,
+   "tn": 31,
+   "precision": 0.5523,
+   "recall": 1.0,
+   "f1": 0.7116,
+   "accuracy": 0.6037,
+   "specificity": 0.2246,
+   "flag_rate": 0.8852
+  }
+ },
+ "forest": [
+  {
+   "label": "Halfway: system vs flag every sprint",
+   "f1_difference": 0.0495,
+   "ci_95": [
+    0.0061,
+    0.094
+   ],
+   "share_of_resamples_a_better": 0.9875,
+   "p": 1e-06
+  },
+  {
+   "label": "Three-quarters: system vs flag every sprint",
+   "f1_difference": 0.0993,
+   "ci_95": [
+    0.0485,
+    0.148
+   ],
+   "share_of_resamples_a_better": 1.0,
+   "p": 0.0
+  },
+  {
+   "label": "Sprint end: system vs flag every sprint",
+   "f1_difference": 0.0549,
+   "ci_95": [
+    0.0295,
+    0.0802
+   ],
+   "share_of_resamples_a_better": 1.0,
+   "p": 0.0
+  },
+  {
+   "label": "Sprint end: system vs tuned model",
+   "f1_difference": 0.1187,
+   "ci_95": [
+    -0.0247,
+    0.2914
+   ],
+   "share_of_resamples_a_better": 0.943,
+   "p": 0.782556
+  }
+ ],
+ "auc": [
+  {
+   "checkpoint": "Halfway",
+   "system": 0.7916,
+   "open_share": 0.8018
+  },
+  {
+   "checkpoint": "Three-quarters",
+   "system": 0.8744,
+   "open_share": 0.8814
+  }
+ ],
+ "collapse": {
+  "tuned": {
+   "cv_f1": 0.816,
+   "cv_auc": 0.887,
+   "heldout_f1": 0.5929,
+   "heldout_auc": 0.6575
+  },
+  "rule_heldout_f1": 0.7116,
+  "rule_all_f1": 0.7728,
+  "bootstrap_ci": [
+   0.6096025514952961,
+   0.8136130882277636
+  ]
+ },
+ "confusion": {
+  "Halfway": {
+   "tp": 119,
+   "fp": 86,
+   "fn": 13,
+   "tn": 52
+  },
+  "Three-quarters": {
+   "tp": 127,
+   "fp": 77,
+   "fn": 5,
+   "tn": 61
+  },
+  "Sprint end": {
+   "tp": 132,
+   "fp": 107,
+   "fn": 0,
+   "tn": 31
+  },
+  "Sprint end, tuned model": {
+   "tp": 75,
+   "fp": 46,
+   "fn": 57,
+   "tn": 92
+  }
+ },
+ "calibration": {
+  "brier_all987": 0.3455,
+  "auc_end_all987": 0.5811
+ },
+ "rebalance": {
+  "workload_recommendations": 1808,
+  "with_moves": 1524,
+  "without_moves": 284,
+  "severity_improved": {
+   "ok": 943,
+   "total": 1524,
+   "rate": 0.6188
+  },
+  "peak_drop_points": {
+   "mean": 9.49,
+   "median": 6.0
+  },
+  "transitions": {
+   "critical->critical": 519,
+   "critical->high": 390,
+   "critical->low": 45,
+   "critical->medium": 153,
+   "high->high": 52,
+   "high->low": 128,
+   "high->medium": 155,
+   "medium->low": 72,
+   "medium->medium": 10
+  }
+ },
+ "coverage": {
+  "delay": 1743,
+  "dependency": 33,
+  "silent_member": 779,
+  "workload": 1808,
+  "knowledge": 0,
+  "coordination": 0
+ },
+ "delay_via_api": {
+  "end.all": {
+   "n": 987,
+   "tp": 580,
+   "fp": 341,
+   "fn": 0,
+   "tn": 66,
+   "precision": 0.6298,
+   "recall": 1.0,
+   "f1": 0.7728,
+   "accuracy": 0.6545
+  },
+  "end.holdout": {
+   "n": 270,
+   "tp": 132,
+   "fp": 107,
+   "fn": 0,
+   "tn": 31,
+   "precision": 0.5523,
+   "recall": 1.0,
+   "f1": 0.7116,
+   "accuracy": 0.6037
+  },
+  "end.tuning": {
+   "n": 717,
+   "tp": 448,
+   "fp": 234,
+   "fn": 0,
+   "tn": 35,
+   "precision": 0.6569,
+   "recall": 1.0,
+   "f1": 0.7929,
+   "accuracy": 0.6736
+  },
+  "mid.all": {
+   "n": 987,
+   "tp": 555,
+   "fp": 267,
+   "fn": 25,
+   "tn": 140,
+   "precision": 0.6752,
+   "recall": 0.9569,
+   "f1": 0.7917,
+   "accuracy": 0.7042
+  },
+  "mid.holdout": {
+   "n": 270,
+   "tp": 119,
+   "fp": 86,
+   "fn": 13,
+   "tn": 52,
+   "precision": 0.5805,
+   "recall": 0.9015,
+   "f1": 0.7062,
+   "accuracy": 0.6333
+  },
+  "mid.tuning": {
+   "n": 717,
+   "tp": 436,
+   "fp": 181,
+   "fn": 12,
+   "tn": 88,
+   "precision": 0.7066,
+   "recall": 0.9732,
+   "f1": 0.8188,
+   "accuracy": 0.7308
+  }
+ },
+ "tokens": {
+  "sweep": [
+   {
+    "tasks": 13,
+    "graph": 266,
+    "naive": 1050
+   },
+   {
+    "tasks": 53,
+    "graph": 386,
+    "naive": 4695
+   },
+   {
+    "tasks": 203,
+    "graph": 389,
+    "naive": 18901
+   },
+   {
+    "tasks": 1003,
+    "graph": 389,
+    "naive": 94724
+   },
+   {
+    "tasks": 2003,
+    "graph": 390,
+    "naive": 189834
+   }
+  ],
+  "remeasured_naive_at_2003": 200916
+ },
+ "pipeline_latency": {
+  "all": {
+   "n": 1974,
+   "p50_ms": 50.2,
+   "p95_ms": 72.8,
+   "max_ms": 670.8
+  },
+  "<25 tasks": {
+   "n": 1129,
+   "p50_ms": 47.9,
+   "p95_ms": 65.8
+  },
+  "25-49": {
+   "n": 726,
+   "p50_ms": 52.7,
+   "p95_ms": 74.1
+  },
+  "50-99": {
+   "n": 115,
+   "p50_ms": 61.9,
+   "p95_ms": 89.0
+  },
+  "100+": {
+   "n": 4,
+   "p50_ms": 80.3,
+   "p95_ms": 83.9
+  }
+ },
+ "api_latency": {
+  "sign in": {
+   "n": 15,
+   "p50_ms": 390.4,
+   "p95_ms": 400.0,
+   "max_ms": 401.5
+  },
+  "workspace (project list)": {
+   "n": 15,
+   "p50_ms": 9.7,
+   "p95_ms": 10.5,
+   "max_ms": 12.3
+  },
+  "project": {
+   "n": 15,
+   "p50_ms": 7.7,
+   "p95_ms": 9.5,
+   "max_ms": 10.1
+  },
+  "task board (30 tasks)": {
+   "n": 15,
+   "p50_ms": 13.7,
+   "p95_ms": 14.7,
+   "max_ms": 24.1
+  },
+  "dependencies": {
+   "n": 15,
+   "p50_ms": 9.7,
+   "p95_ms": 11.9,
+   "max_ms": 12.3
+  },
+  "sprints": {
+   "n": 15,
+   "p50_ms": 11.3,
+   "p95_ms": 13.7,
+   "max_ms": 14.1
+  },
+  "team": {
+   "n": 15,
+   "p50_ms": 14.3,
+   "p95_ms": 16.8,
+   "max_ms": 16.9
+  },
+  "dashboard": {
+   "n": 15,
+   "p50_ms": 12.2,
+   "p95_ms": 15.5,
+   "max_ms": 15.6
+  },
+  "task discussion": {
+   "n": 15,
+   "p50_ms": 11.0,
+   "p95_ms": 12.6,
+   "max_ms": 12.7
+  },
+  "create task": {
+   "n": 15,
+   "p50_ms": 25.4,
+   "p95_ms": 28.6,
+   "max_ms": 29.1
+  },
+  "edit task": {
+   "n": 15,
+   "p50_ms": 22.0,
+   "p95_ms": 24.7,
+   "max_ms": 25.0
+  },
+  "move task": {
+   "n": 15,
+   "p50_ms": 22.4,
+   "p95_ms": 24.9,
+   "max_ms": 25.7
+  },
+  "delete task": {
+   "n": 15,
+   "p50_ms": 23.2,
+   "p95_ms": 25.7,
+   "max_ms": 27.0
+  },
+  "run analysis (backend + AI service)": {
+   "n": 10,
+   "p50_ms": 715.1,
+   "p95_ms": 753.9,
+   "max_ms": 753.9
+  },
+  "analysis history": {
+   "n": 15,
+   "p50_ms": 24.1,
+   "p95_ms": 41.9,
+   "max_ms": 107.1
+  }
+ },
+ "llm": {
+  "kappa": 0.9533,
+  "kappa_n": 37,
+  "kappa_by_type": {
+   "coordination": {
+    "n": 1,
+    "kappa": 1.0
+   },
+   "delay": {
+    "n": 1,
+    "kappa": 1.0
+   },
+   "dependency": {
+    "n": 14,
+    "kappa": 1.0
+   },
+   "knowledge": {
+    "n": 12,
+    "kappa": 0.8588
+   },
+   "silent_member": {
+    "n": 1,
+    "kappa": 1.0
+   },
+   "workload": {
+    "n": 8,
+    "kappa": 1.0
+   }
+  },
+  "validity_end_to_end": 0.4111,
+  "validity_range": [
+   0.54,
+   0.95
+  ],
+  "grounding": {
+   "stripped": 200,
+   "trials": 200
+  },
+  "ablation": {
+   "graph_f1": 1.0,
+   "naive_f1": 0.9474,
+   "n": 36
+  }
+ },
+ "specialists": {
+  "Halfway": {
+   "planning": {
+    "n": 270,
+    "tp": 0,
+    "fp": 0,
+    "fn": 132,
+    "tn": 138,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "accuracy": 0.5111
+   },
+   "progress": {
+    "n": 270,
+    "tp": 121,
+    "fp": 87,
+    "fn": 11,
+    "tn": 51,
+    "precision": 0.5817,
+    "recall": 0.9167,
+    "f1": 0.7118,
+    "accuracy": 0.637
+   },
+   "workload": {
+    "n": 270,
+    "tp": 80,
+    "fp": 64,
+    "fn": 52,
+    "tn": 74,
+    "precision": 0.5556,
+    "recall": 0.6061,
+    "f1": 0.5797,
+    "accuracy": 0.5704
+   },
+   "risk": {
+    "n": 270,
+    "tp": 119,
+    "fp": 86,
+    "fn": 13,
+    "tn": 52,
+    "precision": 0.5805,
+    "recall": 0.9015,
+    "f1": 0.7062,
+    "accuracy": 0.6333
+   }
+  },
+  "Sprint end": {
+   "planning": {
+    "n": 270,
+    "tp": 0,
+    "fp": 0,
+    "fn": 132,
+    "tn": 138,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "accuracy": 0.5111
+   },
+   "progress": {
+    "n": 270,
+    "tp": 81,
+    "fp": 0,
+    "fn": 51,
+    "tn": 138,
+    "precision": 1.0,
+    "recall": 0.6136,
+    "f1": 0.7606,
+    "accuracy": 0.8111
+   },
+   "workload": {
+    "n": 270,
+    "tp": 81,
+    "fp": 65,
+    "fn": 51,
+    "tn": 73,
+    "precision": 0.5548,
+    "recall": 0.6136,
+    "f1": 0.5827,
+    "accuracy": 0.5704
+   },
+   "risk": {
+    "n": 270,
+    "tp": 132,
+    "fp": 107,
+    "fn": 0,
+    "tn": 31,
+    "precision": 0.5523,
+    "recall": 1.0,
+    "f1": 0.7116,
+    "accuracy": 0.6037
+   }
+  }
+ },
+ "code_coverage": {
+  "areas": {
+   "Backend: MVP API routes": 74.1,
+   "Backend: outside the MVP (meetings, admin, jobs)": 18.5,
+   "Backend: MVP models, schemas, services": 74.3,
+   "AI: agents, pipeline, LLM client": 69.0,
+   "AI: deferred agents (outside the MVP)": 63.2,
+   "AI: API and models": 86.5,
+   "AI: knowledge graph and metrics": 93.2
+  },
+  "backend_mvp": 74.2,
+  "backend_all": 60.1,
+  "ai_all": 80.8
+ },
+ "engineering": {
+  "tests": {
+   "backend": 79,
+   "ai_service": 75,
+   "frontend": 53
+  },
+  "role_checks": 170,
+  "ci_jobs": 7,
+  "demo_claims": 14,
+  "defects_fixed": 7
+ }
+}</script>
+<script>
+(function () {
+  "use strict";
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const NS = "http://www.w3.org/2000/svg";
+  const fmt = (v, d = 3) => Number(v).toFixed(d);
+  const int = (v) => Math.round(v).toLocaleString("en-US");
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  function el(tag, attrs = {}, parent) {
+    const n = document.createElementNS(NS, tag);
+    let style = "";
+    for (const [k, v] of Object.entries(attrs)) {
+      if (typeof v === "string" && v.includes("var(")) style += `${k}:${v};`;
+      else n.setAttribute(k, v);
+    }
+    if (style) n.setAttribute("style", style);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function text(parent, x, y, str, attrs = {}) {
+    const t = el("text", Object.assign({ x, y, fill: "var(--ink-2)", "font-size": 12, "font-family": "var(--sans)",
+      stroke: "var(--surface)", "stroke-width": 3, "stroke-linejoin": "round", "paint-order": "stroke" }, attrs), parent);
+    t.textContent = str;
+    return t;
+  }
+  // Horizontal bar: square at the baseline, 4px rounded data-end.
+  function hbar(x0, y, w, h) {
+    const r = Math.min(4, w / 2, h / 2);
+    if (w <= 0) return "";
+    return `M${x0},${y} H${x0 + w - r} Q${x0 + w},${y} ${x0 + w},${y + r} V${y + h - r} Q${x0 + w},${y + h} ${x0 + w - r},${y + h} H${x0} Z`;
+  }
+
+  // ---- tooltip (textContent only)
+  const tip = document.getElementById("tip");
+  function showTip(evt, title, rows) {
+    tip.replaceChildren();
+    const t = document.createElement("div"); t.className = "t"; t.textContent = title; tip.appendChild(t);
+    for (const r of rows) {
+      const row = document.createElement("div"); row.className = "r";
+      const lab = document.createElement("span");
+      if (r.color) { const k = document.createElement("i"); k.className = "key line"; k.style.background = r.color; lab.appendChild(k); }
+      lab.appendChild(document.createTextNode(r.label));
+      const val = document.createElement("b"); val.textContent = r.value;
+      row.append(lab, val); tip.appendChild(row);
+    }
+    tip.hidden = false;
+    let x, y;
+    if (evt && evt.clientX !== undefined && evt.type !== "focus") { x = evt.clientX; y = evt.clientY; }
+    else { const b = evt.target.getBoundingClientRect(); x = b.left + b.width / 2; y = b.top; }
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.min(window.innerWidth - w - 8, Math.max(8, x + 14)) + "px";
+    tip.style.top = Math.max(8, (y - h - 12 < 8 ? y + 16 : y - h - 12)) + "px";
+  }
+  const hideTip = () => { tip.hidden = true; };
+  function hover(node, title, rows) {
+    node.setAttribute("class", "hit");
+    node.setAttribute("tabindex", "0");
+    node.setAttribute("role", "img");
+    node.setAttribute("aria-label", title + ": " + rows.map((r) => `${r.label} ${r.value}`).join(", "));
+    const on = (e) => showTip(e, title, rows);
+    node.addEventListener("pointermove", on);
+    node.addEventListener("focus", on);
+    node.addEventListener("pointerleave", hideTip);
+    node.addEventListener("blur", hideTip);
+  }
+
+  // ---- tables (the always-available view)
+  function table(id, head, rows, numeric = []) {
+    const t = document.createElement("table");
+    const tr = document.createElement("tr");
+    head.forEach((h, i) => { const th = document.createElement("th"); th.textContent = h; if (numeric.includes(i)) th.className = "num"; tr.appendChild(th); });
+    const thead = document.createElement("thead"); thead.appendChild(tr); t.appendChild(thead);
+    const tb = document.createElement("tbody");
+    for (const r of rows) {
+      const row = document.createElement("tr");
+      r.forEach((c, i) => { const td = document.createElement("td"); td.textContent = c; if (numeric.includes(i)) td.className = "num"; row.appendChild(td); });
+      tb.appendChild(row);
+    }
+    t.appendChild(tb);
+    document.getElementById(id).replaceChildren(t);
+  }
+
+  // ---- responsive mounting
+  const renderers = [];
+  function mount(id, draw) {
+    const host = document.getElementById(id);
+    const run = () => { const w = Math.max(280, Math.floor(host.clientWidth)); host.replaceChildren(draw(w)); };
+    renderers.push(run); run();
+  }
+  let pending;
+  new ResizeObserver(() => { cancelAnimationFrame(pending); pending = requestAnimationFrame(() => renderers.forEach((r) => r())); })
+    .observe(document.querySelector(".wrap"));
+
+  function svg(w, h) { return el("svg", { viewBox: `0 0 ${w} ${h}`, width: w, height: h, role: "group" }); }
+  function xgrid(s, x0, x1, y0, y1, ticks, sx, label = (v) => v) {
+    // Narrow plots keep every other tick so labels never touch.
+    const spacing = (x1 - x0) / Math.max(1, ticks.length - 1);
+    const step = Math.max(1, Math.ceil(52 / spacing));
+    ticks = ticks.filter((_, i) => i % step === 0);
+    for (const t of ticks) {
+      const x = sx(t);
+      el("line", { x1: x, x2: x, y1: y0, y2: y1, stroke: "var(--grid)", "stroke-width": 1 }, s);
+      const anchor = Math.abs(x - x0) < 1 ? "start" : Math.abs(x - x1) < 1 ? "end" : "middle";
+      text(s, x, y1 + 16, label(t), { "text-anchor": anchor, fill: "var(--muted)", "font-size": 11 });
+    }
+  }
+
+  // ================= header tiles
+  const tile = (host, label, value, note) => {
+    const d = document.createElement("div"); d.className = "tile";
+    const a = document.createElement("span"); a.className = "label"; a.textContent = label;
+    const b = document.createElement("span"); b.className = "value"; b.textContent = value;
+    const c = document.createElement("span"); c.className = "note"; c.textContent = note;
+    d.append(a, b, c); document.getElementById(host).appendChild(d);
+  };
+  document.getElementById("nSprints").textContent = int(D.dataset.sprints);
+  const failed = D.checks.reduce((n, c) => n + (c.total - c.ok), 0);
+  tile("tiles", "Real-sprint analyses", int(D.dataset.runs), `${failed} failed checks across ${D.checks.length} kinds of check`);
+  const c50 = D.auc[0];
+  tile("tiles", "Warning halfway through a sprint", "AUC " + fmt(c50.system, 3), "on 22 projects it never saw; F1 " + fmt(D.pr["Halfway"].f1, 3));
+  tile("tiles", "Fix predictions that held", `${int(D.rebalance.with_moves)} / ${int(D.rebalance.with_moves)}`, `severity dropped a level in ${Math.round(D.rebalance.severity_improved.rate * 100)}%`);
+  tile("tiles", "Prompt saving at 2,003 tasks", "487×", "1.47× growth while the project grows 154×");
+
+  // ================= 1. ledger
+  const LABELS = {
+    "coordinator.completed": ["Coordinator", "Analysis completes"],
+    "coordinator.all_specialists": ["Coordinator", "Returns all five specialists"],
+    "coordinator.deterministic": ["Coordinator", "Same sprint, same answer"],
+    "planning.figures_match": ["Planning", "Figures match an independent recount"],
+    "planning.schema_valid": ["Planning", "Output valid"],
+    "planning.no_error": ["Planning", "No error output"],
+    "progress.completion_matches": ["Progress", "Completion rate matches recount"],
+    "progress.stalled_matches": ["Progress", "Stalled tasks match recount"],
+    "progress.schema_valid": ["Progress", "Output valid"],
+    "progress.no_error": ["Progress", "No error output"],
+    "workload.figures_match": ["Workload", "Team, overloaded and under-used match recount"],
+    "workload.schema_valid": ["Workload", "Output valid"],
+    "workload.no_error": ["Workload", "No error output"],
+    "risk.matches_direct_computation": ["Risk", "Scores match a direct graph computation"],
+    "risk.findings_cite_evidence": ["Risk", "Every finding cites evidence"],
+    "risk.citations_resolve": ["Risk", "Every cited node is real"],
+    "evidence.references_resolve": ["Risk", "Every evidence reference resolves"],
+    "risk.schema_valid": ["Risk", "Output valid"],
+    "risk.no_error": ["Risk", "No error output"],
+    "recommendation.grounded_in_finding": ["Recommendation", "Grounded in an actual finding"],
+    "recommendation.covers_medium_plus_risks": ["Recommendation", "Covers every medium+ risk"],
+    "recommendation.schema_valid": ["Recommendation", "Output valid"],
+    "recommendation.no_error": ["Recommendation", "No error output"],
+    "rebalance.predicted_peak_holds": ["Recommendation", "Predicted heaviest load = actual"],
+    "rebalance.predicted_severity_holds": ["Recommendation", "Predicted severity = actual"],
+    "rebalance.moves_are_valid": ["Recommendation", "Every move is valid"],
+    "rebalance.no_move_raises_peak": ["Recommendation", "No move raises the heaviest load"],
+    "rebalance.before_matches_board": ["Recommendation", "Starting load matches the board"],
+    "rebalance.effect_stated": ["Recommendation", "Effect stated with every move"],
+  };
+  const groups = {};
+  for (const c of D.checks) {
+    const [g, name] = LABELS[c.id] || ["Other", c.id];
+    (groups[g] = groups[g] || []).push({ name, ...c });
+  }
+  const ledger = document.getElementById("ledger");
+  for (const g of ["Coordinator", "Planning", "Progress", "Workload", "Risk", "Recommendation"]) {
+    if (!groups[g]) continue;
+    const box = document.createElement("div"); box.className = "group";
+    const h = document.createElement("h3"); h.textContent = g + " agent"; box.appendChild(h);
+    for (const c of groups[g]) {
+      const row = document.createElement("div"); row.className = "row";
+      const a = document.createElement("span"); a.textContent = c.name;
+      const b = document.createElement("span"); b.className = "n";
+      const pill = document.createElement("span"); pill.className = "pill";
+      pill.textContent = c.ok === c.total ? "pass" : "fail";
+      b.textContent = `${int(c.ok)} / ${int(c.total)} `; b.appendChild(pill);
+      row.append(a, b); box.appendChild(row);
+    }
+    ledger.appendChild(box);
+  }
+
+  // thresholds: three small multiples
+  const LEVELS = ["none", "low", "medium", "high", "critical"];
+  const TH = [
+    { key: "overdue", title: "Overdue ratio", fmtx: (v) => fmt(v, 2) },
+    { key: "silent", title: "Silent-member ratio", fmtx: (v) => fmt(v, 1) },
+    { key: "workload", title: "Workload skew", fmtx: (v) => fmt(v, 2) },
+  ];
+  const thHost = document.getElementById("thresholds");
+  for (const t of TH) {
+    const div = document.createElement("div"); div.className = "chart"; div.id = "th-" + t.key; thHost.appendChild(div);
+    const series = D.thresholds[t.key];
+    mount(div.id, (w) => {
+      const h = 190, m = { l: 58, r: 12, t: 22, b: 36 };
+      const s = svg(w, h);
+      const xs = series.rows.map((r) => r.x);
+      const x0 = Math.min(...xs), x1 = Math.max(...xs);
+      const sx = (v) => m.l + (v - x0) / (x1 - x0) * (w - m.l - m.r);
+      const maxL = Math.max(...series.rows.map((r) => r.level), 3);
+      const sy = (l) => h - m.b - l / maxL * (h - m.t - m.b);
+      text(s, m.l, 14, t.title, { fill: "var(--ink)", "font-weight": 600 });
+      for (let l = 0; l <= maxL; l++) {
+        el("line", { x1: m.l, x2: w - m.r, y1: sy(l), y2: sy(l), stroke: "var(--grid)" }, s);
+        text(s, m.l - 8, sy(l) + 4, LEVELS[l], { "text-anchor": "end", fill: "var(--muted)", "font-size": 11 });
+      }
+      const ticks = [x0, (x0 + x1) / 2, x1];
+      ticks.forEach((v, k) => text(s, sx(v), h - m.b + 16, t.fmtx(v), { "text-anchor": ["start", "middle", "end"][k], fill: "var(--muted)", "font-size": 11 }));
+      // documented threshold
+      const tx = sx(series.documented);
+      el("line", { x1: tx, x2: tx, y1: m.t, y2: h - m.b, stroke: "var(--ink-2)", "stroke-width": 1 }, s);
+      text(s, tx + 4, m.t + 10, "documented " + series.documented.toFixed(2), { fill: "var(--ink-2)", "font-size": 11 });
+      let d = "";
+      series.rows.forEach((r, i) => {
+        const x = sx(r.x), y = sy(r.level);
+        if (i === 0) d += `M${x},${y}`; else d += ` H${x} V${y}`;
+      });
+      el("path", { d, fill: "none", stroke: "var(--s1)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, s);
+      // mark the first reading at or past the documented value
+      const flip = series.rows.find((r, i) => i > 0 && r.level >= 2 && series.rows[i - 1].level < 2);
+      if (flip) {
+        const g = el("g", {}, s);
+        el("circle", { cx: sx(flip.x), cy: sy(flip.level), r: 12, fill: "transparent" }, g);
+        el("circle", { class: "mark", cx: sx(flip.x), cy: sy(flip.level), r: 4.5, fill: "var(--s1)", stroke: "var(--surface)", "stroke-width": 2 }, g);
+        const prev = series.rows[series.rows.indexOf(flip) - 1];
+        hover(g, t.title, [{ label: "Last reading below", value: `${t.fmtx(prev.x)} → ${LEVELS[prev.level]}` }, { label: "First reading above", value: `${t.fmtx(flip.x)} → ${LEVELS[flip.level]}` }]);
+      }
+      return s;
+    });
+  }
+  table("thresholdsTable", ["Signal", "Documented threshold", "Last reading below", "First reading above"],
+    TH.map((t) => {
+      const rows = D.thresholds[t.key].rows;
+      const i = rows.findIndex((r, k) => k > 0 && r.level >= 2 && rows[k - 1].level < 2);
+      return [t.title, D.thresholds[t.key].documented.toFixed(2), `${t.fmtx(rows[i - 1].x)} (${LEVELS[rows[i - 1].level]})`, `${t.fmtx(rows[i].x)} (${LEVELS[rows[i].level]})`];
+    }), [1]);
+
+  // ================= 2. prediction
+  const COLOR = { "Delay risk not low": "var(--s1)", "Delay risk high or worse": "var(--s1)", "Tuned logistic model": "var(--s2)", "Flag every sprint": "var(--base)" };
+  const NAME = { "Delay risk not low": "TeamSync (any warning)", "Delay risk high or worse": "TeamSync (high+ only)", "Tuned logistic model": "Tuned logistic model", "Flag every sprint": "Flag every sprint" };
+  mount("f1chart", (w) => {
+    const narrow = w < 460;
+    const m = { l: narrow ? 128 : 168, r: 44, t: 8 };
+    const bh = 16, gap = 6, ghead = 24;
+    const moments = ["Halfway", "Three-quarters", "Sprint end"];
+    let y = m.t; const layout = [];
+    for (const mo of moments) {
+      layout.push({ head: mo, y }); y += ghead;
+      for (const r of D.heldout_f1.filter((r) => r.moment === mo)) { layout.push({ row: r, y }); y += bh + gap; }
+      y += 6;
+    }
+    const h = y + 26;
+    const s = svg(w, h);
+    const sx = (v) => m.l + v * (w - m.l - m.r);
+    xgrid(s, m.l, w - m.r, m.t, h - 26, [0, 0.2, 0.4, 0.6, 0.8, 1], sx, (v) => v.toFixed(1));
+    for (const it of layout) {
+      if (it.head) { text(s, 0, it.y + 15, it.head, { fill: "var(--ink)", "font-weight": 600 }); continue; }
+      const r = it.row;
+      text(s, 10, it.y + 12, NAME[r.predictor], { "font-size": narrow ? 11 : 12 });
+      const g = el("g", {}, s);
+      el("rect", { x: m.l, y: it.y - 3, width: w - m.l - m.r + 40, height: bh + 6, fill: "transparent" }, g);
+      el("path", { class: "mark", d: hbar(sx(0), it.y, sx(r.f1) - sx(0), bh), fill: COLOR[r.predictor] }, g);
+      text(g, sx(r.f1) + 6, it.y + 12, fmt(r.f1, 3), { fill: "var(--ink)", "font-variant-numeric": "tabular-nums" });
+      hover(g, `${r.moment} · ${NAME[r.predictor]}`, [{ label: "F1", value: fmt(r.f1, 3), color: COLOR[r.predictor] }]);
+    }
+    return s;
+  });
+  table("f1table", ["When", "Predictor", "F1"], D.heldout_f1.map((r) => [r.moment, NAME[r.predictor], fmt(r.f1, 3)]), [2]);
+
+  mount("forest", (w) => {
+    const rows = D.forest, rowH = 66, m = { l: 12, r: 16, t: 10 };
+    const h = m.t + rows.length * rowH + 30;
+    const s = svg(w, h);
+    const lo = -0.05, hi = 0.30;
+    const sx = (v) => m.l + (v - lo) / (hi - lo) * (w - m.l - m.r);
+    xgrid(s, m.l, w - m.r, m.t, h - 30, [-0.05, 0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30], sx, (v) => (v > 0 ? "+" : "") + v.toFixed(2));
+    el("line", { x1: sx(0), x2: sx(0), y1: m.t, y2: h - 30, stroke: "var(--ink-2)", "stroke-width": 1.5 }, s);
+    rows.forEach((r, i) => {
+      const y0 = m.t + i * rowH;
+      const sig = r.ci_95[0] > 0;
+      const col = sig ? "var(--s1)" : "var(--base)";
+      const pv = r.p < 0.001 ? "p < 0.001" : "p = " + r.p.toFixed(2);
+      text(s, m.l, y0 + 14, r.label, { fill: "var(--ink)", "font-size": 12 });
+      const g = el("g", {}, s);
+      const cy = y0 + 46;
+      text(s, m.l, y0 + 29, `${r.f1_difference > 0 ? "+" : ""}${fmt(r.f1_difference, 3)}  [${fmt(r.ci_95[0], 3)}, ${fmt(r.ci_95[1], 3)}]  ${pv}`, { "font-size": 11.5, fill: "var(--muted)" });
+      el("rect", { x: m.l, y: y0 + 34, width: w - m.l - m.r, height: 24, fill: "transparent" }, g);
+      el("line", { class: "mark", x1: sx(r.ci_95[0]), x2: sx(r.ci_95[1]), y1: cy, y2: cy, stroke: col, "stroke-width": 2, "stroke-linecap": "round" }, g);
+      [r.ci_95[0], r.ci_95[1]].forEach((v) => el("line", { x1: sx(v), x2: sx(v), y1: cy - 5, y2: cy + 5, stroke: col, "stroke-width": 2, "stroke-linecap": "round" }, g));
+      el("circle", { class: "mark", cx: sx(r.f1_difference), cy, r: 5, fill: col, stroke: "var(--surface)", "stroke-width": 2 }, g);
+      hover(g, r.label, [
+        { label: "F1 difference", value: (r.f1_difference > 0 ? "+" : "") + fmt(r.f1_difference, 3), color: col },
+        { label: "95% interval", value: `${fmt(r.ci_95[0], 3)} to ${fmt(r.ci_95[1], 3)}` },
+        { label: "McNemar", value: pv },
+        { label: "Verdict", value: sig ? "real difference" : "cannot be separated" },
+      ]);
+    });
+    return s;
+  });
+  table("forestTable", ["Comparison", "F1 gain", "95% interval", "McNemar p"],
+    D.forest.map((r) => [r.label, (r.f1_difference > 0 ? "+" : "") + fmt(r.f1_difference, 4), `[${fmt(r.ci_95[0], 3)}, ${fmt(r.ci_95[1], 3)}]`, r.p < 0.001 ? "< 0.001" : fmt(r.p, 3)]), [1, 3]);
+
+  mount("auc", (w) => {
+    const m = { l: 110, r: 112, t: 10 }, rowH = 46;
+    const h = m.t + D.auc.length * rowH + 30;
+    const s = svg(w, h);
+    const lo = 0.5, hi = 1.0;
+    const sx = (v) => m.l + (v - lo) / (hi - lo) * (w - m.l - m.r);
+    xgrid(s, m.l, w - m.r, m.t, h - 30, [0.5, 0.6, 0.7, 0.8, 0.9, 1.0], sx, (v) => v.toFixed(1));
+    D.auc.forEach((r, i) => {
+      const cy = m.t + i * rowH + 22;
+      text(s, 0, cy + 4, r.checkpoint, { fill: "var(--ink)" });
+      el("line", { x1: sx(Math.min(r.system, r.open_share)), x2: sx(Math.max(r.system, r.open_share)), y1: cy, y2: cy, stroke: "var(--axis)", "stroke-width": 2 }, s);
+      [["open_share", "var(--base)", "Share of work still open"], ["system", "var(--s1)", "TeamSync projection"]].forEach(([k, col, name]) => {
+        const g = el("g", {}, s);
+        el("circle", { cx: sx(r[k]), cy, r: 12, fill: "transparent" }, g);
+        el("circle", { class: "mark", cx: sx(r[k]), cy, r: 5.5, fill: col, stroke: "var(--surface)", "stroke-width": 2 }, g);
+        hover(g, `${r.checkpoint} · ${name}`, [{ label: "AUC", value: fmt(r[k], 3), color: col }]);
+      });
+      text(s, sx(Math.max(r.system, r.open_share)) + 12, cy + 4, `${fmt(r.system, 3)} vs ${fmt(r.open_share, 3)}`, { "font-size": 11.5, "font-variant-numeric": "tabular-nums" });
+    });
+    return s;
+  });
+  table("aucTable", ["Checkpoint", "TeamSync projection", "Share of work still open"], D.auc.map((r) => [r.checkpoint, fmt(r.system, 4), fmt(r.open_share, 4)]), [1, 2]);
+
+  mount("slope", (w) => {
+    const h = 250, m = { l: 44, r: 150, t: 20, b: 44 };
+    const s = svg(w, h);
+    const x0 = m.l + 30, x1 = w - m.r;
+    const lo = 0.5, hi = 0.9;
+    const sy = (v) => h - m.b - (v - lo) / (hi - lo) * (h - m.t - m.b);
+    for (const t of [0.5, 0.6, 0.7, 0.8, 0.9]) {
+      el("line", { x1: m.l, x2: w - m.r + 10, y1: sy(t), y2: sy(t), stroke: "var(--grid)" }, s);
+      text(s, m.l - 8, sy(t) + 4, t.toFixed(1), { "text-anchor": "end", fill: "var(--muted)", "font-size": 11 });
+    }
+    text(s, x0, h - m.b + 20, "9 tuning projects", { "text-anchor": "middle", fill: "var(--muted)", "font-size": 11 });
+    text(s, x1, h - m.b + 20, "22 unseen projects", { "text-anchor": "middle", fill: "var(--muted)", "font-size": 11 });
+    const series = [
+      { name: "Tuned logistic model", a: D.collapse.tuned.cv_f1, b: D.collapse.tuned.heldout_f1, col: "var(--s2)", aNote: "cross-validated" },
+      { name: "TeamSync risk agent", a: D.delay_via_api["end.tuning"].f1, b: D.collapse.rule_heldout_f1, col: "var(--s1)", aNote: "untuned" },
+    ];
+    for (const sr of series) {
+      const g = el("g", {}, s);
+      el("line", { class: "mark", x1: x0, x2: x1, y1: sy(sr.a), y2: sy(sr.b), stroke: sr.col, "stroke-width": 2, "stroke-linecap": "round" }, g);
+      [[x0, sr.a], [x1, sr.b]].forEach(([x, v]) => {
+        el("circle", { cx: x, cy: sy(v), r: 12, fill: "transparent" }, g);
+        el("circle", { class: "mark", cx: x, cy: sy(v), r: 5, fill: sr.col, stroke: "var(--surface)", "stroke-width": 2 }, g);
+      });
+      text(s, x1 + 12, sy(sr.b) + 4, `${fmt(sr.b, 3)} ${sr.name === "TeamSync risk agent" ? "TeamSync" : "tuned model"}`, { fill: "var(--ink)", "font-size": 12 });
+      hover(g, sr.name, [{ label: `Tuning projects (${sr.aNote})`, value: fmt(sr.a, 3), color: sr.col }, { label: "Unseen projects", value: fmt(sr.b, 3) }, { label: "Change", value: (sr.b - sr.a > 0 ? "+" : "") + fmt(sr.b - sr.a, 3) }]);
+    }
+    return s;
+  });
+  table("slopeTable", ["Predictor", "Tuning projects", "Unseen projects", "Change"],
+    [["Tuned logistic model (cross-validated on tuning)", fmt(D.collapse.tuned.cv_f1, 3), fmt(D.collapse.tuned.heldout_f1, 3), fmt(D.collapse.tuned.heldout_f1 - D.collapse.tuned.cv_f1, 3)],
+     ["TeamSync risk agent (no tuning)", fmt(D.delay_via_api["end.tuning"].f1, 3), fmt(D.collapse.rule_heldout_f1, 3), fmt(D.collapse.rule_heldout_f1 - D.delay_via_api["end.tuning"].f1, 3)],
+     ["Tuned model AUC", fmt(D.collapse.tuned.cv_auc, 3), fmt(D.collapse.tuned.heldout_auc, 3), fmt(D.collapse.tuned.heldout_auc - D.collapse.tuned.cv_auc, 3)]], [1, 2, 3]);
+
+  // confusion matrices
+  const cmHost = document.getElementById("cms");
+  for (const [name, c] of Object.entries(D.confusion)) {
+    const box = document.createElement("div"); box.className = "cm";
+    const h = document.createElement("h4"); h.textContent = name; box.appendChild(h);
+    const g = document.createElement("div"); g.className = "grid";
+    const cell = (cls, n, lab) => { const d = document.createElement("div"); d.className = "cell " + cls; const b = document.createElement("b"); b.textContent = int(n); const sp = document.createElement("span"); sp.textContent = lab; d.append(b, sp); return d; };
+    const hd = (t, cls) => { const d = document.createElement("div"); d.className = cls; d.textContent = t; return d; };
+    g.append(hd("", "hd"), hd("Warned", "hd"), hd("Not warned", "hd"),
+      hd("Late", "rh"), cell("ok", c.tp, "caught"), cell("err", c.fn, "missed"),
+      hd("On time", "rh"), cell("err", c.fp, "false alarm"), cell("ok", c.tn, "correctly quiet"));
+    box.appendChild(g);
+    const n = c.tp + c.fp + c.fn + c.tn;
+    const f = document.createElement("p"); f.className = "foot";
+    f.textContent = `Right ${Math.round((c.tp + c.tn) / n * 100)}% · caught ${Math.round(c.tp / (c.tp + c.fn) * 100)}% of late · ${Math.round(c.tn / (c.tn + c.fp) * 100)}% of on-time left alone`;
+    box.appendChild(f);
+    cmHost.appendChild(box);
+  }
+  document.getElementById("calib").textContent =
+    `Calibration: the verdict's confidence value has a Brier score of ${fmt(D.calibration.brier_all987, 3)} at sprint end on all 987 sprints ` +
+    `(0 is perfect, 0.25 is a coin toss) — read the warnings as flags, not as probabilities. Sprint-end AUC is ${fmt(D.calibration.auc_end_all987, 3)}, weak by construction: every task in a sprint shares one deadline.`;
+  table("cmTable", ["Predictor", "Caught", "Missed", "False alarms", "Correctly quiet", "Precision", "Recall", "Specificity"],
+    Object.entries(D.confusion).map(([name, c]) => [name, c.tp, c.fn, c.fp, c.tn, fmt(c.tp / (c.tp + c.fp), 3), fmt(c.tp / (c.tp + c.fn), 3), fmt(c.tn / (c.tn + c.fp), 3)].map(String)), [1, 2, 3, 4, 5, 6, 7]);
+
+  // each agent's own verdict
+  const AGENTS = [["risk", "Risk agent"], ["progress", "Progress agent"], ["workload", "Workload agent"], ["planning", "Planning agent"]];
+  mount("agentsChart", (w) => {
+    const narrow = w < 460;
+    const m = { l: narrow ? 118 : 150, r: 70, t: 8 }, bh = 16, gap = 6, ghead = 24;
+    let y = m.t; const layout = [];
+    for (const mode of ["Halfway", "Sprint end"]) {
+      layout.push({ head: mode, y }); y += ghead;
+      for (const [k, name] of AGENTS) { layout.push({ mode, k, name, y }); y += bh + gap; }
+      y += 6;
+    }
+    const h = y + 26;
+    const s = svg(w, h);
+    const sx = (v) => m.l + v * (w - m.l - m.r);
+    xgrid(s, m.l, w - m.r, m.t, h - 26, [0, 0.2, 0.4, 0.6, 0.8, 1], sx, (v) => v.toFixed(1));
+    for (const it of layout) {
+      if (it.head) { text(s, 0, it.y + 15, it.head, { fill: "var(--ink)", "font-weight": 600 }); continue; }
+      const c = D.specialists[it.mode][it.k];
+      const col = it.k === "risk" ? "var(--s1)" : "var(--base)";
+      text(s, 10, it.y + 12, it.name, { "font-size": narrow ? 11 : 12 });
+      const g = el("g", {}, s);
+      el("rect", { x: m.l, y: it.y - 3, width: w - m.l - m.r + 60, height: bh + 6, fill: "transparent" }, g);
+      if (c.f1 > 0) el("path", { class: "mark", d: hbar(sx(0), it.y, sx(c.f1) - sx(0), bh), fill: col }, g);
+      const flagged = c.tp + c.fp;
+      text(g, c.f1 > 0 ? sx(c.f1) + 6 : sx(0) + 4, it.y + 12, c.f1 > 0 ? fmt(c.f1, 3) : "never warns (0 of " + c.n + ")", { fill: c.f1 > 0 ? "var(--ink)" : "var(--muted)" });
+      hover(g, `${it.mode} · ${it.name}`, [{ label: "F1", value: fmt(c.f1, 3), color: col }, { label: "Precision", value: fmt(c.precision, 3) }, { label: "Recall", value: fmt(c.recall, 3) }, { label: "Sprints warned", value: `${flagged} of ${c.n}` }]);
+    }
+    return s;
+  });
+  table("agentsTable", ["When", "Agent", "Warned", "Precision", "Recall", "F1", "Accuracy"],
+    ["Halfway", "Sprint end"].flatMap((mode) => AGENTS.map(([k, name]) => { const c = D.specialists[mode][k]; return [mode, name, `${c.tp + c.fp} / ${c.n}`, fmt(c.precision, 3), fmt(c.recall, 3), fmt(c.f1, 3), fmt(c.accuracy, 3)]; })), [2, 3, 4, 5, 6]);
+
+  // ================= 3. fixes
+  const R = D.rebalance;
+  tile("fixTiles", "Predicted effect held", `${int(R.with_moves)} / ${int(R.with_moves)}`, "new heaviest load and new severity, both exact");
+  tile("fixTiles", "Severity dropped a level", Math.round(R.severity_improved.rate * 100) + "%", `${int(R.severity_improved.ok)} of ${int(R.with_moves)} sprints`);
+  tile("fixTiles", "Heaviest load reduced by", R.peak_drop_points.median + " points", `median; mean ${R.peak_drop_points.mean}`);
+  tile("fixTiles", "No helpful move existed", int(R.without_moves), `of ${int(R.workload_recommendations)} workload recommendations — none suggested`);
+
+  const SEV = ["low", "medium", "high", "critical"];
+  const SEVCOL = { low: "var(--good)", medium: "var(--warning)", high: "var(--serious)", critical: "var(--critical)" };
+  const trans = {};
+  for (const [k, v] of Object.entries(R.transitions)) { const [a, b] = k.split("->"); (trans[a] = trans[a] || {})[b] = v; }
+  const legend = document.getElementById("transLegend");
+  for (const l of SEV) { const sp = document.createElement("span"); const k = document.createElement("i"); k.className = "key"; k.style.background = SEVCOL[l]; sp.append(k, document.createTextNode("Ended " + l)); legend.appendChild(sp); }
+  mount("trans", (w) => {
+    const starts = ["critical", "high", "medium"].filter((a) => trans[a]);
+    const m = { l: 116, r: 8, t: 6 }, bh = 26, gap = 18;
+    const h = m.t + starts.length * (bh + gap) + 22;
+    const s = svg(w, h);
+    const sx = (p) => m.l + p * (w - m.l - m.r);
+    xgrid(s, m.l, w - m.r, m.t, h - 22, [0, 0.25, 0.5, 0.75, 1], sx, (v) => Math.round(v * 100) + "%");
+    starts.forEach((a, i) => {
+      const y = m.t + i * (bh + gap);
+      const total = Object.values(trans[a]).reduce((x, y2) => x + y2, 0);
+      text(s, 0, y + 12, "Started " + a, { fill: "var(--ink)" });
+      text(s, 0, y + 26, int(total) + " sprints", { fill: "var(--muted)", "font-size": 11 });
+      let acc = 0;
+      SEV.forEach((b) => {
+        const n = trans[a][b] || 0; if (!n) return;
+        const x = sx(acc / total), wd = sx((acc + n) / total) - x;
+        const g = el("g", {}, s);
+        el("rect", { class: "mark", x: x + (acc ? 1 : 0), y, width: Math.max(0, wd - (acc ? 1 : 0) - 1), height: bh, rx: 3, fill: SEVCOL[b] }, g);
+        const label = Math.round(n / total * 100) + "%";
+        if (wd > 38) text(g, x + wd / 2, y + 17, label, { "text-anchor": "middle", fill: b === "critical" ? "#ffffff" : "#0b0b0b", "font-weight": 600, "font-size": 11.5 });
+        hover(g, `Started ${a} → ended ${b}`, [{ label: "Sprints", value: int(n), color: SEVCOL[b] }, { label: "Share", value: label }]);
+        acc += n;
+      });
+    });
+    return s;
+  });
+  table("transTable", ["Started", "Ended low", "Ended medium", "Ended high", "Ended critical"],
+    ["critical", "high", "medium"].map((a) => [a, ...SEV.map((b) => String((trans[a] || {})[b] || 0))]), [1, 2, 3, 4]);
+
+  const COV = [["workload", "Workload"], ["delay", "Delay"], ["silent_member", "Silent members"], ["dependency", "Dependencies"], ["knowledge", "Knowledge concentration"], ["coordination", "Coordination"]];
+  mount("coverage", (w) => {
+    const m = { l: 160, r: 64, t: 6 }, bh = 18, gap = 12;
+    const h = m.t + COV.length * (bh + gap) + 22;
+    const s = svg(w, h);
+    const max = 2000;
+    const sx = (v) => m.l + v / max * (w - m.l - m.r);
+    xgrid(s, m.l, w - m.r, m.t, h - 22, [0, 500, 1000, 1500, 2000], sx, (v) => int(v));
+    COV.forEach(([k, name], i) => {
+      const y = m.t + i * (bh + gap), n = D.coverage[k] || 0;
+      text(s, 0, y + 13, name, { fill: "var(--ink)", "font-size": 12 });
+      const g = el("g", {}, s);
+      el("rect", { x: m.l, y: y - 4, width: w - m.l - m.r, height: bh + 8, fill: "transparent" }, g);
+      if (n) el("path", { class: "mark", d: hbar(m.l, y, sx(n) - m.l, bh), fill: "var(--s1)" }, g);
+      text(g, n ? sx(n) + 6 : m.l + 4, y + 13, n ? int(n) : "0 · never reached medium", { fill: n ? "var(--ink)" : "var(--muted)", "font-size": 12, "font-variant-numeric": "tabular-nums" });
+      hover(g, name, [{ label: "Recommendations made", value: int(n), color: "var(--s1)" }]);
+    });
+    return s;
+  });
+  table("coverageTable", ["Risk type", "Recommendations made (one per medium-or-worse case)"], COV.map(([k, name]) => [name, int(D.coverage[k] || 0)]), [1]);
+
+  // ================= 4. cost and speed
+  mount("tokens", (w) => {
+    const h = 260, m = { l: 52, r: 110, t: 14, b: 40 };
+    const s = svg(w, h);
+    const lx = (v) => Math.log10(v), sx = (v) => m.l + (lx(v) - 1) / (lx(3000) - 1) * (w - m.l - m.r);
+    const sy = (v) => h - m.b - (lx(v) - 2) / (lx(300000) - 2) * (h - m.t - m.b);
+    for (const t of [100, 1000, 10000, 100000]) {
+      el("line", { x1: m.l, x2: w - m.r, y1: sy(t), y2: sy(t), stroke: "var(--grid)" }, s);
+      text(s, m.l - 8, sy(t) + 4, t >= 1000 ? t / 1000 + "k" : String(t), { "text-anchor": "end", fill: "var(--muted)", "font-size": 11 });
+    }
+    for (const t of [10, 100, 1000]) text(s, sx(t), h - m.b + 16, t === 1000 ? "1,000 tasks" : String(t), { "text-anchor": t === 10 ? "start" : "middle", fill: "var(--muted)", "font-size": 11 });
+    const pts = D.tokens.sweep;
+    [["naive", "var(--base)"], ["graph", "var(--s1)"]].forEach(([k, col]) => {
+      el("path", { d: pts.map((p, i) => `${i ? "L" : "M"}${sx(p.tasks)},${sy(p[k])}`).join(" "), fill: "none", stroke: col, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, s);
+      pts.forEach((p) => el("circle", { cx: sx(p.tasks), cy: sy(p[k]), r: 4, fill: col, stroke: "var(--surface)", "stroke-width": 2 }, s));
+    });
+    const last = pts[pts.length - 1];
+    text(s, sx(last.tasks) + 10, sy(last.naive) + 4, int(last.naive), { fill: "var(--ink)", "font-variant-numeric": "tabular-nums" });
+    text(s, sx(last.tasks) + 10, sy(last.graph) + 4, int(last.graph) + " tokens", { fill: "var(--ink)" });
+    // the gap at the largest size
+    const gx = sx(last.tasks) - 18;
+    el("line", { x1: gx, x2: gx, y1: sy(last.naive) + 10, y2: sy(last.graph) - 10, stroke: "var(--axis)", "stroke-width": 1 }, s);
+    text(s, gx - 6, (sy(last.naive) + sy(last.graph)) / 2 + 4, Math.round(last.naive / last.graph) + "× smaller", { "text-anchor": "end", fill: "var(--ink)", "font-weight": 600, "font-size": 13 });
+    // crosshair hover over each project size
+    pts.forEach((p, i) => {
+      const left = i ? (sx(pts[i - 1].tasks) + sx(p.tasks)) / 2 : m.l;
+      const right = i < pts.length - 1 ? (sx(p.tasks) + sx(pts[i + 1].tasks)) / 2 : w - m.r;
+      const g = el("g", {}, s);
+      el("rect", { x: left, y: m.t, width: right - left, height: h - m.t - m.b, fill: "transparent" }, g);
+      hover(g, int(p.tasks) + " tasks", [{ label: "Whole project", value: int(p.naive), color: "var(--base)" }, { label: "TeamSync", value: int(p.graph), color: "var(--s1)" }, { label: "Ratio", value: Math.round(p.naive / p.graph) + "×" }]);
+    });
+    return s;
+  });
+  table("tokensTable", ["Tasks", "Whole project (tokens)", "TeamSync (tokens)", "Ratio"],
+    D.tokens.sweep.map((p) => [int(p.tasks), int(p.naive), int(p.graph), Math.round(p.naive / p.graph) + "×"]).concat([["2,003 (re-measured)", int(D.tokens.remeasured_naive_at_2003), "390", Math.round(D.tokens.remeasured_naive_at_2003 / 390) + "×"]]), [0, 1, 2, 3]);
+
+  const API = Object.entries(D.api_latency).map(([name, v]) => ({ name, ...v })).sort((a, b) => b.p50_ms - a.p50_ms);
+  const NICE = (n) => n.replace("(backend + AI service)", "").replace("(project list)", "").replace("(30 tasks)", "").trim().replace(/^./, (c) => c.toUpperCase());
+  mount("api", (w) => {
+    const m = { l: 128, r: 52, t: 26 }, rowH = 22;
+    const h = m.t + API.length * rowH + 26;
+    const s = svg(w, h);
+    const lo = Math.log10(5), hi = Math.log10(1500);
+    const sx = (v) => m.l + (Math.log10(v) - lo) / (hi - lo) * (w - m.l - m.r);
+    xgrid(s, m.l, w - m.r, m.t, h - 26, [10, 100, 1000], sx, (v) => (v >= 1000 ? "1 s" : v + " ms"));
+    [[100, "feels instant"], [1000, "keeps flow"]].forEach(([v, lab]) => {
+      el("line", { x1: sx(v), x2: sx(v), y1: m.t - 6, y2: h - 26, stroke: "var(--ink-2)", "stroke-width": 1 }, s);
+      text(s, sx(v) - 4, m.t - 10, lab, { "text-anchor": "end", fill: "var(--ink-2)", "font-size": 11 });
+    });
+    API.forEach((r, i) => {
+      const cy = m.t + i * rowH + 11;
+      text(s, 0, cy + 4, NICE(r.name), { fill: "var(--ink)", "font-size": 12 });
+      const g = el("g", {}, s);
+      el("rect", { x: m.l, y: cy - 10, width: w - m.l - m.r + 40, height: 20, fill: "transparent" }, g);
+      el("line", { x1: sx(r.p50_ms), x2: sx(r.p95_ms), y1: cy, y2: cy, stroke: "var(--s1)", "stroke-width": 2, "stroke-opacity": 0.45, "stroke-linecap": "round" }, g);
+      el("circle", { class: "mark", cx: sx(r.p50_ms), cy, r: 4.5, fill: "var(--s1)", stroke: "var(--surface)", "stroke-width": 2 }, g);
+      text(g, sx(r.p95_ms) + 8, cy + 4, Math.round(r.p50_ms) + " ms", { "font-size": 11.5, "font-variant-numeric": "tabular-nums" });
+      hover(g, NICE(r.name), [{ label: "Median", value: r.p50_ms.toFixed(1) + " ms", color: "var(--s1)" }, { label: "95th percentile", value: r.p95_ms.toFixed(1) + " ms" }, { label: "Samples", value: String(r.n) }]);
+    });
+    return s;
+  });
+  table("apiTable", ["Feature", "Median (ms)", "95th percentile (ms)", "Samples"], API.map((r) => [NICE(r.name), r.p50_ms.toFixed(1), r.p95_ms.toFixed(1), String(r.n)]), [1, 2, 3]);
+
+  const PIPE = ["<25 tasks", "25-49", "50-99", "100+"].map((k) => ({ k, ...D.pipeline_latency[k] }));
+  mount("pipeline", (w) => {
+    const m = { l: 110, r: 60, t: 8 }, rowH = 26;
+    const h = m.t + PIPE.length * rowH + 26;
+    const s = svg(w, h);
+    const sx = (v) => m.l + v / 100 * (w - m.l - m.r);
+    xgrid(s, m.l, w - m.r, m.t, h - 26, [0, 25, 50, 75, 100], sx, (v) => v + " ms");
+    PIPE.forEach((r, i) => {
+      const cy = m.t + i * rowH + 12;
+      const name = r.k === "<25 tasks" ? "Under 25 tasks" : r.k === "100+" ? "100+ tasks" : r.k.replace("-", "–") + " tasks";
+      text(s, 0, cy + 4, name, { fill: "var(--ink)", "font-size": 12 });
+      const g = el("g", {}, s);
+      el("rect", { x: m.l, y: cy - 11, width: w - m.l - m.r + 40, height: 22, fill: "transparent" }, g);
+      el("line", { x1: sx(r.p50_ms), x2: sx(r.p95_ms), y1: cy, y2: cy, stroke: "var(--s1)", "stroke-width": 2, "stroke-opacity": 0.45, "stroke-linecap": "round" }, g);
+      el("circle", { class: "mark", cx: sx(r.p50_ms), cy, r: 4.5, fill: "var(--s1)", stroke: "var(--surface)", "stroke-width": 2 }, g);
+      text(g, sx(r.p95_ms) + 8, cy + 4, Math.round(r.p50_ms) + " ms", { "font-size": 11.5, "font-variant-numeric": "tabular-nums" });
+      hover(g, name, [{ label: "Median", value: r.p50_ms + " ms", color: "var(--s1)" }, { label: "95th percentile", value: r.p95_ms + " ms" }, { label: "Sprints", value: int(r.n) }]);
+    });
+    return s;
+  });
+  table("pipelineTable", ["Sprint size", "Analyses", "Median (ms)", "95th percentile (ms)"], PIPE.map((r) => [r.k, int(r.n), String(r.p50_ms), String(r.p95_ms)]), [1, 2, 3]);
+
+  // ================= 6. engineering quality
+  const E = D.engineering, CC = D.code_coverage;
+  tile("qualityTiles", "Automated tests passing", int(E.tests.backend + E.tests.ai_service + E.tests.frontend), `backend ${E.tests.backend} · AI service ${E.tests.ai_service} · frontend ${E.tests.frontend}`);
+  tile("qualityTiles", "Role checks", `${E.role_checks} / ${E.role_checks}`, "every protected endpoint × every role");
+  tile("qualityTiles", "MVP code covered by tests", `${Math.round(CC.backend_mvp)}% · ${Math.round(CC.ai_all)}%`, "backend MVP code · AI service");
+  tile("qualityTiles", "Defects found and fixed", String(E.defects_fixed), `in this validation; ${E.ci_jobs} CI jobs re-check everything on each push`);
+  const AREAS = Object.entries(CC.areas).sort((a, b) => b[1] - a[1]);
+  mount("codecov", (w) => {
+    const narrow = w < 520;
+    const m = { l: narrow ? 176 : 270, r: 50, t: 6 }, bh = 16, gap = 10;
+    const h = m.t + AREAS.length * (bh + gap) + 22;
+    const s = svg(w, h);
+    const sx = (v) => m.l + v / 100 * (w - m.l - m.r);
+    xgrid(s, m.l, w - m.r, m.t, h - 22, [0, 25, 50, 75, 100], sx, (v) => v + "%");
+    AREAS.forEach(([name, v], i) => {
+      const y = m.t + i * (bh + gap);
+      const outside = /outside|deferred/.test(name);
+      const col = outside ? "var(--base)" : "var(--s1)";
+      const label = narrow ? name.replace("Backend: ", "BE: ").replace("AI: ", "AI: ").replace(" (meetings, admin, jobs)", "").replace(" (outside the MVP)", "") : name;
+      text(s, 0, y + 12, label, { fill: "var(--ink)", "font-size": narrow ? 11 : 12 });
+      const g = el("g", {}, s);
+      el("rect", { x: m.l, y: y - 3, width: w - m.l - m.r + 40, height: bh + 6, fill: "transparent" }, g);
+      el("path", { class: "mark", d: hbar(sx(0), y, sx(v) - sx(0), bh), fill: col }, g);
+      text(g, sx(v) + 6, y + 12, v.toFixed(0) + "%", { fill: "var(--ink)" });
+      hover(g, name, [{ label: "Statements covered", value: v.toFixed(1) + "%", color: col }]);
+    });
+    return s;
+  });
+  table("codecovTable", ["Area", "Statements covered"], AREAS.map(([n, v]) => [n, v.toFixed(1) + "%"])
+    .concat([["Backend, all non-test code", CC.backend_all.toFixed(1) + "%"], ["Backend, MVP code", CC.backend_mvp.toFixed(1) + "%"], ["AI service, all non-test code", CC.ai_all.toFixed(1) + "%"], ["Frontend", "not measured"]]), [1]);
+
+  // ================= 7. completeness matrix
+  const Y = ["yes", "measured"], P = ["part", "partial"], N = ["no", "missing"], X = ["na", "n/a"];
+  const COLS = ["Correct output", "Accurate on real data", "Compared with a baseline", "Statistically tested", "Speed and cost", "Repeatable", "Human evaluation"];
+  const ROWS = [
+    ["Coordinator", [Y, X, X, X, Y, Y, X]],
+    ["Planning agent", [Y, ["part", "measured: never warns"], N, N, Y, Y, N]],
+    ["Progress agent", [Y, Y, P, N, Y, Y, N]],
+    ["Workload agent", [Y, Y, P, N, Y, Y, N]],
+    ["Risk agent — delay", [Y, Y, Y, Y, Y, Y, N]],
+    ["Risk agent — other five risks", [Y, P, N, N, Y, Y, N]],
+    ["Recommendation agent", [Y, P, N, X, Y, Y, N]],
+    ["Language-model narration (optional)", [Y, P, Y, P, Y, N, N]],
+    ["Web app and API", [Y, Y, X, X, P, Y, N]],
+  ];
+  const mt = document.getElementById("matrix");
+  const thead = document.createElement("thead"), hr = document.createElement("tr");
+  ["Part", ...COLS].forEach((c) => { const th = document.createElement("th"); th.textContent = c; hr.appendChild(th); });
+  thead.appendChild(hr); mt.appendChild(thead);
+  const tb = document.createElement("tbody");
+  for (const [name, cells] of ROWS) {
+    const tr = document.createElement("tr");
+    const td0 = document.createElement("td"); td0.textContent = name; td0.style.fontWeight = "500"; tr.appendChild(td0);
+    cells.forEach(([cls, lab]) => {
+      const td = document.createElement("td"); const sp = document.createElement("span"); sp.className = "st " + cls;
+      sp.textContent = (cls === "yes" ? "✓ " : cls === "part" ? "◐ " : cls === "no" ? "✗ " : "") + lab; td.appendChild(sp); tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  }
+  mt.appendChild(tb);
+  const GAPS = [
+    ["Human evaluation of the explanations and the app", "Does a manager find the right problem faster with the evidence than without? A usability score (SUS) for the app. The largest gap for an explainable-AI project, and no automated test can close it.", "About 2 weeks · 8–12 participants"],
+    ["The Planning agent's verdict", "It never warns, because the product never supplies team capacity. Add a capacity setting per sprint, then score it again.", "A Phase 2 feature · 1–2 days"],
+    ["Load and concurrency", "Response times are single-user. Measure throughput and latency with many simultaneous users on PostgreSQL.", "Half a day · automated"],
+    ["The other five risk types on real data", "Knowledge and coordination never reach medium inside one sprint of TAWOS. Evaluate over releases, or on a dataset with component ownership.", "Days to weeks · needs data"],
+    ["The language model, re-measured", "Replace the 54–95% validity range with one number and thicken the κ sample, with per-call logging.", "About an hour · paid API key"],
+    ["Frontend code coverage", "Frontend tests pass but their coverage is not measured.", "Minutes · one npm package"],
+  ];
+  const gh = document.getElementById("gaps");
+  for (const [title, what, effort] of GAPS) {
+    const d = document.createElement("div");
+    const a = document.createElement("span"); const st = document.createElement("strong"); st.textContent = title + ". "; a.append(st, document.createTextNode(what));
+    const b = document.createElement("span"); b.className = "effort"; b.textContent = effort;
+    d.append(a, b); gh.appendChild(d);
+  }
+
+  // ================= 5. LLM
+  const L = D.llm;
+  tile("llmTiles", "Fabricated citations removed", `${L.grounding.stripped} / ${L.grounding.trials}`, "before any reached a user");
+  tile("llmTiles", "Agreement with the deterministic verdict", "κ " + fmt(L.kappa, 2), `Cohen's kappa, ${L.kappa_n} comparisons — "almost perfect"`);
+  tile("llmTiles", "Accuracy vs. sending the whole project", `${fmt(L.ablation.graph_f1, 3)} vs ${fmt(L.ablation.naive_f1, 3)}`, `F1 on ${L.ablation.n} identical scenarios; difference not significant`);
+  tile("llmTiles", "Calls made without a key", String(D.llm_guard.calls_attempted - D.llm_guard.refused_before_network), `of ${int(D.llm_guard.calls_attempted)} attempts reached the network`);
+
+  mount("validity", (w) => {
+    const h = 128, m = { l: 8, r: 16, t: 52 };
+    const s = svg(w, h);
+    const sx = (v) => m.l + v * (w - m.l - m.r);
+    xgrid(s, m.l, w - m.r, m.t, m.t + 30, [0, 0.25, 0.5, 0.75, 1], sx, (v) => Math.round(v * 100) + "%");
+    const [a, b] = L.validity_range;
+    const g1 = el("g", {}, s);
+    el("rect", { class: "mark", x: sx(a), y: m.t + 4, width: sx(b) - sx(a), height: 22, rx: 4, fill: "var(--s1-wash)", stroke: "var(--s1)", "stroke-width": 1 }, g1);
+    text(g1, (sx(a) + sx(b)) / 2, m.t - 28, `model's own validity: ${Math.round(a * 100)}–${Math.round(b * 100)}%`, { "text-anchor": "middle", fill: "var(--ink)", "font-size": 12 });
+    hover(g1, "Model's own validity", [{ label: "Lower bound", value: Math.round(a * 100) + "% (every undiagnosed failure reached the model)", color: "var(--s1)" }, { label: "Upper bound", value: Math.round(b * 100) + "% (none did)" }]);
+    const x = sx(L.validity_end_to_end);
+    const g2 = el("g", {}, s);
+    el("rect", { x: x - 12, y: m.t - 22, width: 24, height: 56, fill: "transparent" }, g2);
+    el("line", { class: "mark", x1: x, x2: x, y1: m.t, y2: m.t + 30, stroke: "var(--s2)", "stroke-width": 3, "stroke-linecap": "round" }, g2);
+    const measured = "measured end to end: " + (L.validity_end_to_end * 100).toFixed(1) + "%";
+    const fitsLeft = x - 6 - measured.length * 6.4 > 0;
+    text(g2, fitsLeft ? x - 6 : x + 6, m.t - 8, measured, { "text-anchor": fitsLeft ? "end" : "start", fill: "var(--ink)", "font-size": 12 });
+    hover(g2, "End-to-end validity (measured)", [{ label: "Valid calls", value: (L.validity_end_to_end * 100).toFixed(1) + "% (37 of 90)", color: "var(--s2)" }, { label: "Main cause of failure", value: "free-tier rate limits" }]);
+    return s;
+  });
+  table("kappaTable", ["Risk type", "Comparisons", "Cohen's κ"],
+    Object.entries(L.kappa_by_type).map(([k, v]) => [k.replace("_", " "), String(v.n), fmt(v.kappa, 2)])
+      .concat([["All", String(L.kappa_n), fmt(L.kappa, 3)], ["Validity end to end", "90 calls", (L.validity_end_to_end * 100).toFixed(1) + "%"], ["Validity, model only", "bounded", "54–95%"]]), [1, 2]);
+})();
+</script>

@@ -53,6 +53,26 @@ show up as a mismatch.
 | All three | Output valid against its schema; no error output | 1,974 / 1,974 each |
 | All three | LLM calls that reached the network without a key | **0** of 8,883 attempts — every one refused before any I/O |
 
+**Their own verdicts, against the real outcome.** Each specialist also gives a risk level, shown to
+users beside the Risk agent's. It does not feed the product's risk score, but it is scored here the
+same way (a warning = anything above *low*; the 270 held-out sprints):
+
+| Agent | Halfway: warned · precision · recall · F1 | Sprint end: warned · precision · recall · F1 |
+|---|---|---|
+| Risk (the product's verdict) | 205 · 0.581 · 0.902 · **0.706** | 239 · 0.552 · 1.000 · **0.712** |
+| Progress | 208 · 0.582 · 0.917 · **0.712** | 81 · 1.000 · 0.614 · **0.761** |
+| Workload | 144 · 0.556 · 0.606 · 0.580 | 146 · 0.555 · 0.614 · 0.583 |
+| Planning | **0 of 270** — never warns | **0 of 270** — never warns |
+
+- **The Planning agent's verdict is inert.** Its only warning is planned work exceeding team capacity,
+  and the backend never supplies a capacity (`team_capacity_points` is always empty), so as shipped it
+  always says *low*. Its figures are right; its verdict carries no information. Adding a capacity
+  setting is a Phase 2 fix.
+- **Progress matches the Risk agent halfway through** (0.712 vs 0.706): a plain completion-rate rule
+  does as well as the pace projection. Its perfect sprint-end precision is built in — a sprint less than
+  half done is late by definition.
+- **Workload is a weak lateness signal**, as expected: it measures uneven load, not delay.
+
 ### Risk
 
 | Check | Result |
@@ -148,6 +168,19 @@ each endpoint requires is read off the code, then every protected endpoint (34 r
 called as each of the five roles: **170 / 170** behave exactly as the policy says. A second check fails
 the build if any data-changing endpoint is added without a role check.
 
+**Code coverage** — share of statements the test suites execute, excluding the tests themselves
+(`pytest-cov`; the backend measured with greenlet tracing, without which SQLAlchemy's async layer hides
+code after the first database call and the figure reads 7 points too low):
+
+| Area | Covered |
+|---|---|
+| Backend code the MVP uses (API routes, models, schemas, services) | **74%** |
+| … of which task / project / auth routes | 85% / 84% / 89% |
+| Backend code outside the MVP (meetings, admin, background jobs) | 18% |
+| AI service, all | **81%** |
+| … of which the knowledge graph and metrics | 93% |
+| Frontend | not measured (the coverage plugin is not installed) |
+
 **Response times** — end to end over HTTP against the running stack with the real Mesos sprint (30
 tasks, 13 people), SQLite, no LLM key, one Windows laptop; 15 timed requests each after 2 warm-ups:
 
@@ -202,7 +235,13 @@ were reachable through the deployed API. Each now has a regression test.
 - **The language-model layer's current behaviour** — its three results above are from the published
   runs; re-measuring needs a paid key.
 - **Whether real teams would follow the suggested moves** — only that the moves do what they predict.
-- **Production-scale performance** — response times are from one laptop on SQLite.
+- **Production-scale performance** — response times are from one laptop on SQLite, and no load or
+  concurrency test has been run.
+- **Anything from the Planning agent's verdict** — it never warns, because no team capacity is supplied.
+- **Frontend code coverage** — its tests pass, but coverage is not measured.
+
+The charts and a per-agent completeness matrix are in
+[`PHASE1_PERFORMANCE_METRICS.pdf`](PHASE1_PERFORMANCE_METRICS.pdf).
 
 ## 7. Reproduce it
 
