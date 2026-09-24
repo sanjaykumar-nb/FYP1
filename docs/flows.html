@@ -1,0 +1,430 @@
+<title>TeamSync Flows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --ground: #f5f7f9;
+    --surface: #ffffff;
+    --surface-2: #eef1f5;
+    --ink: #151a21;
+    --ink-2: #4a545f;
+    --muted: #727d8a;
+    --line: #d5dae1;
+    --line-strong: #b4bcc6;
+    --blue: #2a78d6;
+    --blue-wash: rgba(42, 120, 214, 0.10);
+    --orange: #cf5524;
+    --orange-wash: rgba(235, 104, 52, 0.12);
+    --green: #158a61;
+    --green-wash: rgba(27, 175, 122, 0.12);
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #0f1319;
+      --surface: #161b22;
+      --surface-2: #1d232c;
+      --ink: #e7eaef;
+      --ink-2: #aab3bf;
+      --muted: #7e8896;
+      --line: #2a313b;
+      --line-strong: #3b444f;
+      --blue: #62a2f0;
+      --blue-wash: rgba(98, 162, 240, 0.16);
+      --orange: #f0855a;
+      --orange-wash: rgba(240, 133, 90, 0.16);
+      --green: #3ec795;
+      --green-wash: rgba(62, 199, 149, 0.16);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #0f1319;
+    --surface: #161b22;
+    --surface-2: #1d232c;
+    --ink: #e7eaef;
+    --ink-2: #aab3bf;
+    --muted: #7e8896;
+    --line: #2a313b;
+    --line-strong: #3b444f;
+    --blue: #62a2f0;
+    --blue-wash: rgba(98, 162, 240, 0.16);
+    --orange: #f0855a;
+    --orange-wash: rgba(240, 133, 90, 0.16);
+    --green: #3ec795;
+    --green-wash: rgba(62, 199, 149, 0.16);
+  }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 40px 64px;
+    display: grid;
+    gap: 40px;
+  }
+  header { display: grid; gap: 10px; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(26px, 4.4vw, 38px);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  header p { margin: 0; max-width: 62ch; color: var(--ink-2); }
+
+  figure {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 22px 18px;
+    display: grid;
+    gap: 14px;
+  }
+  .fig-head { display: grid; gap: 4px; }
+  .fig-head h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .fig-head .n {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--blue);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+  .scroll svg { display: block; height: auto; max-width: 100%; min-width: 660px; }
+  figcaption { color: var(--ink-2); font-size: 14px; max-width: 78ch; }
+  figcaption code, .note code { font-family: var(--mono); font-size: 0.92em; color: var(--ink); }
+
+  .note {
+    border-left: 3px solid var(--green);
+    background: var(--green-wash);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 18px;
+    display: grid;
+    gap: 6px;
+  }
+  .note h2 { margin: 0; font-size: 16px; font-weight: 600; }
+  .note p { margin: 0; color: var(--ink-2); max-width: 70ch; }
+
+  svg text { font-family: var(--sans); fill: var(--ink); }
+  svg .sub { fill: var(--ink-2); font-size: 11px; }
+  svg .edge { fill: var(--muted); font-size: 11px; font-family: var(--mono); }
+  svg .box { fill: var(--surface-2); stroke: var(--line-strong); stroke-width: 1; }
+  svg .box-blue { fill: var(--blue-wash); stroke: var(--blue); stroke-width: 1.4; }
+  svg .box-orange { fill: var(--orange-wash); stroke: var(--orange); stroke-width: 1.4; }
+  svg .box-green { fill: var(--green-wash); stroke: var(--green); stroke-width: 1.4; }
+  svg .box-dash { fill: none; stroke: var(--line-strong); stroke-width: 1.2; stroke-dasharray: 5 4; }
+  svg .flow { stroke: var(--line-strong); stroke-width: 1.4; fill: none; }
+  svg .flow-blue { stroke: var(--blue); stroke-width: 1.6; fill: none; }
+  svg .flow-orange { stroke: var(--orange); stroke-width: 1.6; fill: none; }
+  svg .flow-dash { stroke: var(--line-strong); stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
+  svg .life { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 5; }
+  svg .lane { font-family: var(--mono); font-size: 11.5px; fill: var(--muted); letter-spacing: 0.06em; }
+
+  @media print {
+    /* On paper there is nothing to scroll: let every figure print whole. */
+    body { background: #ffffff; }
+    .wrap { max-width: none; padding-block: 0; gap: 26px; }
+    .scroll { overflow: visible; }
+    .scroll svg { min-width: 0; width: 100%; }
+    figure, .note { break-inside: avoid; page-break-inside: avoid; box-shadow: none; }
+    figure { padding: 16px; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">TeamSync AI &middot; Phase 1</span>
+    <h1>Three flows through TeamSync</h1>
+    <p>
+      What a manager does, what one analysis actually does across the two services, and what happens when work
+      lands in GitHub. Every number in the product is computed from a knowledge graph of the project, and every
+      warning carries the tasks and people it came from &mdash; these three pictures are where that shows up.
+    </p>
+  </header>
+
+  <figure>
+    <div class="fig-head">
+      <span class="n">Flow 1</span>
+      <h2>The loop a manager runs</h2>
+    </div>
+    <div class="scroll">
+      <svg viewBox="0 0 900 214" role="img"
+           aria-label="Six steps in a row &mdash; set up, plan work, do the work, run analysis, read findings, apply a move &mdash; with a return arrow from apply a move back to run analysis.">
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--line-strong)"/>
+          </marker>
+          <marker id="a1b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--blue)"/>
+          </marker>
+        </defs>
+
+        <rect class="box" x="20" y="36" width="130" height="56" rx="9"/>
+        <text x="85" y="60" text-anchor="middle" font-size="13.5" font-weight="500">Set up</text>
+        <text x="85" y="78" text-anchor="middle" class="sub">project, sprints, team</text>
+
+        <rect class="box" x="165" y="36" width="130" height="56" rx="9"/>
+        <text x="230" y="60" text-anchor="middle" font-size="13.5" font-weight="500">Plan the work</text>
+        <text x="230" y="78" text-anchor="middle" class="sub">tasks, points, owners</text>
+
+        <rect class="box" x="310" y="36" width="130" height="56" rx="9"/>
+        <text x="375" y="60" text-anchor="middle" font-size="13.5" font-weight="500">Do the work</text>
+        <text x="375" y="78" text-anchor="middle" class="sub">board, or commits</text>
+
+        <rect class="box-blue" x="455" y="36" width="130" height="56" rx="9"/>
+        <text x="520" y="60" text-anchor="middle" font-size="13.5" font-weight="500">Run analysis</text>
+        <text x="520" y="78" text-anchor="middle" class="sub">AI Insights tab</text>
+
+        <rect class="box" x="600" y="36" width="130" height="56" rx="9"/>
+        <text x="665" y="60" text-anchor="middle" font-size="13.5" font-weight="500">Read findings</text>
+        <text x="665" y="78" text-anchor="middle" class="sub">each cites its tasks</text>
+
+        <rect class="box" x="745" y="36" width="130" height="56" rx="9"/>
+        <text x="810" y="60" text-anchor="middle" font-size="13.5" font-weight="500">Apply a move</text>
+        <text x="810" y="78" text-anchor="middle" class="sub">one click reassigns</text>
+
+        <path class="flow" d="M150,64 L161,64" marker-end="url(#a1)"/>
+        <path class="flow" d="M295,64 L306,64" marker-end="url(#a1)"/>
+        <path class="flow" d="M440,64 L451,64" marker-end="url(#a1)"/>
+        <path class="flow" d="M585,64 L596,64" marker-end="url(#a1)"/>
+        <path class="flow" d="M730,64 L741,64" marker-end="url(#a1)"/>
+
+        <path class="flow-blue" d="M810,92 L810,150 L520,150 L520,96" marker-end="url(#a1b)"/>
+        <text x="665" y="143" text-anchor="middle" class="edge">re-run &mdash; the risk should have dropped</text>
+
+        <text x="20" y="190" class="sub">Capacity, sprint dates and task components are set once; they are what the pace,
+          workload and knowledge signals read.</text>
+      </svg>
+    </div>
+    <figcaption>
+      The product's claim is testable by the person using it: apply what it suggests, analyse again, and the risk it
+      predicted should fall. On 1,524 real sprints the predicted effect held every time.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <div class="fig-head">
+      <span class="n">Flow 2</span>
+      <h2>One analysis, hop by hop</h2>
+    </div>
+    <div class="scroll">
+      <svg viewBox="0 0 900 890" role="img"
+           aria-label="A sequence across three lifelines &mdash; browser, backend, AI service. The browser posts one request; the backend checks the role, reads the project once into a snapshot, opens an AgentRun row, and posts the snapshot to the AI service, which builds a knowledge graph, computes six risks as findings carrying node ids, gives each specialist only its findings and a witness subgraph, optionally rewords with a language model, then computes risk and recommendation from the graph; the result returns to the backend, is saved on the AgentRun, and the browser renders it.">
+        <defs>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--line-strong)"/>
+          </marker>
+          <marker id="a2b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--blue)"/>
+          </marker>
+        </defs>
+
+        <text x="140" y="24" text-anchor="middle" class="lane">BROWSER</text>
+        <text x="450" y="24" text-anchor="middle" class="lane">BACKEND</text>
+        <text x="760" y="24" text-anchor="middle" class="lane">AI SERVICE</text>
+        <line class="life" x1="140" y1="36" x2="140" y2="856"/>
+        <line class="life" x1="450" y1="36" x2="450" y2="856"/>
+        <line class="life" x1="760" y1="36" x2="760" y2="856"/>
+
+        <rect class="box-blue" x="30" y="46" width="220" height="46" rx="9"/>
+        <text x="140" y="74" text-anchor="middle" font-size="13.5" font-weight="500">Run Analysis pressed</text>
+
+        <path class="flow-blue" d="M140,92 L140,112 L450,112 L450,130" marker-end="url(#a2b)"/>
+        <text x="298" y="106" text-anchor="middle" class="edge">POST /analytics/{id}/analyze</text>
+
+        <rect class="box" x="290" y="130" width="320" height="52" rx="9"/>
+        <text x="450" y="152" text-anchor="middle" font-size="13.5" font-weight="500">Is this person allowed?</text>
+        <text x="450" y="170" text-anchor="middle" class="sub">role must carry analytics:run</text>
+
+        <path class="flow" d="M450,182 L450,204" marker-end="url(#a2)"/>
+
+        <rect class="box" x="290" y="204" width="320" height="60" rx="9"/>
+        <text x="450" y="226" text-anchor="middle" font-size="13.5" font-weight="500">Read the project once</text>
+        <text x="450" y="244" text-anchor="middle" class="sub">members &middot; sprints &middot; tasks &middot; dependencies</text>
+        <text x="450" y="258" text-anchor="middle" class="sub">comments &middot; capacity &middot; past velocity</text>
+
+        <path class="flow" d="M450,264 L450,286" marker-end="url(#a2)"/>
+
+        <rect class="box" x="290" y="286" width="320" height="52" rx="9"/>
+        <text x="450" y="308" text-anchor="middle" font-size="13.5" font-weight="500">Open the analysis record</text>
+        <text x="450" y="326" text-anchor="middle" class="sub">the audit trail starts before the work does</text>
+
+        <path class="flow-blue" d="M450,338 L450,358 L760,358 L760,376" marker-end="url(#a2b)"/>
+        <text x="608" y="352" text-anchor="middle" class="edge">snapshot handed over</text>
+
+        <rect class="box" x="640" y="376" width="240" height="46" rx="9"/>
+        <text x="760" y="404" text-anchor="middle" font-size="13.5" font-weight="500">Knowledge graph built</text>
+
+        <path class="flow" d="M760,422 L760,444" marker-end="url(#a2)"/>
+
+        <rect class="box" x="640" y="444" width="240" height="64" rx="9"/>
+        <text x="760" y="466" text-anchor="middle" font-size="13.5" font-weight="500">Six risks computed</text>
+        <text x="760" y="484" text-anchor="middle" class="sub">delay &middot; workload &middot; dependency</text>
+        <text x="760" y="498" text-anchor="middle" class="sub">knowledge &middot; coordination &middot; silence</text>
+
+        <path class="flow" d="M760,508 L760,530" marker-end="url(#a2)"/>
+
+        <rect class="box" x="640" y="530" width="240" height="64" rx="9"/>
+        <text x="760" y="552" text-anchor="middle" font-size="13.5" font-weight="500">Specialists explain</text>
+        <text x="760" y="570" text-anchor="middle" class="sub">Planning &middot; Progress &middot; Workload,</text>
+        <text x="760" y="584" text-anchor="middle" class="sub">each shown only its own evidence</text>
+
+        <path class="flow-dash" d="M760,594 L760,616" marker-end="url(#a2)"/>
+
+        <rect class="box-dash" x="640" y="616" width="240" height="60" rx="9"/>
+        <text x="760" y="638" text-anchor="middle" font-size="13" font-weight="500">Optional wording pass</text>
+        <text x="760" y="656" text-anchor="middle" class="sub">a model may reword a finding;</text>
+        <text x="760" y="670" text-anchor="middle" class="sub">invented citations are stripped</text>
+
+        <path class="flow" d="M760,676 L760,698" marker-end="url(#a2)"/>
+
+        <rect class="box" x="640" y="698" width="240" height="60" rx="9"/>
+        <text x="760" y="720" text-anchor="middle" font-size="13.5" font-weight="500">Risk and fixes</text>
+        <text x="760" y="738" text-anchor="middle" class="sub">both read off the graph,</text>
+        <text x="760" y="752" text-anchor="middle" class="sub">never asked of a model</text>
+
+        <path class="flow-blue" d="M760,758 L760,776 L450,776 L450,794" marker-end="url(#a2b)"/>
+        <text x="608" y="770" text-anchor="middle" class="edge">findings, scores, suggested moves</text>
+
+        <rect class="box" x="290" y="794" width="320" height="42" rx="9"/>
+        <text x="450" y="820" text-anchor="middle" font-size="13.5" font-weight="500">Saved on the analysis record</text>
+
+        <path class="flow-blue" d="M450,836 L450,852 L140,852 L140,844" marker-end="url(#a2b)"/>
+        <text x="298" y="868" text-anchor="middle" class="edge">panel renders; ids become names</text>
+
+        <rect class="box-blue" x="30" y="798" width="220" height="46" rx="9"/>
+        <text x="140" y="826" text-anchor="middle" font-size="13.5" font-weight="500">Findings, with evidence</text>
+      </svg>
+    </div>
+    <figcaption>
+      The project is read once per analysis and handed over as a snapshot &mdash; the AI service holds no database of its
+      own. Typical timing is about <strong>700 ms</strong> end to end, of which the agent pipeline is under 50 ms;
+      the rest is reading the project and saving the result. Without an API key the optional wording pass is skipped
+      and the deterministic text stands, which is how every published result was measured.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <div class="fig-head">
+      <span class="n">Flow 3</span>
+      <h2>Work arriving from GitHub</h2>
+    </div>
+    <div class="scroll">
+      <svg viewBox="0 0 980 392" role="img"
+           aria-label="Pushes and pull requests arrive either instantly by signed webhook or on demand by the sync button; each is matched to a task by its reference or key; a commit moves the task to in progress, an open pull request to review, a merge to done, never backwards; the commit or pull request is kept as evidence, and the next analysis reads the updated board.">
+        <defs>
+          <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--line-strong)"/>
+          </marker>
+          <marker id="a3o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--orange)"/>
+          </marker>
+          <marker id="a3g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--green)"/>
+          </marker>
+        </defs>
+
+        <text x="20" y="28" class="lane">IN THE REPOSITORY</text>
+        <rect class="box" x="20" y="44" width="150" height="38" rx="8"/>
+        <text x="95" y="68" text-anchor="middle" font-size="13">someone pushes</text>
+        <rect class="box" x="20" y="100" width="150" height="38" rx="8"/>
+        <text x="95" y="124" text-anchor="middle" font-size="13">a PR is opened</text>
+        <rect class="box" x="20" y="156" width="150" height="38" rx="8"/>
+        <text x="95" y="180" text-anchor="middle" font-size="13">a PR is merged</text>
+
+        <path class="flow" d="M170,63 L196,63 L196,119"/>
+        <path class="flow" d="M170,119 L196,119"/>
+        <path class="flow" d="M170,175 L196,175 L196,119"/>
+
+        <path class="flow-orange" d="M196,100 L196,88 L228,88" marker-end="url(#a3o)"/>
+        <path class="flow-dash" d="M196,140 L196,174 L228,174" marker-end="url(#a3)"/>
+
+        <rect class="box-orange" x="228" y="60" width="212" height="56" rx="9"/>
+        <text x="334" y="82" text-anchor="middle" font-size="13.5" font-weight="500">Webhook &middot; instant</text>
+        <text x="334" y="100" text-anchor="middle" class="sub">signed with this project's secret</text>
+
+        <rect class="box-dash" x="228" y="146" width="212" height="56" rx="9"/>
+        <text x="334" y="168" text-anchor="middle" font-size="13.5" font-weight="500">Sync &middot; on demand</text>
+        <text x="334" y="186" text-anchor="middle" class="sub">last 100 commits and PRs</text>
+
+        <path class="flow-orange" d="M440,88 L466,88 L466,116 L486,116" marker-end="url(#a3o)"/>
+        <path class="flow-dash" d="M440,174 L466,174 L466,146 L486,146" marker-end="url(#a3)"/>
+
+        <rect class="box" x="486" y="82" width="226" height="98" rx="9"/>
+        <text x="599" y="106" text-anchor="middle" font-size="13.5" font-weight="500">Which task is this?</text>
+        <text x="599" y="127" text-anchor="middle" class="edge">a1b2c3d4</text>
+        <text x="599" y="145" text-anchor="middle" class="sub">the task's reference, or a key</text>
+        <text x="599" y="163" text-anchor="middle" class="edge">MESOS-8383</text>
+
+        <path class="flow" d="M712,104 L744,104 L744,72 L768,72" marker-end="url(#a3)"/>
+        <path class="flow" d="M712,131 L756,131 L768,131" marker-end="url(#a3)"/>
+        <path class="flow" d="M712,158 L744,158 L744,190 L768,190" marker-end="url(#a3)"/>
+        <text x="742" y="66" text-anchor="end" class="edge">commit</text>
+        <text x="754" y="125" text-anchor="end" class="edge">PR open</text>
+        <text x="742" y="208" text-anchor="end" class="edge">merged</text>
+
+        <rect class="box" x="768" y="52" width="192" height="40" rx="8"/>
+        <text x="864" y="77" text-anchor="middle" font-size="13">moves to In Progress</text>
+        <rect class="box" x="768" y="111" width="192" height="40" rx="8"/>
+        <text x="864" y="136" text-anchor="middle" font-size="13">moves to Review</text>
+        <rect class="box" x="768" y="170" width="192" height="40" rx="8"/>
+        <text x="864" y="195" text-anchor="middle" font-size="13">moves to Done</text>
+        <text x="864" y="230" text-anchor="middle" class="sub">forward only &mdash; never back</text>
+
+        <path class="flow-green" d="M599,180 L599,214" marker-end="url(#a3g)"/>
+        <rect class="box-green" x="486" y="214" width="226" height="56" rx="9"/>
+        <text x="599" y="236" text-anchor="middle" font-size="13.5" font-weight="500">Kept as evidence</text>
+        <text x="599" y="254" text-anchor="middle" class="sub">the commit or PR, author and date</text>
+
+        <path class="flow" d="M599,270 L599,306 L330,306 L330,322" marker-end="url(#a3)"/>
+        <path class="flow" d="M864,238 L864,322" marker-end="url(#a3)"/>
+
+        <rect class="box-blue" x="120" y="322" width="740" height="48" rx="9"/>
+        <text x="490" y="351" text-anchor="middle" font-size="13.5" font-weight="500">The next analysis reads the board this just updated &mdash; pace, workload and completion all follow</text>
+      </svg>
+    </div>
+    <figcaption>
+      Both routes run the same matching engine, so a commit behaves identically whether GitHub pushed it or someone
+      pressed Sync. A push also knows its branch, which the repository listing does not, so
+      <code>fix/a1b2c3d4-retry</code> moves that task even when the commit message says nothing. Every webhook call
+      must carry a signature made with the project's own secret; one that doesn't is refused before its body is read.
+    </figcaption>
+  </figure>
+
+  <div class="note">
+    <h2>The rule underneath all three</h2>
+    <p>
+      Nothing in this chain asks a language model whether a risk exists. Risks are computed from the graph, each
+      finding carries the node ids that witness it, and those ids are checked against the graph before anyone sees
+      them &mdash; 40,001 of 40,001 resolved across 2,961 analyses of real sprints. That is also why a status change driven
+      by GitHub keeps the commit that caused it.
+    </p>
+  </div>
+</div>

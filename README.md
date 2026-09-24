@@ -339,6 +339,7 @@ python -m eval.make_figures                  # regenerate every figure in docs/i
 | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | Six-minute demo recording script — setup, shot list, expected numbers |
 | [docs/SLIDES.md](docs/SLIDES.md) | Presentation outline — 14 slides with the numbers to quote and the claims to avoid |
 | [PHASE1_PERFORMANCE_METRICS.pdf](PHASE1_PERFORMANCE_METRICS.pdf) | Every agent and feature charted, with what each result shows, lets you claim and does not, and a completeness matrix (source page: `docs/phase1-metrics.html`) |
+| [docs/TEAMSYNC_FLOWS.pdf](docs/TEAMSYNC_FLOWS.pdf) | Three diagrams: the loop a manager runs, one analysis hop by hop across both services, and how GitHub work reaches the board (source page: `docs/flows.html`) |
 | [VALIDATION_REPORT.md](VALIDATION_REPORT.md) | Phase 1 validation — every agent on all 987 real sprints, role matrix, response times, defects found and fixed |
 | [RELEASE_NOTES.md](RELEASE_NOTES.md) | v1.0-mvp — what the bundle contains, how to run it, how it was verified |
 | [docs/API.md](docs/API.md) | Every endpoint of both services, marked by whether the app uses it and a test covers it; OpenAPI specs in `docs/api/` |
