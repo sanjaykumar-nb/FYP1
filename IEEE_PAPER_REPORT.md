@@ -318,9 +318,9 @@ checks, boundary sweeps, and the ablation.
 
 | Item | Value |
 |---|---|
-| Backend tests | 95/95 pass, on both SQLite and PostgreSQL 16 (including a role × endpoint matrix of 170 checks) |
+| Backend tests | 102/102 pass, on both SQLite and PostgreSQL 16 (including a role × endpoint matrix of 185 checks) |
 | AI service tests | 85/85 pass (`pytest -m "not deferred"`; 5 deferred tests for un-built agents are excluded, 2 of them currently red) |
-| Frontend tests | 61/61 pass (`vitest`), `tsc --noEmit` clean |
+| Frontend tests | 63/63 pass (`vitest`), `tsc --noEmit` clean |
 | Continuous integration | All three suites, the type check, and a replay of the demo that checks every number the demo script quotes, on every push (GitHub Actions) |
 | Code size | ~21K LOC |
 | Quality gates | ruff, mypy, eslint, prettier, tsc |
@@ -721,7 +721,7 @@ carries surveillance and fairness concerns. A paragraph acknowledging this stren
 # Run the system
 cp .env.example .env          # GROQ_API_KEY optional — full fallback mode works without it
 make up && make db-seed       # tables are created on startup; there is no migration step
-make test                     # backend 95, ai 85, frontend 61 (also run in CI on every push)
+make test                     # backend 102, ai 85, frontend 63 (also run in CI on every push)
 ```
 
 ```bash

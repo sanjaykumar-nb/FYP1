@@ -33,6 +33,8 @@ UNGATED_BY_DESIGN = {
     ("POST", "/api/v1/auth/logout"): "ends the caller's own session",
     ("PATCH", "/api/v1/auth/me"): "edits the caller's own profile",
     ("POST", "/api/v1/organizations"): "creates a new, empty organization owned by the caller",
+    ("POST", "/api/v1/projects/{project_id}/github/webhook"):
+        "GitHub calls it; every request must carry a signature made with the project's own secret",
 }
 
 

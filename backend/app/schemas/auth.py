@@ -193,6 +193,7 @@ class ProjectResponse(ProjectBase):
     actual_end_date: Optional[datetime] = None
     sprint_capacity_points: Optional[int] = None
     github_repo: Optional[str] = None
+    github_webhook_configured: bool = False
     created_at: datetime
 
     class Config:

@@ -387,6 +387,75 @@
         "title": "GithubSyncResult",
         "type": "object"
       },
+      "GithubWebhookReceipt": {
+        "description": "What one webhook call did.",
+        "properties": {
+          "applied": {
+            "title": "Applied",
+            "type": "boolean"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          },
+          "event": {
+            "title": "Event",
+            "type": "string"
+          },
+          "links_added": {
+            "default": 0,
+            "title": "Links Added",
+            "type": "integer"
+          },
+          "tasks_moved": {
+            "default": [],
+            "items": {
+              "type": "object"
+            },
+            "title": "Tasks Moved",
+            "type": "array"
+          }
+        },
+        "required": [
+          "event",
+          "applied"
+        ],
+        "title": "GithubWebhookReceipt",
+        "type": "object"
+      },
+      "GithubWebhookSecret": {
+        "description": "Shown once, when it is made: what to paste into GitHub's webhook settings.",
+        "properties": {
+          "content_type": {
+            "default": "application/json",
+            "title": "Content Type",
+            "type": "string"
+          },
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "secret": {
+            "title": "Secret",
+            "type": "string"
+          }
+        },
+        "required": [
+          "secret",
+          "path",
+          "events"
+        ],
+        "title": "GithubWebhookSecret",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1857,6 +1926,11 @@
               }
             ],
             "title": "Github Repo"
+          },
+          "github_webhook_configured": {
+            "default": false,
+            "title": "Github Webhook Configured",
+            "type": "boolean"
           },
           "health_score": {
             "anyOf": [
@@ -6190,6 +6264,161 @@
           }
         },
         "summary": "Sync With Github",
+        "tags": [
+          "github"
+        ]
+      }
+    },
+    "/api/v1/projects/{project_id}/github/webhook": {
+      "post": {
+        "description": "Receive one event from GitHub and apply it.\n\nThis is the one write path with no role check: GitHub has no account here. Instead\nevery request must carry a signature made with this project's own secret, and a\nrequest without a good one is refused before its body is looked at.",
+        "operationId": "receive_webhook_api_v1_projects__project_id__github_webhook_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubWebhookReceipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Receive Webhook",
+        "tags": [
+          "github"
+        ]
+      }
+    },
+    "/api/v1/projects/{project_id}/github/webhook-secret": {
+      "delete": {
+        "description": "Stop accepting webhook calls for this project.",
+        "operationId": "delete_webhook_secret_api_v1_projects__project_id__github_webhook_secret_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Webhook Secret",
+        "tags": [
+          "github"
+        ]
+      },
+      "post": {
+        "description": "Make a new secret for this project's webhook, and show it once.\n\nIt is shown here and never again: the API only ever reports whether one exists.\nMaking a new one replaces the old, so GitHub must be given the new one.",
+        "operationId": "create_webhook_secret_api_v1_projects__project_id__github_webhook_secret_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubWebhookSecret"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Webhook Secret",
         "tags": [
           "github"
         ]

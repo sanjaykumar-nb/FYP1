@@ -30,3 +30,22 @@ class GithubSyncResult(BaseModel):
     pull_requests_matched: int
     links_added: int
     tasks_moved: list[dict]
+
+
+class GithubWebhookSecret(BaseModel):
+    """Shown once, when it is made: what to paste into GitHub's webhook settings."""
+
+    secret: str
+    path: str  # append to your public API URL to get the payload URL
+    events: list[str]
+    content_type: str = "application/json"
+
+
+class GithubWebhookReceipt(BaseModel):
+    """What one webhook call did."""
+
+    event: str
+    applied: bool
+    links_added: int = 0
+    tasks_moved: list[dict] = []
+    detail: str = ""

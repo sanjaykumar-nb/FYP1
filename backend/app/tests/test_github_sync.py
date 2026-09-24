@@ -4,6 +4,10 @@ GitHub itself is never called: every test supplies the commits and pull requests
 would have returned, so these run offline and deterministically.
 """
 
+import hashlib
+import hmac
+import json
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
@@ -169,3 +173,110 @@ class TestEndpoint:
         assert updated.json()["github_username"] == "octocat"
         bad = await client.patch("/api/v1/auth/me", json={"github_username": "not a handle!"}, headers=auth_headers)
         assert bad.status_code == 422
+
+
+class TestWebhook:
+    """GitHub calling us the moment something happens, with a signature instead of a login."""
+
+    @staticmethod
+    def signed(secret: str, payload: dict, event: str) -> tuple[bytes, dict]:
+        body = json.dumps(payload).encode()
+        digest = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+        return body, {"X-Hub-Signature-256": f"sha256={digest}", "X-GitHub-Event": event,
+                      "Content-Type": "application/json"}
+
+    async def secret_for(self, client: AsyncClient, auth_headers, project) -> str:
+        made = await client.post(f"/api/v1/projects/{project.id}/github/webhook-secret", headers=auth_headers)
+        assert made.status_code == 200
+        return made.json()["secret"]
+
+    async def test_the_secret_is_shown_once_and_never_in_the_project(
+        self, client: AsyncClient, auth_headers, test_project
+    ):
+        made = await client.post(f"/api/v1/projects/{test_project.id}/github/webhook-secret", headers=auth_headers)
+        body = made.json()
+        assert len(body["secret"]) >= 32 and body["path"].endswith("/github/webhook")
+        assert body["events"] == ["push", "pull_request"]
+
+        project = (await client.get(f"/api/v1/projects/{test_project.id}", headers=auth_headers)).json()
+        assert project["github_webhook_configured"] is True
+        assert "secret" not in str(project)
+
+    async def test_a_push_moves_the_task_it_names(
+        self, client: AsyncClient, auth_headers, db_session, test_project, test_user
+    ):
+        task = await make_task(db_session, test_project, test_user)
+        secret = await self.secret_for(client, auth_headers, test_project)
+        payload = {"ref": f"refs/heads/fix/{short_ref(task.id)}-retry",
+                   "commits": [{"id": "f" * 40, "message": "tidy the loop", "url": "https://github.com/o/r/commit/f",
+                                "timestamp": "2026-09-24T10:00:00Z", "author": {"username": "octocat"}}]}
+        body, headers = self.signed(secret, payload, "push")
+
+        response = await client.post(f"/api/v1/projects/{test_project.id}/github/webhook", content=body, headers=headers)
+
+        assert response.status_code == 200 and response.json()["applied"] is True
+        assert response.json()["tasks_moved"][0]["to"] == "in_progress"
+        await db_session.refresh(task)
+        assert task.status == "in_progress"  # the branch named it, the message did not
+
+    async def test_a_merged_pull_request_finishes_the_task(
+        self, client: AsyncClient, auth_headers, db_session, test_project, test_user
+    ):
+        task = await make_task(db_session, test_project, test_user, status="in_progress")
+        secret = await self.secret_for(client, auth_headers, test_project)
+        payload = {"action": "closed", "pull_request": pull(11, f"Retry loop {short_ref(task.id)}", merged=True)}
+        body, headers = self.signed(secret, payload, "pull_request")
+
+        response = await client.post(f"/api/v1/projects/{test_project.id}/github/webhook", content=body, headers=headers)
+
+        assert response.status_code == 200
+        await db_session.refresh(task)
+        assert task.status == "done"
+
+    async def test_a_wrong_or_missing_signature_is_refused(
+        self, client: AsyncClient, auth_headers, db_session, test_project, test_user
+    ):
+        task = await make_task(db_session, test_project, test_user)
+        await self.secret_for(client, auth_headers, test_project)
+        payload = {"ref": "refs/heads/main",
+                   "commits": [{"id": "e" * 40, "message": f"{short_ref(task.id)} sneak", "url": "",
+                                "timestamp": "2026-09-24T10:00:00Z", "author": {"username": "impostor"}}]}
+        body, headers = self.signed("the-wrong-secret", payload, "push")
+        url = f"/api/v1/projects/{test_project.id}/github/webhook"
+
+        assert (await client.post(url, content=body, headers=headers)).status_code == 401
+        assert (await client.post(url, content=body, headers={"X-GitHub-Event": "push"})).status_code == 401
+        await db_session.refresh(task)
+        assert task.status == "backlog"  # nothing was applied
+
+    async def test_a_project_with_no_secret_accepts_nothing(
+        self, client: AsyncClient, auth_headers, test_project
+    ):
+        await self.secret_for(client, auth_headers, test_project)
+        removed = await client.delete(f"/api/v1/projects/{test_project.id}/github/webhook-secret", headers=auth_headers)
+        assert removed.status_code == 204
+
+        body, headers = self.signed("anything", {"ref": "refs/heads/main", "commits": []}, "push")
+        response = await client.post(f"/api/v1/projects/{test_project.id}/github/webhook", content=body, headers=headers)
+        assert response.status_code == 401
+
+    async def test_ping_and_events_we_ignore_are_answered_politely(
+        self, client: AsyncClient, auth_headers, test_project
+    ):
+        secret = await self.secret_for(client, auth_headers, test_project)
+        url = f"/api/v1/projects/{test_project.id}/github/webhook"
+
+        body, headers = self.signed(secret, {"zen": "Design for failure."}, "ping")
+        ping = await client.post(url, content=body, headers=headers)
+        assert ping.status_code == 200 and ping.json()["applied"] is False
+
+        body, headers = self.signed(secret, {"starred_at": "now"}, "star")
+        ignored = await client.post(url, content=body, headers=headers)
+        assert ignored.status_code == 200 and ignored.json()["applied"] is False
+
+    async def test_a_developer_cannot_make_a_webhook_secret(
+        self, client: AsyncClient, user_with_role, test_project
+    ):
+        headers = await user_with_role("developer")
+        response = await client.post(f"/api/v1/projects/{test_project.id}/github/webhook-secret", headers=headers)
+        assert response.status_code == 403

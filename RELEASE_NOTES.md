@@ -104,8 +104,10 @@ Every push runs, on GitHub Actions:
   finishes it. Tasks never move backwards, nothing is written to GitHub, and each change keeps a
   link to the commit or pull request behind it. Public repositories need no credentials;
   `GITHUB_TOKEN` raises the rate limit and reaches private ones. People can record their handle in
-  their profile. Covered by 13 tests; it is newer than the Phase 1 validation, which does not
-  involve it.
+  their profile. **Webhooks** give instant updates: the project makes a secret to paste into
+  GitHub, and every call must carry a signature made with it — the one write path without a role
+  check, and the permission test knows why. Covered by 20 tests; newer than the Phase 1
+  validation, which does not involve it.
 
 - **Sprint capacity.** A project's settings take a sprint capacity in story points; left empty, the
   average the team completed in its last three finished sprints is used. The Planning agent now
@@ -124,7 +126,7 @@ Every push runs, on GitHub Actions:
   accounts, an answer key read from the board, and the analysis script: `docs/user-study/`.
 - The importer also reads blocking links named "Blocks" (LSST's Jira), not only "Blocker".
 
-Tests: backend 95, AI service 85, frontend 61.
+Tests: backend 102, AI service 85, frontend 63.
 
 ## Since v1.0-mvp — found by the Phase 1 validation
 

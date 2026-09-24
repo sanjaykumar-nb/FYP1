@@ -34,6 +34,13 @@ class Project(BaseModel):
     sprint_capacity_points: Mapped[int | None] = mapped_column(Integer, nullable=True)
     # "owner/name" of the GitHub repository this project's work lands in.
     github_repo: Mapped[str | None] = mapped_column(String(140), nullable=True)
+    # Shared with GitHub when a webhook is set up, so its calls can be told from anyone else's.
+    # Never returned by the API; only whether one exists (github_webhook_configured).
+    github_webhook_secret: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+    @property
+    def github_webhook_configured(self) -> bool:
+        return bool(self.github_webhook_secret)
 
     # Relationships
     organization: Mapped["Organization"] = relationship("Organization", back_populates="projects")

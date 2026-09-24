@@ -56,6 +56,7 @@ _ADDED_COLUMNS = [
     ("tasks", "component", "VARCHAR(100)"),
     ("projects", "sprint_capacity_points", "INTEGER"),
     ("projects", "github_repo", "VARCHAR(140)"),
+    ("projects", "github_webhook_secret", "VARCHAR(64)"),
     ("users", "github_username", "VARCHAR(39)"),
 ]
 

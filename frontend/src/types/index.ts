@@ -25,6 +25,8 @@ export interface Project {
   sprint_capacity_points: number | null
   /** "owner/name" of the GitHub repository this project's work lands in. */
   github_repo: string | null
+  /** Whether a webhook secret exists; the secret itself is never returned. */
+  github_webhook_configured?: boolean
   created_at: string
 }
 
@@ -92,6 +94,14 @@ export interface GithubLink {
   author_login: string | null
   state: string | null
   authored_at: string | null
+}
+
+/** Shown once, when the webhook secret is made. */
+export interface GithubWebhookSecret {
+  secret: string
+  path: string
+  events: string[]
+  content_type: string
 }
 
 export interface GithubSyncResult {

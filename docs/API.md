@@ -15,7 +15,7 @@ checked against the caller's role.
 
 ## Backend — http://localhost:8000
 
-71 operations; 43 used by the app or covered by tests.
+74 operations; 46 used by the app or covered by tests.
 
 ### admin
 
@@ -58,6 +58,9 @@ checked against the caller's role.
 |---|---|---|---|---|
 | `GET` | `/api/v1/projects/{project_id}/github/links` | List Github Links | yes | — |
 | `POST` | `/api/v1/projects/{project_id}/github/sync` | Sync With Github | yes | yes |
+| `POST` | `/api/v1/projects/{project_id}/github/webhook` | Receive Webhook | yes | yes |
+| `DELETE` | `/api/v1/projects/{project_id}/github/webhook-secret` | Delete Webhook Secret | yes | yes |
+| `POST` | `/api/v1/projects/{project_id}/github/webhook-secret` | Create Webhook Secret | yes | yes |
 
 ### meetings
 

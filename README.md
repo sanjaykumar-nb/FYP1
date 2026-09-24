@@ -252,6 +252,13 @@ request behind it. Public repositories need no credentials; `GITHUB_TOKEN` (a re
 raises the rate limit and reaches private ones. People can record their handle in **Profile →
 GitHub username**.
 
+For **instant updates** instead of pressing Sync, press **Set up a webhook** in the same place. It
+shows the payload URL, the content type and a secret, once — paste them into the repository's
+*Settings → Webhooks*, and select the **push** and **pull request** events. GitHub then calls the
+project the moment someone pushes or opens a pull request. Every call must carry a signature made
+with that secret, and one that does not is refused without being read. GitHub has to reach the URL,
+so a laptop on localhost needs a tunnel (`cloudflared tunnel --url http://localhost:8000`).
+
 ### See it on a real sprint
 
 The seed data above is invented. To watch the system analyse **real project history** — sprint 74
@@ -274,9 +281,9 @@ full walkthrough, including what is real and what the replay derives, is in [DEM
 
 ```bash
 make test               # everything
-make test-backend       # backend: 95 tests
+make test-backend       # backend: 102 tests
 make test-ai            # AI service: 85 tests
-make test-frontend      # frontend: 61 tests (vitest)
+make test-frontend      # frontend: 63 tests (vitest)
 ```
 
 Or per-service, without Docker:

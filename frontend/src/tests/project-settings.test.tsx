@@ -4,10 +4,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { parseCapacity } from '@/lib/utils'
 import { taskReference } from '@/components/tasks/task-github'
 
-const api = vi.hoisted(() => ({ get: vi.fn(), patch: vi.fn(), delete: vi.fn() }))
+const api = vi.hoisted(() => ({ get: vi.fn(), patch: vi.fn(), post: vi.fn(), delete: vi.fn() }))
 const permissions = vi.hoisted(() => ({ granted: new Set<string>() }))
 
-vi.mock('@/lib/api', () => ({ api }))
+vi.mock('@/lib/api', () => ({ api, API_BASE_URL: 'https://api.example.com' }))
 vi.mock('@/hooks/use-permissions', () => ({
   usePermissions: () => ({ can: (p: string) => permissions.granted.has(p) }),
 }))
@@ -125,5 +125,34 @@ describe('taskReference', () => {
   it('is the first eight characters of the task id when the API sends none', () => {
     expect(taskReference({ id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })).toBe('a1b2c3d4')
     expect(taskReference({ id: 'ignored', reference: 'deadbeef' })).toBe('deadbeef')
+  })
+})
+
+describe('GitHub webhook setup', () => {
+  const WITH_REPO = { ...PROJECT, github_repo: 'apache/mesos', github_webhook_configured: false }
+
+  beforeEach(() => {
+    api.get.mockReset().mockResolvedValue({ data: WITH_REPO })
+    api.post.mockReset().mockResolvedValue({
+      data: { secret: 'abc123secret', path: '/api/v1/projects/p1/github/webhook', events: ['push', 'pull_request'], content_type: 'application/json' },
+    })
+    permissions.granted = new Set(['project:update'])
+  })
+
+  it('shows the payload URL and the secret once, after creating it', async () => {
+    renderPage()
+    fireEvent.click(await screen.findByRole('button', { name: 'Set up a webhook' }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/projects/p1/github/webhook-secret'))
+    expect(await screen.findByText('abc123secret')).toBeInTheDocument()
+    expect(screen.getByText(/\/api\/v1\/projects\/p1\/github\/webhook/)).toBeInTheDocument()
+    expect(screen.getByText(/push, pull_request/)).toBeInTheDocument()
+  })
+
+  it('offers to replace or turn off a webhook that already exists', async () => {
+    api.get.mockResolvedValue({ data: { ...WITH_REPO, github_webhook_configured: true } })
+    renderPage()
+    expect(await screen.findByRole('button', { name: 'Replace the secret' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Turn it off' })).toBeInTheDocument()
   })
 })

@@ -12,9 +12,9 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "@/hooks/use-toast"
 import { usePermissions } from "@/hooks/use-permissions"
-import { api } from "@/lib/api"
+import { API_BASE_URL, api } from "@/lib/api"
 import { parseCapacity } from "@/lib/utils"
-import type { GithubSyncResult, Project } from "@/types"
+import type { GithubSyncResult, GithubWebhookSecret, Project } from "@/types"
 
 const STATUSES = [
   { value: "active", label: "Active" },
@@ -47,6 +47,7 @@ export default function ProjectSettingsPage() {
     name: "", description: "", status: "active", start_date: "", target_end_date: "", capacity: "", repo: "",
   })
   const [confirmArchive, setConfirmArchive] = useState(false)
+  const [webhook, setWebhook] = useState<GithubWebhookSecret | null>(null)
 
   const { data: project } = useQuery({
     queryKey: ["project", projectId],
@@ -105,6 +106,26 @@ export default function ProjectSettingsPage() {
     },
     onError: (error: any) =>
       toast({ title: "Could not read the repository", description: errorDetail(error, "Check the name and try again"), variant: "destructive" }),
+  })
+
+  const makeWebhook = useMutation({
+    mutationFn: () =>
+      api.post<GithubWebhookSecret>(`/projects/${projectId}/github/webhook-secret`).then((res) => res.data),
+    onSuccess: (data) => {
+      setWebhook(data)
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] })
+    },
+    onError: () => toast({ title: "Could not create the webhook secret", variant: "destructive" }),
+  })
+
+  const stopWebhook = useMutation({
+    mutationFn: () => api.delete(`/projects/${projectId}/github/webhook-secret`),
+    onSuccess: () => {
+      setWebhook(null)
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] })
+      toast({ title: "Webhook turned off", description: "GitHub's calls will no longer be accepted.", variant: "success" })
+    },
+    onError: () => toast({ title: "Could not turn the webhook off", variant: "destructive" }),
   })
 
   const archive = useMutation({
@@ -229,6 +250,59 @@ export default function ProjectSettingsPage() {
               {sync.isPending ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Github className="mr-2 h-4 w-4" />}
               {sync.isPending ? "Reading GitHub…" : "Sync with GitHub"}
             </Button>
+
+            <div className="space-y-3 border-t pt-4">
+              <div>
+                <h3 className="text-sm font-medium">Instant updates</h3>
+                <p className="text-sm text-muted-foreground">
+                  With a webhook, GitHub tells this project the moment someone pushes or opens a pull request, so
+                  nobody has to press Sync.{" "}
+                  {project.github_webhook_configured
+                    ? "A webhook secret exists for this project."
+                    : "No webhook is set up yet."}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" onClick={() => makeWebhook.mutate()} disabled={makeWebhook.isPending}>
+                  {project.github_webhook_configured ? "Replace the secret" : "Set up a webhook"}
+                </Button>
+                {project.github_webhook_configured && (
+                  <Button variant="ghost" onClick={() => stopWebhook.mutate()} disabled={stopWebhook.isPending}>
+                    Turn it off
+                  </Button>
+                )}
+              </div>
+
+              {webhook && (
+                <div className="space-y-2 rounded-md border bg-muted/40 p-3 text-sm">
+                  <p className="font-medium">
+                    In GitHub: the repository → Settings → Webhooks → Add webhook
+                  </p>
+                  <dl className="grid gap-1.5">
+                    <div>
+                      <dt className="text-xs text-muted-foreground">Payload URL</dt>
+                      <dd className="break-all font-mono text-xs">{`${API_BASE_URL}${webhook.path}`}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-muted-foreground">Content type</dt>
+                      <dd className="font-mono text-xs">{webhook.content_type}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-muted-foreground">Secret (shown once — copy it now)</dt>
+                      <dd className="break-all font-mono text-xs">{webhook.secret}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-muted-foreground">Events</dt>
+                      <dd className="text-xs">Let me select individual events: {webhook.events.join(", ")}</dd>
+                    </div>
+                  </dl>
+                  <p className="text-xs text-muted-foreground">
+                    GitHub has to be able to reach that URL, so a laptop running on localhost needs a tunnel. Requests
+                    without a signature made with this secret are refused.
+                  </p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}

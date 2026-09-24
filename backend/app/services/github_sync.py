@@ -19,7 +19,11 @@ It does not write to GitHub, create tasks, or reassign anyone.
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import re
+import secrets
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Awaitable, Callable, Iterable, Optional
 
@@ -42,6 +46,31 @@ SHORT_REF = re.compile(r"\b([0-9a-f]{8})\b", re.I)
 # How far a task can be pushed. A task only ever moves down this list, never up.
 ORDER = ["backlog", "planned", "in_progress", "blocked", "review", "done"]
 PAGE = 100  # recent history is what matters; one page of each is plenty
+
+
+@dataclass
+class CommitRecord:
+    """A commit, however it reached us: a repository listing, or a push event."""
+
+    sha: str
+    message: str
+    url: str
+    login: str | None = None
+    when: datetime | None = None
+    branch: str | None = None  # a push event knows its branch; a listing does not
+
+
+@dataclass
+class PullRecord:
+    number: int
+    title: str
+    body: str
+    branch: str
+    url: str
+    login: str | None = None
+    merged: bool = False
+    state: str = "open"
+    when: datetime | None = None
 
 
 class GitHubUnavailable(RuntimeError):
@@ -152,6 +181,60 @@ async def sync_project(
     if not repo:
         raise ValueError("This project has no GitHub repository set.")
 
+    commits = await fetch(f"/repos/{repo}/commits", {"per_page": PAGE})
+    pulls = await fetch(f"/repos/{repo}/pulls", {"state": "all", "per_page": PAGE,
+                                                 "sort": "updated", "direction": "desc"})
+    result = await apply_work(db, project, [commit_from_listing(c) for c in commits],
+                              [pull_from_payload(p) for p in pulls])
+    return {"repository": repo, **result}
+
+
+def commit_from_listing(commit: dict) -> CommitRecord:
+    """A commit as the repository listing gives it."""
+    info = commit.get("commit") or {}
+    return CommitRecord(
+        sha=(commit.get("sha") or "")[:40],
+        message=info.get("message") or "",
+        url=commit.get("html_url") or "",
+        login=(commit.get("author") or {}).get("login"),
+        when=_when((info.get("author") or {}).get("date")),
+    )
+
+
+def commit_from_push(commit: dict, branch: Optional[str]) -> CommitRecord:
+    """A commit as a push event gives it — a different shape, and it knows its branch."""
+    author = commit.get("author") or {}
+    return CommitRecord(
+        sha=(commit.get("id") or "")[:40],
+        message=commit.get("message") or "",
+        url=commit.get("url") or "",
+        login=author.get("username") or author.get("name"),
+        when=_when(commit.get("timestamp")),
+        branch=branch,
+    )
+
+
+def pull_from_payload(pull: dict) -> PullRecord:
+    """A pull request: the same shape in the repository listing and in a webhook event."""
+    merged = bool(pull.get("merged_at"))
+    return PullRecord(
+        number=pull.get("number") or 0,
+        title=pull.get("title") or f"pull request #{pull.get('number')}",
+        body=pull.get("body") or "",
+        branch=((pull.get("head") or {}).get("ref")) or "",
+        url=pull.get("html_url") or "",
+        login=(pull.get("user") or {}).get("login"),
+        merged=merged,
+        state="merged" if merged else (pull.get("state") or "open"),
+        when=_when(pull.get("merged_at") or pull.get("created_at")),
+    )
+
+
+async def apply_work(
+    db: AsyncSession, project: Project,
+    commits: list[CommitRecord], pulls: list[PullRecord],
+) -> dict:
+    """Match commits and pull requests to tasks, link them, and move those tasks along."""
     tasks = (await db.execute(select(Task).where(Task.project_id == project.id))).scalars().all()
     index = _index(tasks)
     existing = {
@@ -160,10 +243,6 @@ async def sync_project(
             select(TaskGithubLink).join(Task, Task.id == TaskGithubLink.task_id)
             .where(Task.project_id == project.id))).scalars().all()
     }
-
-    commits = await fetch(f"/repos/{repo}/commits", {"per_page": PAGE})
-    pulls = await fetch(f"/repos/{repo}/pulls", {"state": "all", "per_page": PAGE,
-                                                 "sort": "updated", "direction": "desc"})
 
     moved: list[dict] = []
     links_added = 0
@@ -185,42 +264,63 @@ async def sync_project(
             moved.append({"task_id": str(task.id), "title": task.title, "from": was, "to": to, "because": because})
 
     for commit in commits:
-        info = (commit.get("commit") or {})
-        message = info.get("message") or ""
-        named = _mentions(index, message)
+        named = _mentions(index, commit.message, commit.branch)
         if not named:
             continue
         matched_commits += 1
-        author = (commit.get("author") or {}).get("login")
-        when = _when(((info.get("author") or {}).get("date")))
         for task in named:
-            link(task, "commit", (commit.get("sha") or "")[:40], commit.get("html_url") or "",
-                 message.splitlines()[0] if message else "(no message)", author, None, when)
-            move(task, "in_progress", f"commit {(commit.get('sha') or '')[:7]}")
+            link(task, "commit", commit.sha, commit.url,
+                 commit.message.splitlines()[0] if commit.message else "(no message)",
+                 commit.login, None, commit.when)
+            move(task, "in_progress", f"commit {commit.sha[:7]}")
 
     for pull in pulls:
-        head = ((pull.get("head") or {}).get("ref")) or ""
-        named = _mentions(index, pull.get("title"), pull.get("body"), head)
+        named = _mentions(index, pull.title, pull.body, pull.branch)
         if not named:
             continue
         matched_pulls += 1
-        merged = bool(pull.get("merged_at"))
-        state = "merged" if merged else (pull.get("state") or "open")
-        author = (pull.get("user") or {}).get("login")
-        when = _when(pull.get("merged_at") or pull.get("created_at"))
         for task in named:
-            link(task, "pull_request", str(pull.get("number")), pull.get("html_url") or "",
-                 pull.get("title") or f"pull request #{pull.get('number')}", author, state, when)
-            if merged:
-                move(task, "done", f"pull request #{pull.get('number')} merged")
-            elif state == "open":
-                move(task, "review", f"pull request #{pull.get('number')} open")
+            link(task, "pull_request", str(pull.number), pull.url, pull.title, pull.login, pull.state, pull.when)
+            if pull.merged:
+                move(task, "done", f"pull request #{pull.number} merged")
+            elif pull.state == "open":
+                move(task, "review", f"pull request #{pull.number} open")
 
     await db.commit()
     return {
-        "repository": repo,
         "commits_read": len(commits), "commits_matched": matched_commits,
         "pull_requests_read": len(pulls), "pull_requests_matched": matched_pulls,
         "links_added": links_added,
         "tasks_moved": moved,
     }
+
+
+# ------------------------------------------------------------------ webhooks
+def new_webhook_secret() -> str:
+    """A secret to paste into GitHub, so its calls can be told from anyone else's."""
+    return secrets.token_hex(24)
+
+
+def signature_matches(secret: Optional[str], body: bytes, header: Optional[str]) -> bool:
+    """Whether X-Hub-Signature-256 really is GitHub signing this body with our secret."""
+    if not secret or not header or not header.startswith("sha256="):
+        return False
+    expected = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, header[len("sha256="):])
+
+
+async def apply_event(db: AsyncSession, project: Project, event: str, payload: dict) -> Optional[dict]:
+    """Apply one webhook event. Returns None for the events this product ignores."""
+    if event == "push":
+        ref = payload.get("ref") or ""
+        branch = ref.split("refs/heads/", 1)[1] if ref.startswith("refs/heads/") else None
+        commits = [commit_from_push(c, branch) for c in (payload.get("commits") or [])]
+        if not commits:
+            return None
+        return await apply_work(db, project, commits, [])
+    if event == "pull_request":
+        pull = payload.get("pull_request") or {}
+        if not pull:
+            return None
+        return await apply_work(db, project, [], [pull_from_payload(pull)])
+    return None

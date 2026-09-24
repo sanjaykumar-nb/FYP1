@@ -14,8 +14,8 @@ not re-measured, it says so.
 | **Risk agent** | Scores vs. direct graph computation; every cited node real; delay predictions vs. what each sprint really did | **1,974 / 1,974** match · **40,001 / 40,001** citations real · reproduces the published figures exactly |
 | **Recommendation agent** | Every suggested reassignment applied and the risk recomputed | Predicted effect held in **1,524 / 1,524** cases; severity improved in **62%** |
 | **Published evaluations** | Every one re-run from scratch | All reproduce — after fixing an evaluation clock that had silently broken one of them |
-| **Roles** | Every protected endpoint × every role, read off the code | **34 × 5 = 170** checks pass — after fixing **five security defects** this validation found |
-| **Features** | Test suites, the demo replay, response times | 95 + 85 + 61 tests pass; 14 / 14 demo claims; every feature responds in under a second |
+| **Roles** | Every protected endpoint × every role, read off the code | **37 × 5 = 185** checks pass — after fixing **five security defects** this validation found |
+| **Features** | Test suites, the demo replay, response times | 102 + 85 + 63 tests pass; 14 / 14 demo claims; every feature responds in under a second |
 | **Load** | Up to 50 people at once, 5 analyses at once, 25 simultaneous sign-ins | **0 failed requests** — after fixing **three defects** the load test found (7 failures before) |
 
 ---
@@ -168,12 +168,12 @@ gained two fields since; the graph prompt is unchanged. The published 487× is t
 
 ## 3. Product features
 
-**Tests.** Backend **95** (SQLite locally; SQLite and PostgreSQL 16 in CI), AI service **85**, frontend
-**61** plus a clean type check. The demo replay (`check_demo`) holds **14 / 14** claims.
+**Tests.** Backend **102** (SQLite locally; SQLite and PostgreSQL 16 in CI), AI service **85**, frontend
+**63** plus a clean type check. The demo replay (`check_demo`) holds **14 / 14** claims.
 
 **Roles** ([`test_permission_matrix.py`](backend/app/tests/test_permission_matrix.py)). The permission
-each endpoint requires is read off the code, then every protected endpoint (34 route/method pairs) is
-called as each of the five roles: **170 / 170** behave exactly as the policy says. A second check fails
+each endpoint requires is read off the code, then every protected endpoint (37 route/method pairs) is
+called as each of the five roles: **185 / 185** behave exactly as the policy says. A second check fails
 the build if any data-changing endpoint is added without a role check.
 
 **Code coverage** — share of statements the test suites execute, excluding the tests themselves
@@ -275,7 +275,7 @@ The load test found three more, all fixed:
   runs; re-measuring needs a paid key.
 - **Whether real teams would follow the suggested moves** — only that the moves do what they predict.
 - **Whether GitHub sync helps a real team.** It landed after this validation: it is covered by
-  its own 13 tests, but no real repository's history has been replayed through it, and none of the
+  its own 20 tests, but no real repository's history has been replayed through it, and none of the
   TAWOS results above involve it.
 - **Production-scale performance** — the load test ran on one laptop on SQLite; CI repeats it on
   PostgreSQL on a shared runner, but nothing has been measured on production hardware.
