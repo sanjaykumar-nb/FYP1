@@ -422,7 +422,7 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
       <details class="data"><summary>Show the numbers</summary><div class="tablewrap" id="codecovTable"></div></details>
     </div>
     <dl class="infer">
-      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0"><strong>225 automated tests</strong> pass, the backend's on both SQLite and PostgreSQL, and a role matrix read off the code checks every protected endpoint against every role: <strong>170 of 170</strong>. Tests cover <strong>74%</strong> of the backend code the MVP uses, <strong>81%</strong> of the AI service and <strong>93%</strong> of the knowledge graph; in the frontend, <strong>88%</strong> of the analysis panel, hooks and API client, but only <strong>24%</strong> of all its code. The validation found and fixed ten defects: six security holes or crashes in endpoints the app does not use, a broken evaluation clock, and three that only showed under load.</dd></div>
+      <div><dt class="k">What it shows</dt><dd class="v" style="margin:0"><strong>250 automated tests</strong> pass, the backend's on both SQLite and PostgreSQL, and a role matrix read off the code checks every protected endpoint against every role: <strong>185 of 185</strong>. Tests cover <strong>74%</strong> of the backend code the MVP uses, <strong>81%</strong> of the AI service and <strong>93%</strong> of the knowledge graph; in the frontend, <strong>88%</strong> of the analysis panel, hooks and API client, but only <strong>24%</strong> of all its code. The validation found and fixed ten defects: six security holes or crashes in endpoints the app does not use, a broken evaluation clock, and three that only showed under load.</dd></div>
       <div><dt class="k claim">You can claim</dt><dd class="v" style="margin:0">The MVP is <strong>well tested where it matters</strong>, its access control is verified exhaustively rather than by example, and every push re-runs all of it.</dd></div>
       <div><dt class="k not">Don't claim</dt><dd class="v" style="margin:0">High coverage overall: code outside the MVP is only 18% covered, and most frontend pages have no unit tests; they are exercised by the demo replay and by hand.</dd></div>
     </dl>
@@ -1578,11 +1578,11 @@ footer { margin-top: 48px; font-size: 12.5px; color: var(--muted); display: grid
  },
  "engineering": {
   "tests": {
-   "backend": 82,
+   "backend": 102,
    "ai_service": 85,
-   "frontend": 58
+   "frontend": 63
   },
-  "role_checks": 170,
+  "role_checks": 185,
   "ci_jobs": 7,
   "demo_claims": 14,
   "defects_fixed": 10
