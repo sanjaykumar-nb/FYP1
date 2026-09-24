@@ -139,6 +139,8 @@ every number: [IEEE_PAPER_REPORT.md](IEEE_PAPER_REPORT.md).
 - Task components (the code area a task touches), which drive the knowledge-concentration and
   coordination risks
 - Task dependencies (with real multi-hop cycle detection), subtasks, comments
+- GitHub sync: commits and pull requests that name a task move it along and are linked to it
+  as evidence (see "Tracking work from GitHub" below)
 - Real-time updates via WebSocket
 
 **AI intelligence layer**
@@ -234,6 +236,22 @@ npm run dev
 Then visit http://localhost:3000 and log in with `pm@demo.com` / `password123` (or register a
 new account). Open a project → **AI Insights** tab → **Run Analysis**.
 
+### Tracking work from GitHub
+
+Set a repository in **Project settings → GitHub repository** (`owner/name`), then press
+**Sync with GitHub**. It reads the last 100 commits and pull requests and matches them to tasks by
+what the author wrote:
+
+- the task's reference — eight characters shown on the task's **GitHub** tab, e.g. a branch named
+  `fix/a1b2c3d4-retry-loop`;
+- or a key like `MESOS-8383` when the task's title starts with one (sprints imported from Jira do).
+
+A commit starts a task, an open pull request sends it to review, a merged one finishes it. Tasks
+never move backwards, nothing is written to GitHub, and every change links the commit or pull
+request behind it. Public repositories need no credentials; `GITHUB_TOKEN` (a read-only token)
+raises the rate limit and reaches private ones. People can record their handle in **Profile →
+GitHub username**.
+
 ### See it on a real sprint
 
 The seed data above is invented. To watch the system analyse **real project history** — sprint 74
@@ -256,9 +274,9 @@ full walkthrough, including what is real and what the replay derives, is in [DEM
 
 ```bash
 make test               # everything
-make test-backend       # backend: 82 tests
+make test-backend       # backend: 95 tests
 make test-ai            # AI service: 85 tests
-make test-frontend      # frontend: 58 tests (vitest)
+make test-frontend      # frontend: 61 tests (vitest)
 ```
 
 Or per-service, without Docker:

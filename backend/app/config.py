@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # GitHub (optional): a read-only token raises the API rate limit and reaches private repos.
+    GITHUB_TOKEN: Optional[str] = None
+    GITHUB_API_URL: str = "https://api.github.com"
+
     # AI Service
     AI_SERVICE_URL: str = "http://localhost:8001"
     GROQ_API_KEY: Optional[str] = None

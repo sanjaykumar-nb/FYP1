@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import computed_field, BaseModel, Field, field_validator
 from typing import Literal, Optional
 from datetime import datetime
 from uuid import UUID
@@ -62,6 +62,12 @@ class TaskUpdate(BaseModel):
 
 
 class TaskResponse(TaskBase):
+    @computed_field
+    @property
+    def reference(self) -> str:
+        """What to put in a branch name or commit message so GitHub sync finds this task."""
+        return str(self.id).replace("-", "")[:8]
+
     id: UUID
     project_id: UUID
     milestone_id: Optional[UUID] = None

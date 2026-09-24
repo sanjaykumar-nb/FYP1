@@ -28,13 +28,18 @@ export default function ProfilePage() {
   const queryClient = useQueryClient()
   const { me, role } = usePermissions()
   const [fullName, setFullName] = useState("")
+  const [github, setGithub] = useState("")
 
   useEffect(() => {
-    if (me) setFullName(me.full_name ?? "")
+    if (me) {
+      setFullName(me.full_name ?? "")
+      setGithub(me.github_username ?? "")
+    }
   }, [me])
 
   const save = useMutation({
-    mutationFn: () => api.patch("/auth/me", { full_name: fullName.trim() || null }),
+    mutationFn: () =>
+      api.patch("/auth/me", { full_name: fullName.trim() || null, github_username: github.trim() || null }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] })
       toast({ title: "Profile saved", variant: "success" })
@@ -68,7 +73,14 @@ export default function ProfilePage() {
               <Label htmlFor="profile-email">Email</Label>
               <Input id="profile-email" value={me.email} disabled />
             </div>
-            <Button type="submit" disabled={save.isPending || fullName.trim() === (me.full_name ?? "")}>
+            <div className="space-y-1.5">
+              <Label htmlFor="profile-github">GitHub username</Label>
+              <Input id="profile-github" placeholder="octocat" value={github} onChange={(e) => setGithub(e.target.value)} />
+              <p className="text-xs text-muted-foreground">
+                So commits and pull requests you write are shown against your name.
+              </p>
+            </div>
+            <Button type="submit" disabled={save.isPending || (fullName.trim() === (me.full_name ?? "") && github.trim() === (me.github_username ?? ""))}>
               {save.isPending ? "Saving…" : "Save"}
             </Button>
           </form>

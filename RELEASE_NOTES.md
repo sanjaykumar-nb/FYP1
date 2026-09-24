@@ -30,9 +30,9 @@ Everything below runs with **no LLM API key**. A Groq key is optional and only a
 | `/signup`, `/login` | Create an account (you own a new workspace) or sign in |
 | `/workspace` | Your projects with health and risk scores; create one; restore archived ones |
 | `/projects/:id/dashboard` | Overview, **Sprints**, Tasks, **Team** and **AI Insights**: run the analysis, read each finding's evidence, apply suggested moves |
-| `/projects/:id/tasks` | Kanban board: drag between columns, sprint filter, components, *Blocked by* markers; task dialog with details, dependencies (cycles refused) and discussion |
-| `/projects/:id/settings` | Rename, change status and dates, archive |
-| `/profile` | Your name, and what your role allows |
+| `/projects/:id/tasks` | Kanban board: drag between columns, sprint filter, components, *Blocked by* markers; task dialog with details, dependencies (cycles refused), discussion and GitHub (its reference, and the commits and pull requests that named it) |
+| `/projects/:id/settings` | Rename, change status and dates, set sprint capacity and GitHub repository, sync with GitHub, archive |
+| `/profile` | Your name, your GitHub username, and what your role allows |
 
 ### AI agents
 
@@ -98,6 +98,15 @@ Every push runs, on GitHub Actions:
 
 ## Since v1.0.1-mvp — closing the validation gaps
 
+- **GitHub sync (new).** A project can name a repository; commits and pull requests that name a
+  task — by the eight-character reference on its GitHub tab, or by a key like `MESOS-8383` in its
+  title — move it along: a commit starts it, an open pull request sends it to review, a merged one
+  finishes it. Tasks never move backwards, nothing is written to GitHub, and each change keeps a
+  link to the commit or pull request behind it. Public repositories need no credentials;
+  `GITHUB_TOKEN` raises the rate limit and reaches private ones. People can record their handle in
+  their profile. Covered by 13 tests; it is newer than the Phase 1 validation, which does not
+  involve it.
+
 - **Sprint capacity.** A project's settings take a sprint capacity in story points; left empty, the
   average the team completed in its last three finished sprints is used. The Planning agent now
   warns when a sprint plans more than that, citing the sprint. It never warned before: no capacity
@@ -115,7 +124,7 @@ Every push runs, on GitHub Actions:
   accounts, an answer key read from the board, and the analysis script: `docs/user-study/`.
 - The importer also reads blocking links named "Blocks" (LSST's Jira), not only "Blocker".
 
-Tests: backend 82, AI service 85, frontend 58.
+Tests: backend 95, AI service 85, frontend 61.
 
 ## Since v1.0-mvp — found by the Phase 1 validation
 

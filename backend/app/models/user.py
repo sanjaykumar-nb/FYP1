@@ -18,6 +18,8 @@ class User(BaseModel):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     full_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    # Their GitHub handle, so commits and pull requests can be credited to them.
+    github_username: Mapped[str | None] = mapped_column(String(39), nullable=True)
     timezone: Mapped[str] = mapped_column(String(50), default="UTC", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

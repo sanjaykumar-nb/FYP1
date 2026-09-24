@@ -266,6 +266,127 @@
         "title": "CommunicationAnalysisResponse",
         "type": "object"
       },
+      "GithubLinkResponse": {
+        "properties": {
+          "author_login": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author Login"
+          },
+          "authored_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authored At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          },
+          "task_id": {
+            "format": "uuid",
+            "title": "Task Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "task_id",
+          "kind",
+          "ref",
+          "url",
+          "title"
+        ],
+        "title": "GithubLinkResponse",
+        "type": "object"
+      },
+      "GithubSyncResult": {
+        "description": "What one sync read and what it changed.",
+        "properties": {
+          "commits_matched": {
+            "title": "Commits Matched",
+            "type": "integer"
+          },
+          "commits_read": {
+            "title": "Commits Read",
+            "type": "integer"
+          },
+          "links_added": {
+            "title": "Links Added",
+            "type": "integer"
+          },
+          "pull_requests_matched": {
+            "title": "Pull Requests Matched",
+            "type": "integer"
+          },
+          "pull_requests_read": {
+            "title": "Pull Requests Read",
+            "type": "integer"
+          },
+          "repository": {
+            "title": "Repository",
+            "type": "string"
+          },
+          "tasks_moved": {
+            "items": {
+              "type": "object"
+            },
+            "title": "Tasks Moved",
+            "type": "array"
+          }
+        },
+        "required": [
+          "repository",
+          "commits_read",
+          "commits_matched",
+          "pull_requests_read",
+          "pull_requests_matched",
+          "links_added",
+          "tasks_moved"
+        ],
+        "title": "GithubSyncResult",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -312,6 +433,17 @@
               }
             ],
             "title": "Full Name"
+          },
+          "github_username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Github Username"
           },
           "id": {
             "format": "uuid",
@@ -1067,6 +1199,19 @@
             ],
             "title": "Full Name"
           },
+          "github_username": {
+            "anyOf": [
+              {
+                "maxLength": 39,
+                "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Github Username"
+          },
           "password": {
             "minLength": 8,
             "title": "Password",
@@ -1702,6 +1847,17 @@
             ],
             "title": "Description"
           },
+          "github_repo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Github Repo"
+          },
           "health_score": {
             "anyOf": [
               {
@@ -1833,6 +1989,17 @@
               }
             ],
             "title": "Description"
+          },
+          "github_repo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Github Repo"
           },
           "name": {
             "anyOf": [
@@ -2439,6 +2606,12 @@
             "title": "Project Id",
             "type": "string"
           },
+          "reference": {
+            "description": "What to put in a branch name or commit message so GitHub sync finds this task.",
+            "readOnly": true,
+            "title": "Reference",
+            "type": "string"
+          },
           "reporter_id": {
             "format": "uuid",
             "title": "Reporter Id",
@@ -2493,7 +2666,8 @@
           "project_id",
           "reporter_id",
           "actual_hours",
-          "created_at"
+          "created_at",
+          "reference"
         ],
         "title": "TaskResponse",
         "type": "object"
@@ -2853,6 +3027,12 @@
             "title": "Project Id",
             "type": "string"
           },
+          "reference": {
+            "description": "What to put in a branch name or commit message so GitHub sync finds this task.",
+            "readOnly": true,
+            "title": "Reference",
+            "type": "string"
+          },
           "reporter": {
             "$ref": "#/components/schemas/UserResponse"
           },
@@ -2919,7 +3099,8 @@
           "reporter_id",
           "actual_hours",
           "created_at",
-          "reporter"
+          "reporter",
+          "reference"
         ],
         "title": "TaskWithRelations",
         "type": "object"
@@ -3138,6 +3319,17 @@
             ],
             "title": "Full Name"
           },
+          "github_username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Github Username"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -3203,6 +3395,19 @@
               }
             ],
             "title": "Full Name"
+          },
+          "github_username": {
+            "anyOf": [
+              {
+                "maxLength": 39,
+                "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Github Username"
           },
           "timezone": {
             "anyOf": [
@@ -5863,6 +6068,130 @@
         "summary": "List Project Dependencies",
         "tags": [
           "projects"
+        ]
+      }
+    },
+    "/api/v1/projects/{project_id}/github/links": {
+      "get": {
+        "description": "Every commit and pull request linked to this project's tasks, newest first.",
+        "operationId": "list_github_links_api_v1_projects__project_id__github_links_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GithubLinkResponse"
+                  },
+                  "title": "Response List Github Links Api V1 Projects  Project Id  Github Links Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Github Links",
+        "tags": [
+          "github"
+        ]
+      }
+    },
+    "/api/v1/projects/{project_id}/github/sync": {
+      "post": {
+        "description": "Read the repository's recent commits and pull requests and move tasks along.",
+        "operationId": "sync_with_github_api_v1_projects__project_id__github_sync_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GithubSyncResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sync With Github",
+        "tags": [
+          "github"
         ]
       }
     },

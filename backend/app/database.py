@@ -55,6 +55,8 @@ _ADDED_COLUMNS = [
     ("milestones", "start_date", "DATE"),
     ("tasks", "component", "VARCHAR(100)"),
     ("projects", "sprint_capacity_points", "INTEGER"),
+    ("projects", "github_repo", "VARCHAR(140)"),
+    ("users", "github_username", "VARCHAR(39)"),
 ]
 
 

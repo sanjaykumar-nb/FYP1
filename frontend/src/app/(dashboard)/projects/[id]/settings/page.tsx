@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Archive } from "lucide-react"
+import { Archive, Github, RefreshCw } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,7 +14,7 @@ import { toast } from "@/hooks/use-toast"
 import { usePermissions } from "@/hooks/use-permissions"
 import { api } from "@/lib/api"
 import { parseCapacity } from "@/lib/utils"
-import type { Project } from "@/types"
+import type { GithubSyncResult, Project } from "@/types"
 
 const STATUSES = [
   { value: "active", label: "Active" },
@@ -44,7 +44,7 @@ export default function ProjectSettingsPage() {
   const canArchive = can("project:delete")
 
   const [form, setForm] = useState({
-    name: "", description: "", status: "active", start_date: "", target_end_date: "", capacity: "",
+    name: "", description: "", status: "active", start_date: "", target_end_date: "", capacity: "", repo: "",
   })
   const [confirmArchive, setConfirmArchive] = useState(false)
 
@@ -62,6 +62,7 @@ export default function ProjectSettingsPage() {
         start_date: toDay(project.start_date),
         target_end_date: toDay(project.target_end_date),
         capacity: project.sprint_capacity_points?.toString() ?? "",
+        repo: project.github_repo ?? "",
       })
     }
   }, [project])
@@ -78,6 +79,7 @@ export default function ProjectSettingsPage() {
         start_date: toDateTime(form.start_date),
         target_end_date: toDateTime(form.target_end_date),
         sprint_capacity_points: capacity,
+        github_repo: form.repo.trim() || null,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["project", projectId] })
@@ -86,6 +88,23 @@ export default function ProjectSettingsPage() {
     },
     onError: (error: any) =>
       toast({ title: "Could not save settings", description: errorDetail(error, "Check the fields and try again"), variant: "destructive" }),
+  })
+
+  const sync = useMutation({
+    mutationFn: () => api.post<GithubSyncResult>(`/projects/${projectId}/github/sync`).then((res) => res.data),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", projectId] })
+      const moved = result.tasks_moved
+      toast({
+        title: moved.length ? `${moved.length} task${moved.length === 1 ? "" : "s"} moved` : "Nothing to move",
+        description: moved.length
+          ? moved.slice(0, 3).map((m) => `${m.title}: ${m.from} → ${m.to} (${m.because})`).join("; ")
+          : `Read ${result.commits_read} commits and ${result.pull_requests_read} pull requests; none named a task that had moved on.`,
+        variant: "success",
+      })
+    },
+    onError: (error: any) =>
+      toast({ title: "Could not read the repository", description: errorDetail(error, "Check the name and try again"), variant: "destructive" }),
   })
 
   const archive = useMutation({
@@ -154,6 +173,14 @@ export default function ProjectSettingsPage() {
               </div>
               {!datesValid && <p className="text-xs text-destructive">The end date must be after the start date.</p>}
               <div className="space-y-1.5">
+                <Label htmlFor="project-repo">GitHub repository</Label>
+                <Input id="project-repo" placeholder="owner/repository" value={form.repo} onChange={set("repo")} className="sm:w-96" />
+                <p className="text-xs text-muted-foreground">
+                  Commits and pull requests that name a task — by its reference, shown on the task, or by a key like
+                  MESOS-8383 in its title — move that task along. Leave empty to disconnect.
+                </p>
+              </div>
+              <div className="space-y-1.5">
                 <Label htmlFor="project-capacity">Sprint capacity (story points)</Label>
                 <Input
                   id="project-capacity"
@@ -183,6 +210,28 @@ export default function ProjectSettingsPage() {
           </form>
         </CardContent>
       </Card>
+
+      {project.github_repo && canEdit && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">GitHub</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Reads the last 100 commits and pull requests of{" "}
+              <a className="underline" href={`https://github.com/${project.github_repo}`} target="_blank" rel="noreferrer">
+                {project.github_repo}
+              </a>
+              . A commit starts a task, an open pull request sends it to review, a merged one finishes it. Tasks never
+              move backwards, and each change links the commit or pull request behind it.
+            </p>
+            <Button variant="outline" onClick={() => sync.mutate()} disabled={sync.isPending}>
+              {sync.isPending ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Github className="mr-2 h-4 w-4" />}
+              {sync.isPending ? "Reading GitHub…" : "Sync with GitHub"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {canArchive && (
         <Card className="border-destructive/40">

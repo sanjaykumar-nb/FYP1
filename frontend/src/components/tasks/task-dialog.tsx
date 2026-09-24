@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TaskComments } from "@/components/tasks/task-comments"
 import { TaskDependencies } from "@/components/tasks/task-dependencies"
+import { TaskGithub } from "@/components/tasks/task-github"
 import { toast } from "@/hooks/use-toast"
 import { usePermissions } from "@/hooks/use-permissions"
 import { api } from "@/lib/api"
@@ -268,10 +269,11 @@ export function TaskDialog({
         </DialogHeader>
         {task ? (
           <Tabs defaultValue="details">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="details">Details</TabsTrigger>
               <TabsTrigger value="dependencies">Dependencies</TabsTrigger>
               <TabsTrigger value="discussion">Discussion</TabsTrigger>
+              <TabsTrigger value="github">GitHub</TabsTrigger>
             </TabsList>
             <TabsContent value="details">{detailsForm}</TabsContent>
             <TabsContent value="dependencies">
@@ -279,6 +281,9 @@ export function TaskDialog({
             </TabsContent>
             <TabsContent value="discussion">
               <TaskComments projectId={projectId} taskId={task.id} canComment={!readOnly} />
+            </TabsContent>
+            <TabsContent value="github">
+              <TaskGithub projectId={projectId} task={task} />
             </TabsContent>
           </Tabs>
         ) : (

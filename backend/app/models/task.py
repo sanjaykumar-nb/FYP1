@@ -60,6 +60,7 @@ class Task(BaseModel):
     assignee: Mapped["User | None"] = relationship("User", foreign_keys=[assignee_id], back_populates="assigned_tasks")
     reporter: Mapped["User"] = relationship("User", foreign_keys=[reporter_id], back_populates="reported_tasks")
     comments: Mapped[list["TaskComment"]] = relationship("TaskComment", back_populates="task", lazy="dynamic")
+    github_links: Mapped[list["TaskGithubLink"]] = relationship("TaskGithubLink", back_populates="task", lazy="dynamic")
     blocking_dependencies: Mapped[list["TaskDependency"]] = relationship("TaskDependency", foreign_keys="TaskDependency.blocking_task_id", back_populates="blocking_task", lazy="dynamic")
     blocked_dependencies: Mapped[list["TaskDependency"]] = relationship("TaskDependency", foreign_keys="TaskDependency.blocked_task_id", back_populates="blocked_task", lazy="dynamic")
     action_items: Mapped[list["MeetingActionItem"]] = relationship("MeetingActionItem", back_populates="task", lazy="dynamic")
@@ -115,3 +116,30 @@ class TaskComment(BaseModel):
     # Relationships
     task: Mapped["Task"] = relationship("Task", back_populates="comments")
     user: Mapped["User"] = relationship("User", back_populates="task_comments")
+
+class TaskGithubLink(BaseModel):
+    """A commit or pull request that named this task.
+
+    The link is the evidence behind any status change the sync made: it records what
+    was found, who wrote it and where to read it, so a person can check the claim.
+    """
+
+    __tablename__ = "task_github_links"
+
+    task_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("tasks.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    kind: Mapped[str] = mapped_column(String(20), nullable=False)  # "commit" or "pull_request"
+    ref: Mapped[str] = mapped_column(String(64), nullable=False)  # commit sha, or PR number
+    url: Mapped[str] = mapped_column(String(500), nullable=False)
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    author_login: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    state: Mapped[str | None] = mapped_column(String(20), nullable=True)  # open / merged / closed
+    authored_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    task: Mapped["Task"] = relationship("Task", back_populates="github_links")
+
+    __table_args__ = (UniqueConstraint("task_id", "kind", "ref", name="uq_task_github_link"),)

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Literal, Optional
 from datetime import datetime
 from uuid import UUID
@@ -34,6 +34,7 @@ class UserCreate(UserBase):
 class MemberCreate(UserBase):
     password: str = Field(..., min_length=8)
     role: str = "developer"
+    github_username: Optional[str] = Field(None, max_length=39, pattern=r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$")
 
 
 class LoginRequest(BaseModel):
@@ -49,12 +50,14 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     avatar_url: Optional[str] = None
     timezone: Optional[str] = None
+    github_username: Optional[str] = Field(None, max_length=39, pattern=r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$")
 
 
 class UserResponse(UserBase):
     id: UUID
     organization_id: UUID
     avatar_url: Optional[str] = None
+    github_username: Optional[str] = None
     timezone: str
     is_active: bool
     last_login_at: Optional[datetime] = None
@@ -169,6 +172,15 @@ class ProjectUpdate(BaseModel):
     actual_end_date: Optional[datetime] = None
     # Story points per sprint; null clears it, so the team's measured velocity is used.
     sprint_capacity_points: Optional[int] = Field(None, ge=1, le=10000)
+    # "owner/name", or a github.com link to it; null disconnects the repository.
+    github_repo: Optional[str] = None
+
+    @field_validator("github_repo")
+    @classmethod
+    def _repo(cls, value: Optional[str]) -> Optional[str]:
+        from app.services.github_sync import normalise_repo
+
+        return normalise_repo(value)
 
 
 class ProjectResponse(ProjectBase):
@@ -180,6 +192,7 @@ class ProjectResponse(ProjectBase):
     risk_score: Optional[float] = None
     actual_end_date: Optional[datetime] = None
     sprint_capacity_points: Optional[int] = None
+    github_repo: Optional[str] = None
     created_at: datetime
 
     class Config:

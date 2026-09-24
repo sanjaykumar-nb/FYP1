@@ -23,6 +23,8 @@ export interface Project {
   health_score: number | null
   risk_score: number | null
   sprint_capacity_points: number | null
+  /** "owner/name" of the GitHub repository this project's work lands in. */
+  github_repo: string | null
   created_at: string
 }
 
@@ -33,6 +35,7 @@ export interface Member {
   full_name: string | null
   role?: string
   permissions?: string[]
+  github_username?: string | null
 }
 
 // A sprint or milestone. With a start date, the analysis can tell whether its work is on pace.
@@ -74,6 +77,31 @@ export interface Task {
   started_at: string | null
   completed_at: string | null
   created_at: string
+  /** What to write in a branch name or commit message so GitHub sync finds this task. */
+  reference?: string
+}
+
+/** A commit or pull request that named a task, found by GitHub sync. */
+export interface GithubLink {
+  id: string
+  task_id: string
+  kind: "commit" | "pull_request"
+  ref: string
+  url: string
+  title: string
+  author_login: string | null
+  state: string | null
+  authored_at: string | null
+}
+
+export interface GithubSyncResult {
+  repository: string
+  commits_read: number
+  commits_matched: number
+  pull_requests_read: number
+  pull_requests_matched: number
+  links_added: number
+  tasks_moved: { task_id: string; title: string; from: string; to: string; because: string }[]
 }
 
 export interface TaskDependency {

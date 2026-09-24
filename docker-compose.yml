@@ -40,6 +40,7 @@ services:
       - REFRESH_TOKEN_EXPIRE_DAYS=7
       - AI_SERVICE_URL=http://ai-service:8001
       - GROQ_API_KEY=${GROQ_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
       - ENVIRONMENT=development
     ports: ["8000:8000"]
     depends_on:

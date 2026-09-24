@@ -15,7 +15,7 @@ checked against the caller's role.
 
 ## Backend — http://localhost:8000
 
-69 operations; 41 used by the app or covered by tests.
+71 operations; 43 used by the app or covered by tests.
 
 ### admin
 
@@ -51,6 +51,13 @@ checked against the caller's role.
 | `PATCH` | `/api/v1/auth/me` | Update Current User | yes | yes |
 | `POST` | `/api/v1/auth/refresh` | Refresh Token | yes | yes |
 | `POST` | `/api/v1/auth/register` | Register | yes | yes |
+
+### github
+
+| Method | Path | What it does | App | Tested |
+|---|---|---|---|---|
+| `GET` | `/api/v1/projects/{project_id}/github/links` | List Github Links | yes | — |
+| `POST` | `/api/v1/projects/{project_id}/github/sync` | Sync With Github | yes | yes |
 
 ### meetings
 

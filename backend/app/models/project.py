@@ -32,6 +32,8 @@ class Project(BaseModel):
     # Story points the team can finish in one sprint. Unset, the AI service's planning
     # agent uses the average its last few sprints actually completed.
     sprint_capacity_points: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # "owner/name" of the GitHub repository this project's work lands in.
+    github_repo: Mapped[str | None] = mapped_column(String(140), nullable=True)
 
     # Relationships
     organization: Mapped["Organization"] = relationship("Organization", back_populates="projects")
